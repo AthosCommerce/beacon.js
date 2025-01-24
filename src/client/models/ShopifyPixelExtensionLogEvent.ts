@@ -13,96 +13,78 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ShopifyPixelExtensionLogEventData } from './ShopifyPixelExtensionLogEventData';
+import {
+    ShopifyPixelExtensionLogEventDataFromJSON,
+    ShopifyPixelExtensionLogEventDataFromJSONTyped,
+    ShopifyPixelExtensionLogEventDataToJSON,
+    ShopifyPixelExtensionLogEventDataToJSONTyped,
+} from './ShopifyPixelExtensionLogEventData';
+import type { ShopifyPixelExtensionLogEventContext } from './ShopifyPixelExtensionLogEventContext';
+import {
+    ShopifyPixelExtensionLogEventContextFromJSON,
+    ShopifyPixelExtensionLogEventContextFromJSONTyped,
+    ShopifyPixelExtensionLogEventContextToJSON,
+    ShopifyPixelExtensionLogEventContextToJSONTyped,
+} from './ShopifyPixelExtensionLogEventContext';
+
 /**
- * Product details
+ * 
  * @export
- * @interface Product
+ * @interface ShopifyPixelExtensionLogEvent
  */
-export interface Product {
+export interface ShopifyPixelExtensionLogEvent {
     /**
-     * Unique product identifier of the Searchspring indexed product (also provide `sku`, `childSku`, and `childId` if available)
-     * @type {string}
-     * @memberof Product
+     * 
+     * @type {ShopifyPixelExtensionLogEventContext}
+     * @memberof ShopifyPixelExtensionLogEvent
      */
-    uid: string;
+    context: ShopifyPixelExtensionLogEventContext;
     /**
-     * Unique product variant identifier
-     * @type {string}
-     * @memberof Product
+     * 
+     * @type {ShopifyPixelExtensionLogEventData}
+     * @memberof ShopifyPixelExtensionLogEvent
      */
-    childUid?: string;
-    /**
-     * Unique product identifier (also provide `childSku` if available)
-     * @type {string}
-     * @memberof Product
-     */
-    sku?: string;
-    /**
-     * Unique product variant identifier (also provide `sku` if available)
-     * @type {string}
-     * @memberof Product
-     */
-    childSku?: string;
-    /**
-     * Quantity of the item
-     * @type {number}
-     * @memberof Product
-     */
-    qty: number;
-    /**
-     * Price of individual item
-     * @type {number}
-     * @memberof Product
-     */
-    price: number;
+    data: ShopifyPixelExtensionLogEventData;
 }
 
 /**
- * Check if a given object implements the Product interface.
+ * Check if a given object implements the ShopifyPixelExtensionLogEvent interface.
  */
-export function instanceOfProduct(value: object): value is Product {
-    if (!('uid' in value) || value['uid'] === undefined) return false;
-    if (!('qty' in value) || value['qty'] === undefined) return false;
-    if (!('price' in value) || value['price'] === undefined) return false;
+export function instanceOfShopifyPixelExtensionLogEvent(value: object): value is ShopifyPixelExtensionLogEvent {
+    if (!('context' in value) || value['context'] === undefined) return false;
+    if (!('data' in value) || value['data'] === undefined) return false;
     return true;
 }
 
-export function ProductFromJSON(json: any): Product {
-    return ProductFromJSONTyped(json, false);
+export function ShopifyPixelExtensionLogEventFromJSON(json: any): ShopifyPixelExtensionLogEvent {
+    return ShopifyPixelExtensionLogEventFromJSONTyped(json, false);
 }
 
-export function ProductFromJSONTyped(json: any, ignoreDiscriminator: boolean): Product {
+export function ShopifyPixelExtensionLogEventFromJSONTyped(json: any, ignoreDiscriminator: boolean): ShopifyPixelExtensionLogEvent {
     if (json == null) {
         return json;
     }
     return {
         
-        'uid': json['uid'],
-        'childUid': json['childUid'] == null ? undefined : json['childUid'],
-        'sku': json['sku'] == null ? undefined : json['sku'],
-        'childSku': json['childSku'] == null ? undefined : json['childSku'],
-        'qty': json['qty'],
-        'price': json['price'],
+        'context': ShopifyPixelExtensionLogEventContextFromJSON(json['context']),
+        'data': ShopifyPixelExtensionLogEventDataFromJSON(json['data']),
     };
 }
 
-  export function ProductToJSON(json: any): Product {
-      return ProductToJSONTyped(json, false);
+  export function ShopifyPixelExtensionLogEventToJSON(json: any): ShopifyPixelExtensionLogEvent {
+      return ShopifyPixelExtensionLogEventToJSONTyped(json, false);
   }
 
-  export function ProductToJSONTyped(value?: Product | null, ignoreDiscriminator: boolean = false): any {
+  export function ShopifyPixelExtensionLogEventToJSONTyped(value?: ShopifyPixelExtensionLogEvent | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'uid': value['uid'],
-        'childUid': value['childUid'],
-        'sku': value['sku'],
-        'childSku': value['childSku'],
-        'qty': value['qty'],
-        'price': value['price'],
+        'context': ShopifyPixelExtensionLogEventContextToJSON(value['context']),
+        'data': ShopifyPixelExtensionLogEventDataToJSON(value['data']),
     };
 }
 

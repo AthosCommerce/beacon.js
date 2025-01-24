@@ -14,95 +14,60 @@
 
 import { mapValues } from '../runtime';
 /**
- * Product details
+ * Controller details
  * @export
- * @interface Product
+ * @interface SnapLogEventDataController
  */
-export interface Product {
+export interface SnapLogEventDataController {
     /**
-     * Unique product identifier of the Searchspring indexed product (also provide `sku`, `childSku`, and `childId` if available)
+     * Controller type
      * @type {string}
-     * @memberof Product
+     * @memberof SnapLogEventDataController
      */
-    uid: string;
+    type?: string;
     /**
-     * Unique product variant identifier
+     * Controller ID
      * @type {string}
-     * @memberof Product
+     * @memberof SnapLogEventDataController
      */
-    childUid?: string;
-    /**
-     * Unique product identifier (also provide `childSku` if available)
-     * @type {string}
-     * @memberof Product
-     */
-    sku?: string;
-    /**
-     * Unique product variant identifier (also provide `sku` if available)
-     * @type {string}
-     * @memberof Product
-     */
-    childSku?: string;
-    /**
-     * Quantity of the item
-     * @type {number}
-     * @memberof Product
-     */
-    qty: number;
-    /**
-     * Price of individual item
-     * @type {number}
-     * @memberof Product
-     */
-    price: number;
+    id?: string;
 }
 
 /**
- * Check if a given object implements the Product interface.
+ * Check if a given object implements the SnapLogEventDataController interface.
  */
-export function instanceOfProduct(value: object): value is Product {
-    if (!('uid' in value) || value['uid'] === undefined) return false;
-    if (!('qty' in value) || value['qty'] === undefined) return false;
-    if (!('price' in value) || value['price'] === undefined) return false;
+export function instanceOfSnapLogEventDataController(value: object): value is SnapLogEventDataController {
     return true;
 }
 
-export function ProductFromJSON(json: any): Product {
-    return ProductFromJSONTyped(json, false);
+export function SnapLogEventDataControllerFromJSON(json: any): SnapLogEventDataController {
+    return SnapLogEventDataControllerFromJSONTyped(json, false);
 }
 
-export function ProductFromJSONTyped(json: any, ignoreDiscriminator: boolean): Product {
+export function SnapLogEventDataControllerFromJSONTyped(json: any, ignoreDiscriminator: boolean): SnapLogEventDataController {
     if (json == null) {
         return json;
     }
     return {
         
-        'uid': json['uid'],
-        'childUid': json['childUid'] == null ? undefined : json['childUid'],
-        'sku': json['sku'] == null ? undefined : json['sku'],
-        'childSku': json['childSku'] == null ? undefined : json['childSku'],
-        'qty': json['qty'],
-        'price': json['price'],
+        'type': json['type'] == null ? undefined : json['type'],
+        'id': json['id'] == null ? undefined : json['id'],
     };
 }
 
-  export function ProductToJSON(json: any): Product {
-      return ProductToJSONTyped(json, false);
+  export function SnapLogEventDataControllerToJSON(json: any): SnapLogEventDataController {
+      return SnapLogEventDataControllerToJSONTyped(json, false);
   }
 
-  export function ProductToJSONTyped(value?: Product | null, ignoreDiscriminator: boolean = false): any {
+  export function SnapLogEventDataControllerToJSONTyped(value?: SnapLogEventDataController | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'uid': value['uid'],
-        'childUid': value['childUid'],
-        'sku': value['sku'],
-        'childSku': value['childSku'],
-        'qty': value['qty'],
-        'price': value['price'],
+        'type': value['type'],
+        'id': value['id'],
     };
 }
 

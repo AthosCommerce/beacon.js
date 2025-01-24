@@ -14,95 +14,71 @@
 
 import { mapValues } from '../runtime';
 /**
- * Product details
+ * Contextual data about the error
  * @export
- * @interface Product
+ * @interface ShopifyPixelExtensionLogEventContext
  */
-export interface Product {
+export interface ShopifyPixelExtensionLogEventContext {
     /**
-     * Unique product identifier of the Searchspring indexed product (also provide `sku`, `childSku`, and `childId` if available)
+     * Shopper IP address
      * @type {string}
-     * @memberof Product
+     * @memberof ShopifyPixelExtensionLogEventContext
      */
-    uid: string;
+    iP: string;
     /**
-     * Unique product variant identifier
+     * Shopper UserAgent
      * @type {string}
-     * @memberof Product
+     * @memberof ShopifyPixelExtensionLogEventContext
      */
-    childUid?: string;
+    userAgent: string;
     /**
-     * Unique product identifier (also provide `childSku` if available)
+     * RFC3339 formatted timestamp represents time of event
      * @type {string}
-     * @memberof Product
+     * @memberof ShopifyPixelExtensionLogEventContext
      */
-    sku?: string;
-    /**
-     * Unique product variant identifier (also provide `sku` if available)
-     * @type {string}
-     * @memberof Product
-     */
-    childSku?: string;
-    /**
-     * Quantity of the item
-     * @type {number}
-     * @memberof Product
-     */
-    qty: number;
-    /**
-     * Price of individual item
-     * @type {number}
-     * @memberof Product
-     */
-    price: number;
+    timestamp: string;
 }
 
 /**
- * Check if a given object implements the Product interface.
+ * Check if a given object implements the ShopifyPixelExtensionLogEventContext interface.
  */
-export function instanceOfProduct(value: object): value is Product {
-    if (!('uid' in value) || value['uid'] === undefined) return false;
-    if (!('qty' in value) || value['qty'] === undefined) return false;
-    if (!('price' in value) || value['price'] === undefined) return false;
+export function instanceOfShopifyPixelExtensionLogEventContext(value: object): value is ShopifyPixelExtensionLogEventContext {
+    if (!('iP' in value) || value['iP'] === undefined) return false;
+    if (!('userAgent' in value) || value['userAgent'] === undefined) return false;
+    if (!('timestamp' in value) || value['timestamp'] === undefined) return false;
     return true;
 }
 
-export function ProductFromJSON(json: any): Product {
-    return ProductFromJSONTyped(json, false);
+export function ShopifyPixelExtensionLogEventContextFromJSON(json: any): ShopifyPixelExtensionLogEventContext {
+    return ShopifyPixelExtensionLogEventContextFromJSONTyped(json, false);
 }
 
-export function ProductFromJSONTyped(json: any, ignoreDiscriminator: boolean): Product {
+export function ShopifyPixelExtensionLogEventContextFromJSONTyped(json: any, ignoreDiscriminator: boolean): ShopifyPixelExtensionLogEventContext {
     if (json == null) {
         return json;
     }
     return {
         
-        'uid': json['uid'],
-        'childUid': json['childUid'] == null ? undefined : json['childUid'],
-        'sku': json['sku'] == null ? undefined : json['sku'],
-        'childSku': json['childSku'] == null ? undefined : json['childSku'],
-        'qty': json['qty'],
-        'price': json['price'],
+        'iP': json['IP'],
+        'userAgent': json['userAgent'],
+        'timestamp': json['timestamp'],
     };
 }
 
-  export function ProductToJSON(json: any): Product {
-      return ProductToJSONTyped(json, false);
+  export function ShopifyPixelExtensionLogEventContextToJSON(json: any): ShopifyPixelExtensionLogEventContext {
+      return ShopifyPixelExtensionLogEventContextToJSONTyped(json, false);
   }
 
-  export function ProductToJSONTyped(value?: Product | null, ignoreDiscriminator: boolean = false): any {
+  export function ShopifyPixelExtensionLogEventContextToJSONTyped(value?: ShopifyPixelExtensionLogEventContext | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'uid': value['uid'],
-        'childUid': value['childUid'],
-        'sku': value['sku'],
-        'childSku': value['childSku'],
-        'qty': value['qty'],
-        'price': value['price'],
+        'IP': value['iP'],
+        'userAgent': value['userAgent'],
+        'timestamp': value['timestamp'],
     };
 }
 

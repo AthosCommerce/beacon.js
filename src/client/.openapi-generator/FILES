@@ -1,6 +1,7 @@
 apis/AutocompleteApi.ts
 apis/CartApi.ts
 apis/CategoryApi.ts
+apis/ErrorLogsApi.ts
 apis/OrderApi.ts
 apis/ProductApi.ts
 apis/RecommendationsApi.ts
@@ -31,6 +32,8 @@ models/Model400Response.ts
 models/Model404Response.ts
 models/OrderTransactionSchema.ts
 models/OrderTransactionSchemaData.ts
+models/PersonalizationLogEvent.ts
+models/PersonalizationLogEventData.ts
 models/Product.ts
 models/ProductPageviewSchema.ts
 models/ProductPageviewSchemaData.ts
@@ -43,6 +46,12 @@ models/SearchSchemaData.ts
 models/SearchSchemaDataMerchandising.ts
 models/SearchSchemaDataMerchandisingTriggeredCampaignsInner.ts
 models/SearchSchemaDataPagination.ts
+models/ShopifyPixelExtensionLogEvent.ts
+models/ShopifyPixelExtensionLogEventContext.ts
+models/ShopifyPixelExtensionLogEventData.ts
 models/ShopperLoginSchema.ts
+models/SnapLogEvent.ts
+models/SnapLogEventData.ts
+models/SnapLogEventDataController.ts
 models/index.ts
 runtime.ts

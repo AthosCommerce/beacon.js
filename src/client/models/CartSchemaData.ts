@@ -13,13 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { Product } from './Product';
+import type { Item } from './Item';
 import {
-    ProductFromJSON,
-    ProductFromJSONTyped,
-    ProductToJSON,
-    ProductToJSONTyped,
-} from './Product';
+    ItemFromJSON,
+    ItemFromJSONTyped,
+    ItemToJSON,
+    ItemToJSONTyped,
+} from './Item';
 
 /**
  * Event details
@@ -28,11 +28,17 @@ import {
  */
 export interface CartSchemaData {
     /**
-     * 
-     * @type {Array<Product>}
+     * Item(s) that modified the cart
+     * @type {Array<Item>}
      * @memberof CartSchemaData
      */
-    results: Array<Product>;
+    results: Array<Item>;
+    /**
+     * Updated current cart contents
+     * @type {Array<Item>}
+     * @memberof CartSchemaData
+     */
+    cart?: Array<Item>;
 }
 
 /**
@@ -53,7 +59,8 @@ export function CartSchemaDataFromJSONTyped(json: any, ignoreDiscriminator: bool
     }
     return {
         
-        'results': ((json['results'] as Array<any>).map(ProductFromJSON)),
+        'results': ((json['results'] as Array<any>).map(ItemFromJSON)),
+        'cart': json['cart'] == null ? undefined : ((json['cart'] as Array<any>).map(ItemFromJSON)),
     };
 }
 
@@ -68,7 +75,8 @@ export function CartSchemaDataFromJSONTyped(json: any, ignoreDiscriminator: bool
 
     return {
         
-        'results': ((value['results'] as Array<any>).map(ProductToJSON)),
+        'results': ((value['results'] as Array<any>).map(ItemToJSON)),
+        'cart': value['cart'] == null ? undefined : ((value['cart'] as Array<any>).map(ItemToJSON)),
     };
 }
 

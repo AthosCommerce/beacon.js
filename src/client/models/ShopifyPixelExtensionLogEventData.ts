@@ -14,95 +14,110 @@
 
 import { mapValues } from '../runtime';
 /**
- * Product details
+ * Error details
  * @export
- * @interface Product
+ * @interface ShopifyPixelExtensionLogEventData
  */
-export interface Product {
+export interface ShopifyPixelExtensionLogEventData {
     /**
-     * Unique product identifier of the Searchspring indexed product (also provide `sku`, `childSku`, and `childId` if available)
+     * Error type
      * @type {string}
-     * @memberof Product
+     * @memberof ShopifyPixelExtensionLogEventData
      */
-    uid: string;
+    error: string;
     /**
-     * Unique product variant identifier
+     * Error message
      * @type {string}
-     * @memberof Product
+     * @memberof ShopifyPixelExtensionLogEventData
      */
-    childUid?: string;
+    message: string;
     /**
-     * Unique product identifier (also provide `childSku` if available)
+     * URL of the page where the error occurred
      * @type {string}
-     * @memberof Product
+     * @memberof ShopifyPixelExtensionLogEventData
      */
-    sku?: string;
+    href?: string;
     /**
-     * Unique product variant identifier (also provide `sku` if available)
+     * Filename of the script where the error occurred
      * @type {string}
-     * @memberof Product
+     * @memberof ShopifyPixelExtensionLogEventData
      */
-    childSku?: string;
+    filename?: string;
     /**
-     * Quantity of the item
+     * Stack trace of the error
+     * @type {string}
+     * @memberof ShopifyPixelExtensionLogEventData
+     */
+    stack?: string;
+    /**
+     * Column number where the error occurred
      * @type {number}
-     * @memberof Product
+     * @memberof ShopifyPixelExtensionLogEventData
      */
-    qty: number;
+    colno?: number;
     /**
-     * Price of individual item
+     * Line number where the error occurred
      * @type {number}
-     * @memberof Product
+     * @memberof ShopifyPixelExtensionLogEventData
      */
-    price: number;
+    lineno?: number;
+    /**
+     * Additional optional error details
+     * @type {object}
+     * @memberof ShopifyPixelExtensionLogEventData
+     */
+    details?: object;
 }
 
 /**
- * Check if a given object implements the Product interface.
+ * Check if a given object implements the ShopifyPixelExtensionLogEventData interface.
  */
-export function instanceOfProduct(value: object): value is Product {
-    if (!('uid' in value) || value['uid'] === undefined) return false;
-    if (!('qty' in value) || value['qty'] === undefined) return false;
-    if (!('price' in value) || value['price'] === undefined) return false;
+export function instanceOfShopifyPixelExtensionLogEventData(value: object): value is ShopifyPixelExtensionLogEventData {
+    if (!('error' in value) || value['error'] === undefined) return false;
+    if (!('message' in value) || value['message'] === undefined) return false;
     return true;
 }
 
-export function ProductFromJSON(json: any): Product {
-    return ProductFromJSONTyped(json, false);
+export function ShopifyPixelExtensionLogEventDataFromJSON(json: any): ShopifyPixelExtensionLogEventData {
+    return ShopifyPixelExtensionLogEventDataFromJSONTyped(json, false);
 }
 
-export function ProductFromJSONTyped(json: any, ignoreDiscriminator: boolean): Product {
+export function ShopifyPixelExtensionLogEventDataFromJSONTyped(json: any, ignoreDiscriminator: boolean): ShopifyPixelExtensionLogEventData {
     if (json == null) {
         return json;
     }
     return {
         
-        'uid': json['uid'],
-        'childUid': json['childUid'] == null ? undefined : json['childUid'],
-        'sku': json['sku'] == null ? undefined : json['sku'],
-        'childSku': json['childSku'] == null ? undefined : json['childSku'],
-        'qty': json['qty'],
-        'price': json['price'],
+        'error': json['error'],
+        'message': json['message'],
+        'href': json['href'] == null ? undefined : json['href'],
+        'filename': json['filename'] == null ? undefined : json['filename'],
+        'stack': json['stack'] == null ? undefined : json['stack'],
+        'colno': json['colno'] == null ? undefined : json['colno'],
+        'lineno': json['lineno'] == null ? undefined : json['lineno'],
+        'details': json['details'] == null ? undefined : json['details'],
     };
 }
 
-  export function ProductToJSON(json: any): Product {
-      return ProductToJSONTyped(json, false);
+  export function ShopifyPixelExtensionLogEventDataToJSON(json: any): ShopifyPixelExtensionLogEventData {
+      return ShopifyPixelExtensionLogEventDataToJSONTyped(json, false);
   }
 
-  export function ProductToJSONTyped(value?: Product | null, ignoreDiscriminator: boolean = false): any {
+  export function ShopifyPixelExtensionLogEventDataToJSONTyped(value?: ShopifyPixelExtensionLogEventData | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'uid': value['uid'],
-        'childUid': value['childUid'],
-        'sku': value['sku'],
-        'childSku': value['childSku'],
-        'qty': value['qty'],
-        'price': value['price'],
+        'error': value['error'],
+        'message': value['message'],
+        'href': value['href'],
+        'filename': value['filename'],
+        'stack': value['stack'],
+        'colno': value['colno'],
+        'lineno': value['lineno'],
+        'details': value['details'],
     };
 }
 

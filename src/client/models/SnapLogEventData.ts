@@ -13,96 +13,127 @@
  */
 
 import { mapValues } from '../runtime';
+import type { SnapLogEventDataController } from './SnapLogEventDataController';
+import {
+    SnapLogEventDataControllerFromJSON,
+    SnapLogEventDataControllerFromJSONTyped,
+    SnapLogEventDataControllerToJSON,
+    SnapLogEventDataControllerToJSONTyped,
+} from './SnapLogEventDataController';
+
 /**
- * Product details
+ * Error details
  * @export
- * @interface Product
+ * @interface SnapLogEventData
  */
-export interface Product {
+export interface SnapLogEventData {
     /**
-     * Unique product identifier of the Searchspring indexed product (also provide `sku`, `childSku`, and `childId` if available)
+     * Error type
      * @type {string}
-     * @memberof Product
+     * @memberof SnapLogEventData
      */
-    uid: string;
+    error: string;
     /**
-     * Unique product variant identifier
+     * Error message
      * @type {string}
-     * @memberof Product
+     * @memberof SnapLogEventData
      */
-    childUid?: string;
+    message: string;
     /**
-     * Unique product identifier (also provide `childSku` if available)
+     * 
+     * @type {SnapLogEventDataController}
+     * @memberof SnapLogEventData
+     */
+    controller?: SnapLogEventDataController;
+    /**
+     * URL of the page where the error occurred
      * @type {string}
-     * @memberof Product
+     * @memberof SnapLogEventData
      */
-    sku?: string;
+    href?: string;
     /**
-     * Unique product variant identifier (also provide `sku` if available)
+     * Filename of the script where the error occurred
      * @type {string}
-     * @memberof Product
+     * @memberof SnapLogEventData
      */
-    childSku?: string;
+    filename?: string;
     /**
-     * Quantity of the item
+     * Stack trace of the error
+     * @type {string}
+     * @memberof SnapLogEventData
+     */
+    stack?: string;
+    /**
+     * Column number where the error occurred
      * @type {number}
-     * @memberof Product
+     * @memberof SnapLogEventData
      */
-    qty: number;
+    colno?: number;
     /**
-     * Price of individual item
+     * Line number where the error occurred
      * @type {number}
-     * @memberof Product
+     * @memberof SnapLogEventData
      */
-    price: number;
+    lineno?: number;
+    /**
+     * Additional optional error details
+     * @type {object}
+     * @memberof SnapLogEventData
+     */
+    details?: object;
 }
 
 /**
- * Check if a given object implements the Product interface.
+ * Check if a given object implements the SnapLogEventData interface.
  */
-export function instanceOfProduct(value: object): value is Product {
-    if (!('uid' in value) || value['uid'] === undefined) return false;
-    if (!('qty' in value) || value['qty'] === undefined) return false;
-    if (!('price' in value) || value['price'] === undefined) return false;
+export function instanceOfSnapLogEventData(value: object): value is SnapLogEventData {
+    if (!('error' in value) || value['error'] === undefined) return false;
+    if (!('message' in value) || value['message'] === undefined) return false;
     return true;
 }
 
-export function ProductFromJSON(json: any): Product {
-    return ProductFromJSONTyped(json, false);
+export function SnapLogEventDataFromJSON(json: any): SnapLogEventData {
+    return SnapLogEventDataFromJSONTyped(json, false);
 }
 
-export function ProductFromJSONTyped(json: any, ignoreDiscriminator: boolean): Product {
+export function SnapLogEventDataFromJSONTyped(json: any, ignoreDiscriminator: boolean): SnapLogEventData {
     if (json == null) {
         return json;
     }
     return {
         
-        'uid': json['uid'],
-        'childUid': json['childUid'] == null ? undefined : json['childUid'],
-        'sku': json['sku'] == null ? undefined : json['sku'],
-        'childSku': json['childSku'] == null ? undefined : json['childSku'],
-        'qty': json['qty'],
-        'price': json['price'],
+        'error': json['error'],
+        'message': json['message'],
+        'controller': json['controller'] == null ? undefined : SnapLogEventDataControllerFromJSON(json['controller']),
+        'href': json['href'] == null ? undefined : json['href'],
+        'filename': json['filename'] == null ? undefined : json['filename'],
+        'stack': json['stack'] == null ? undefined : json['stack'],
+        'colno': json['colno'] == null ? undefined : json['colno'],
+        'lineno': json['lineno'] == null ? undefined : json['lineno'],
+        'details': json['details'] == null ? undefined : json['details'],
     };
 }
 
-  export function ProductToJSON(json: any): Product {
-      return ProductToJSONTyped(json, false);
+  export function SnapLogEventDataToJSON(json: any): SnapLogEventData {
+      return SnapLogEventDataToJSONTyped(json, false);
   }
 
-  export function ProductToJSONTyped(value?: Product | null, ignoreDiscriminator: boolean = false): any {
+  export function SnapLogEventDataToJSONTyped(value?: SnapLogEventData | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'uid': value['uid'],
-        'childUid': value['childUid'],
-        'sku': value['sku'],
-        'childSku': value['childSku'],
-        'qty': value['qty'],
-        'price': value['price'],
+        'error': value['error'],
+        'message': value['message'],
+        'controller': SnapLogEventDataControllerToJSON(value['controller']),
+        'href': value['href'],
+        'filename': value['filename'],
+        'stack': value['stack'],
+        'colno': value['colno'],
+        'lineno': value['lineno'],
+        'details': value['details'],
     };
 }
 

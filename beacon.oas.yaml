@@ -16320,6 +16320,1307 @@ paths:
           $ref: '#/components/responses/415-response'
         '500':
           $ref: '#/components/responses/500-response'
+  /{siteId}/log/personalization:
+    post:
+      tags:
+        - Error Logs
+      summary: /beacon/v2/{siteId}/log/personalization
+      description: Personalization error log events
+      operationId: log-personalization
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the SMC (Searchspring Management Console)
+      requestBody:
+        description: Personalization error log
+        required: true
+        content:
+          application/json:
+            schema:
+              title: personalization log event
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  description: Error details
+                  type: object
+                  required:
+                    - error
+                    - message
+                    - timestamp
+                    - profile
+                    - href
+                  properties:
+                    error:
+                      description: Error type
+                      type: string
+                    message:
+                      description: Error message
+                      type: string
+                    timestamp:
+                      description: RFC3339 formatted timestamp represents time of event
+                      type: string
+                      format: date-time
+                    profile:
+                      description: Profile tag
+                      type: string
+                    href:
+                      description: Personalized Recommendations request endpoint
+                      type: string
+                    details:
+                      description: Additional optional error details
+                      type: object
+            examples:
+              example 1:
+                $ref: '#/components/examples/personalization-request-example-1'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          description: Missing or invalid POST body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400-response'
+              examples:
+                Missing/invalid JSON POST body:
+                  $ref: '#/components/examples/missing-invalid-post-body'
+                Missing required key-value:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'missing required key-value: data.orderId'
+                      - 'missing required key-value: data.transactionTotal'
+                      - 'missing required key-value: data.total'
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              }
+                          },
+                          "data": {
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                Invalid format:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'invalid context.ssTimestamp format: expected RFC3339'
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                Invalid data type:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'invalid data type passed for key: `"data.transactionTotal"` (at position 691)'
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": "75",
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                Invalid minimum value passed:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - invalid minimum value passed for key `context.currency.code` - expected length `3`
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "US"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                Invalid maximum value passed:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - invalid maximum value passed for key `context.currency.code` - expected length `3`
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USDA"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                If array is defined must not be empty:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - if `data.items` array is defined must not be empty
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": []
+                          }
+                      }
+                Unknown field:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'request body contains unknown field: "seed"'
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              },
+                              "seed": [{"sku":"abc123-SM"}]
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+        '404':
+          description: Invalid path
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404-response'
+              examples:
+                Invalid path or missing siteId:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    message: 'invalid endpoint path or missing siteId in path: `/beacon/v2/order/transaction`'
+                Invalid siteId pattern:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    messages:
+                      - 'invalid siteId pattern: received `abc12` - expected pattern `^[a-z0-9]{6}$`'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/log/shopifypixel:
+    post:
+      tags:
+        - Error Logs
+      summary: /beacon/v2/{siteId}/log/shopifypixel
+      description: Shopify Pixel Extension error log events
+      operationId: log-shopifypixel
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the SMC (Searchspring Management Console)
+      requestBody:
+        description: Shopify Pixel extension error log
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Shopify Pixel extension log event
+              type: object
+              required:
+                - context
+                - data
+              properties:
+                context:
+                  description: Contextual data about the error
+                  type: object
+                  required:
+                    - IP
+                    - userAgent
+                    - timestamp
+                  properties:
+                    IP:
+                      description: Shopper IP address
+                      type: string
+                    userAgent:
+                      description: Shopper UserAgent
+                      type: string
+                    timestamp:
+                      description: RFC3339 formatted timestamp represents time of event
+                      type: string
+                data:
+                  description: Error details
+                  type: object
+                  required:
+                    - error
+                    - message
+                  properties:
+                    error:
+                      description: Error type
+                      type: string
+                    message:
+                      description: Error message
+                      type: string
+                    href:
+                      description: URL of the page where the error occurred
+                      type: string
+                    filename:
+                      description: Filename of the script where the error occurred
+                      type: string
+                    stack:
+                      description: Stack trace of the error
+                      type: string
+                    colno:
+                      description: Column number where the error occurred
+                      type: integer
+                    lineno:
+                      description: Line number where the error occurred
+                      type: integer
+                    details:
+                      description: Additional optional error details
+                      type: object
+            examples:
+              example 1:
+                $ref: '#/components/examples/shopifypixel-request-example-1'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          description: Missing or invalid POST body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400-response'
+              examples:
+                Missing/invalid JSON POST body:
+                  $ref: '#/components/examples/missing-invalid-post-body'
+                Missing required key-value:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'missing required key-value: data.orderId'
+                      - 'missing required key-value: data.transactionTotal'
+                      - 'missing required key-value: data.total'
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              }
+                          },
+                          "data": {
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                Invalid format:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'invalid context.ssTimestamp format: expected RFC3339'
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                Invalid data type:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'invalid data type passed for key: `"data.transactionTotal"` (at position 691)'
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": "75",
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                Invalid minimum value passed:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - invalid minimum value passed for key `context.currency.code` - expected length `3`
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "US"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                Invalid maximum value passed:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - invalid maximum value passed for key `context.currency.code` - expected length `3`
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USDA"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                If array is defined must not be empty:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - if `data.items` array is defined must not be empty
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": []
+                          }
+                      }
+                Unknown field:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'request body contains unknown field: "seed"'
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              },
+                              "seed": [{"sku":"abc123-SM"}]
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+        '404':
+          description: Invalid path
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404-response'
+              examples:
+                Invalid path or missing siteId:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    message: 'invalid endpoint path or missing siteId in path: `/beacon/v2/order/transaction`'
+                Invalid siteId pattern:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    messages:
+                      - 'invalid siteId pattern: received `abc12` - expected pattern `^[a-z0-9]{6}$`'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/log/snap:
+    post:
+      tags:
+        - Error Logs
+      summary: /beacon/v2/{siteId}/log/snap
+      description: Snap error log events
+      operationId: log-snap
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the SMC (Searchspring Management Console)
+      requestBody:
+        description: Snap error log
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Snap log event
+              type: object
+              required:
+                - context
+                - data
+              properties:
+                context:
+                  description: Contextual data about the error
+                  type: object
+                  required:
+                    - IP
+                    - userAgent
+                    - timestamp
+                  properties:
+                    IP:
+                      description: Shopper IP address
+                      type: string
+                    userAgent:
+                      description: Shopper UserAgent
+                      type: string
+                    timestamp:
+                      description: RFC3339 formatted timestamp represents time of event
+                      type: string
+                data:
+                  description: Error details
+                  type: object
+                  required:
+                    - error
+                    - message
+                  properties:
+                    error:
+                      description: Error type
+                      type: string
+                    message:
+                      description: Error message
+                      type: string
+                    controller:
+                      description: Controller details
+                      type: object
+                      properties:
+                        type:
+                          description: Controller type
+                          type: string
+                        id:
+                          description: Controller ID
+                          type: string
+                    href:
+                      description: URL of the page where the error occurred
+                      type: string
+                    filename:
+                      description: Filename of the script where the error occurred
+                      type: string
+                    stack:
+                      description: Stack trace of the error
+                      type: string
+                    colno:
+                      description: Column number where the error occurred
+                      type: integer
+                    lineno:
+                      description: Line number where the error occurred
+                      type: integer
+                    details:
+                      description: Additional optional error details
+                      type: object
+            examples:
+              example 1:
+                $ref: '#/components/examples/snap-request-example-1'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          description: Missing or invalid POST body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400-response'
+              examples:
+                Missing/invalid JSON POST body:
+                  $ref: '#/components/examples/missing-invalid-post-body'
+                Missing required key-value:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'missing required key-value: data.orderId'
+                      - 'missing required key-value: data.transactionTotal'
+                      - 'missing required key-value: data.total'
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              }
+                          },
+                          "data": {
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                Invalid format:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'invalid context.ssTimestamp format: expected RFC3339'
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                Invalid data type:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'invalid data type passed for key: `"data.transactionTotal"` (at position 691)'
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": "75",
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                Invalid minimum value passed:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - invalid minimum value passed for key `context.currency.code` - expected length `3`
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "US"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                Invalid maximum value passed:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - invalid maximum value passed for key `context.currency.code` - expected length `3`
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USDA"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+                If array is defined must not be empty:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - if `data.items` array is defined must not be empty
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              }
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": []
+                          }
+                      }
+                Unknown field:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'request body contains unknown field: "seed"'
+                    data: |-
+                      {
+                          "context": {
+                              "ssIP": "7309:1fdb:e0d5:7632:7f2a:c269:7519:991b",
+                              "ssUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                              "ssTimestamp": "2024-06-11T17:47:04.075876Z",
+                              "userId": "41f87850-65f5-4546-851c-f166109e57b9",
+                              "sessionId": "1c311c14-c33b-4222-952a-f17db729ea31",
+                              "pageLoadId": "41f87850-c33b-4222-952a-f17db729ea31",
+                              "shopperId": "user123456",
+                              "initiator": "searchspring/snap/preact/0.49.1",
+                              "currency": {
+                                  "code": "USD"
+                              },
+                              "seed": [{"sku":"abc123-SM"}]
+                          },
+                          "data": {
+                              "orderId": "order1337",
+                              "transactionTotal": 75,
+                              "total": 100,
+                              "city": "San Antonio",
+                              "country": "United States",
+                              "state": "Texas",
+                              "items": [
+                                  {
+                                      "Uid": "1234567890",
+                                      "childUid": "1105820260",
+                                      "sku": "ACH81-001",
+                                      "childSku": "ACH81-001-CAMEL",
+                                      "qty": 1,
+                                      "price": 22
+                                  },
+                                  {
+                                      "Uid": "0987654321",
+                                      "childUid": "7426853337",
+                                      "sku": "BAY79-640",
+                                      "childSku": "BAY79-640-RED",
+                                      "qty": 2,
+                                      "price": 39
+                                  }
+                              ]
+                          }
+                      }
+        '404':
+          description: Invalid path
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404-response'
+              examples:
+                Invalid path or missing siteId:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    message: 'invalid endpoint path or missing siteId in path: `/beacon/v2/order/transaction`'
+                Invalid siteId pattern:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    messages:
+                      - 'invalid siteId pattern: received `abc12` - expected pattern `^[a-z0-9]{6}$`'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
 components:
   schemas:
     context:
@@ -16799,31 +18100,6 @@ components:
               description: Tag of the personalized recommendation profile the shopper interacted with
             results:
               $ref: '#/components/schemas/results'
-    product:
-      type: object
-      description: Product details
-      required:
-        - uid
-        - qty
-        - price
-      properties:
-        uid:
-          description: Unique product identifier of the Searchspring indexed product (also provide `sku`, `childSku`, and `childId` if available)
-        childUid:
-          description: Unique product variant identifier
-          type: string
-        sku:
-          description: Unique product identifier (also provide `childSku` if available)
-          type: string
-        childSku:
-          description: Unique product variant identifier (also provide `sku` if available)
-          type: string
-        qty:
-          description: Quantity of the item
-          type: number
-        price:
-          description: Price of individual item
-          type: number
     cart.schema:
       title: Shopper update the shopping cart
       type: object
@@ -16841,8 +18117,40 @@ components:
           properties:
             results:
               type: array
+              description: Item(s) that modified the cart
               items:
-                $ref: '#/components/schemas/product'
+                $ref: '#/components/schemas/item'
+            cart:
+              type: array
+              description: Updated current cart contents
+              items:
+                $ref: '#/components/schemas/item'
+    product:
+      type: object
+      description: Product details
+      required:
+        - uid
+        - qty
+        - price
+      properties:
+        uid:
+          description: Unique product identifier of the Searchspring indexed product (also provide `sku`, `childSku`, and `childId` if available)
+          type: string
+        childUid:
+          description: Unique product variant identifier
+          type: string
+        sku:
+          description: Unique product identifier (also provide `childSku` if available)
+          type: string
+        childSku:
+          description: Unique product variant identifier (also provide `sku` if available)
+          type: string
+        qty:
+          description: Quantity of the item
+          type: number
+        price:
+          description: Price of individual item
+          type: number
   examples:
     request-example-login:
       value:
@@ -17780,6 +19088,78 @@ components:
               childSku: BAY79-640-RED
               qty: 2
               price: 39
+    personalization-request-example-1:
+      value:
+        data:
+          error: RecommendationServiceNotEnabledError
+          message: q8q4eu is calling the rec service, but is not enabled for recommendations
+          timestamp: '2024-06-11T17:47:04.075876Z'
+          profile: error-profile
+          href: https://q8q4eu.a.searchspring.io/boost/q8q4eu/recommend?tags=bundle&product=698493
+          details:
+            object:
+              string: a string
+              int: 1
+              float: 1.1
+            array:
+              - '1'
+              - '2'
+            string: another string
+            int: 2
+            float: 1.1
+    shopifypixel-request-example-1:
+      value:
+        context:
+          IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2024-06-11T17:47:04.075876Z'
+        data:
+          error: SpecificPixelExtensionError
+          message: reason why there was an error with the pixel extension
+          href: www.somedomain.com
+          filename: someFile.jsx
+          stack: stackTrace
+          colno: 278
+          lineno: 92
+          details:
+            object:
+              string: a string
+              int: 1
+              float: 1.1
+            array:
+              - '1'
+              - '2'
+            string: another string
+            int: 2
+            float: 1.1
+    snap-request-example-1:
+      value:
+        context:
+          IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2024-06-11T17:47:04.075876Z'
+        data:
+          error: RuntimeError
+          message: reason why snap threw an error
+          controller:
+            type: testControllerType
+            id: someID
+          href: www.somedomain.com
+          filename: someFile.jsx
+          stack: stackTrace
+          colno: 278
+          lineno: 92
+          details:
+            object:
+              string: a string
+              int: 1
+              float: 1.1
+            array:
+              - '1'
+              - '2'
+            string: another string
+            int: 2
+            float: 1.1
   responses:
     200-response:
       description: OK

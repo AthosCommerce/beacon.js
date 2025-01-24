@@ -13,96 +13,62 @@
  */
 
 import { mapValues } from '../runtime';
+import type { PersonalizationLogEventData } from './PersonalizationLogEventData';
+import {
+    PersonalizationLogEventDataFromJSON,
+    PersonalizationLogEventDataFromJSONTyped,
+    PersonalizationLogEventDataToJSON,
+    PersonalizationLogEventDataToJSONTyped,
+} from './PersonalizationLogEventData';
+
 /**
- * Product details
+ * 
  * @export
- * @interface Product
+ * @interface PersonalizationLogEvent
  */
-export interface Product {
+export interface PersonalizationLogEvent {
     /**
-     * Unique product identifier of the Searchspring indexed product (also provide `sku`, `childSku`, and `childId` if available)
-     * @type {string}
-     * @memberof Product
+     * 
+     * @type {PersonalizationLogEventData}
+     * @memberof PersonalizationLogEvent
      */
-    uid: string;
-    /**
-     * Unique product variant identifier
-     * @type {string}
-     * @memberof Product
-     */
-    childUid?: string;
-    /**
-     * Unique product identifier (also provide `childSku` if available)
-     * @type {string}
-     * @memberof Product
-     */
-    sku?: string;
-    /**
-     * Unique product variant identifier (also provide `sku` if available)
-     * @type {string}
-     * @memberof Product
-     */
-    childSku?: string;
-    /**
-     * Quantity of the item
-     * @type {number}
-     * @memberof Product
-     */
-    qty: number;
-    /**
-     * Price of individual item
-     * @type {number}
-     * @memberof Product
-     */
-    price: number;
+    data: PersonalizationLogEventData;
 }
 
 /**
- * Check if a given object implements the Product interface.
+ * Check if a given object implements the PersonalizationLogEvent interface.
  */
-export function instanceOfProduct(value: object): value is Product {
-    if (!('uid' in value) || value['uid'] === undefined) return false;
-    if (!('qty' in value) || value['qty'] === undefined) return false;
-    if (!('price' in value) || value['price'] === undefined) return false;
+export function instanceOfPersonalizationLogEvent(value: object): value is PersonalizationLogEvent {
+    if (!('data' in value) || value['data'] === undefined) return false;
     return true;
 }
 
-export function ProductFromJSON(json: any): Product {
-    return ProductFromJSONTyped(json, false);
+export function PersonalizationLogEventFromJSON(json: any): PersonalizationLogEvent {
+    return PersonalizationLogEventFromJSONTyped(json, false);
 }
 
-export function ProductFromJSONTyped(json: any, ignoreDiscriminator: boolean): Product {
+export function PersonalizationLogEventFromJSONTyped(json: any, ignoreDiscriminator: boolean): PersonalizationLogEvent {
     if (json == null) {
         return json;
     }
     return {
         
-        'uid': json['uid'],
-        'childUid': json['childUid'] == null ? undefined : json['childUid'],
-        'sku': json['sku'] == null ? undefined : json['sku'],
-        'childSku': json['childSku'] == null ? undefined : json['childSku'],
-        'qty': json['qty'],
-        'price': json['price'],
+        'data': PersonalizationLogEventDataFromJSON(json['data']),
     };
 }
 
-  export function ProductToJSON(json: any): Product {
-      return ProductToJSONTyped(json, false);
+  export function PersonalizationLogEventToJSON(json: any): PersonalizationLogEvent {
+      return PersonalizationLogEventToJSONTyped(json, false);
   }
 
-  export function ProductToJSONTyped(value?: Product | null, ignoreDiscriminator: boolean = false): any {
+  export function PersonalizationLogEventToJSONTyped(value?: PersonalizationLogEvent | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'uid': value['uid'],
-        'childUid': value['childUid'],
-        'sku': value['sku'],
-        'childSku': value['childSku'],
-        'qty': value['qty'],
-        'price': value['price'],
+        'data': PersonalizationLogEventDataToJSON(value['data']),
     };
 }
 

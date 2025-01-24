@@ -14,95 +14,97 @@
 
 import { mapValues } from '../runtime';
 /**
- * Product details
+ * Error details
  * @export
- * @interface Product
+ * @interface PersonalizationLogEventData
  */
-export interface Product {
+export interface PersonalizationLogEventData {
     /**
-     * Unique product identifier of the Searchspring indexed product (also provide `sku`, `childSku`, and `childId` if available)
+     * Error type
      * @type {string}
-     * @memberof Product
+     * @memberof PersonalizationLogEventData
      */
-    uid: string;
+    error: string;
     /**
-     * Unique product variant identifier
+     * Error message
      * @type {string}
-     * @memberof Product
+     * @memberof PersonalizationLogEventData
      */
-    childUid?: string;
+    message: string;
     /**
-     * Unique product identifier (also provide `childSku` if available)
+     * RFC3339 formatted timestamp represents time of event
+     * @type {Date}
+     * @memberof PersonalizationLogEventData
+     */
+    timestamp: Date;
+    /**
+     * Profile tag
      * @type {string}
-     * @memberof Product
+     * @memberof PersonalizationLogEventData
      */
-    sku?: string;
+    profile: string;
     /**
-     * Unique product variant identifier (also provide `sku` if available)
+     * Personalized Recommendations request endpoint
      * @type {string}
-     * @memberof Product
+     * @memberof PersonalizationLogEventData
      */
-    childSku?: string;
+    href: string;
     /**
-     * Quantity of the item
-     * @type {number}
-     * @memberof Product
+     * Additional optional error details
+     * @type {object}
+     * @memberof PersonalizationLogEventData
      */
-    qty: number;
-    /**
-     * Price of individual item
-     * @type {number}
-     * @memberof Product
-     */
-    price: number;
+    details?: object;
 }
 
 /**
- * Check if a given object implements the Product interface.
+ * Check if a given object implements the PersonalizationLogEventData interface.
  */
-export function instanceOfProduct(value: object): value is Product {
-    if (!('uid' in value) || value['uid'] === undefined) return false;
-    if (!('qty' in value) || value['qty'] === undefined) return false;
-    if (!('price' in value) || value['price'] === undefined) return false;
+export function instanceOfPersonalizationLogEventData(value: object): value is PersonalizationLogEventData {
+    if (!('error' in value) || value['error'] === undefined) return false;
+    if (!('message' in value) || value['message'] === undefined) return false;
+    if (!('timestamp' in value) || value['timestamp'] === undefined) return false;
+    if (!('profile' in value) || value['profile'] === undefined) return false;
+    if (!('href' in value) || value['href'] === undefined) return false;
     return true;
 }
 
-export function ProductFromJSON(json: any): Product {
-    return ProductFromJSONTyped(json, false);
+export function PersonalizationLogEventDataFromJSON(json: any): PersonalizationLogEventData {
+    return PersonalizationLogEventDataFromJSONTyped(json, false);
 }
 
-export function ProductFromJSONTyped(json: any, ignoreDiscriminator: boolean): Product {
+export function PersonalizationLogEventDataFromJSONTyped(json: any, ignoreDiscriminator: boolean): PersonalizationLogEventData {
     if (json == null) {
         return json;
     }
     return {
         
-        'uid': json['uid'],
-        'childUid': json['childUid'] == null ? undefined : json['childUid'],
-        'sku': json['sku'] == null ? undefined : json['sku'],
-        'childSku': json['childSku'] == null ? undefined : json['childSku'],
-        'qty': json['qty'],
-        'price': json['price'],
+        'error': json['error'],
+        'message': json['message'],
+        'timestamp': (new Date(json['timestamp'])),
+        'profile': json['profile'],
+        'href': json['href'],
+        'details': json['details'] == null ? undefined : json['details'],
     };
 }
 
-  export function ProductToJSON(json: any): Product {
-      return ProductToJSONTyped(json, false);
+  export function PersonalizationLogEventDataToJSON(json: any): PersonalizationLogEventData {
+      return PersonalizationLogEventDataToJSONTyped(json, false);
   }
 
-  export function ProductToJSONTyped(value?: Product | null, ignoreDiscriminator: boolean = false): any {
+  export function PersonalizationLogEventDataToJSONTyped(value?: PersonalizationLogEventData | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'uid': value['uid'],
-        'childUid': value['childUid'],
-        'sku': value['sku'],
-        'childSku': value['childSku'],
-        'qty': value['qty'],
-        'price': value['price'],
+        'error': value['error'],
+        'message': value['message'],
+        'timestamp': ((value['timestamp']).toISOString()),
+        'profile': value['profile'],
+        'href': value['href'],
+        'details': value['details'],
     };
 }
 
