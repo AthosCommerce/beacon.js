@@ -13,98 +13,62 @@
  */
 
 import { mapValues } from '../runtime';
+import type { Item } from './Item';
+import {
+    ItemFromJSON,
+    ItemFromJSONTyped,
+    ItemToJSON,
+    ItemToJSONTyped,
+} from './Item';
+
 /**
- * Error details
+ * Event details
  * @export
- * @interface PersonalizationLogEventData
+ * @interface CartviewSchemaData
  */
-export interface PersonalizationLogEventData {
+export interface CartviewSchemaData {
     /**
-     * Error type
-     * @type {string}
-     * @memberof PersonalizationLogEventData
+     * Item(s) currently in the cart
+     * @type {Array<Item>}
+     * @memberof CartviewSchemaData
      */
-    error: string;
-    /**
-     * Error message
-     * @type {string}
-     * @memberof PersonalizationLogEventData
-     */
-    message: string;
-    /**
-     * RFC3339 formatted timestamp represents time of event
-     * @type {Date}
-     * @memberof PersonalizationLogEventData
-     */
-    timestamp: Date;
-    /**
-     * Profile tag
-     * @type {string}
-     * @memberof PersonalizationLogEventData
-     */
-    profile: string;
-    /**
-     * Personalized Recommendations request endpoint
-     * @type {string}
-     * @memberof PersonalizationLogEventData
-     */
-    href: string;
-    /**
-     * Additional optional error details
-     * @type {object}
-     * @memberof PersonalizationLogEventData
-     */
-    details?: object;
+    results: Array<Item>;
 }
 
 /**
- * Check if a given object implements the PersonalizationLogEventData interface.
+ * Check if a given object implements the CartviewSchemaData interface.
  */
-export function instanceOfPersonalizationLogEventData(value: object): value is PersonalizationLogEventData {
-    if (!('error' in value) || value['error'] === undefined) return false;
-    if (!('message' in value) || value['message'] === undefined) return false;
-    if (!('timestamp' in value) || value['timestamp'] === undefined) return false;
-    if (!('profile' in value) || value['profile'] === undefined) return false;
-    if (!('href' in value) || value['href'] === undefined) return false;
+export function instanceOfCartviewSchemaData(value: object): value is CartviewSchemaData {
+    if (!('results' in value) || value['results'] === undefined) return false;
     return true;
 }
 
-export function PersonalizationLogEventDataFromJSON(json: any): PersonalizationLogEventData {
-    return PersonalizationLogEventDataFromJSONTyped(json, false);
+export function CartviewSchemaDataFromJSON(json: any): CartviewSchemaData {
+    return CartviewSchemaDataFromJSONTyped(json, false);
 }
 
-export function PersonalizationLogEventDataFromJSONTyped(json: any, ignoreDiscriminator: boolean): PersonalizationLogEventData {
+export function CartviewSchemaDataFromJSONTyped(json: any, ignoreDiscriminator: boolean): CartviewSchemaData {
     if (json == null) {
         return json;
     }
     return {
         
-        'error': json['error'],
-        'message': json['message'],
-        'timestamp': (new Date(json['timestamp'])),
-        'profile': json['profile'],
-        'href': json['href'],
-        'details': json['details'] == null ? undefined : json['details'],
+        'results': ((json['results'] as Array<any>).map(ItemFromJSON)),
     };
 }
 
-  export function PersonalizationLogEventDataToJSON(json: any): PersonalizationLogEventData {
-      return PersonalizationLogEventDataToJSONTyped(json, false);
+  export function CartviewSchemaDataToJSON(json: any): CartviewSchemaData {
+      return CartviewSchemaDataToJSONTyped(json, false);
   }
 
-  export function PersonalizationLogEventDataToJSONTyped(value?: PersonalizationLogEventData | null, ignoreDiscriminator: boolean = false): any {
+  export function CartviewSchemaDataToJSONTyped(value?: CartviewSchemaData | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'error': value['error'],
-        'message': value['message'],
-        'timestamp': ((value['timestamp']).toISOString()),
-        'profile': value['profile'],
-        'href': value['href'],
-        'details': value['details'],
+        'results': ((value['results'] as Array<any>).map(ItemToJSON)),
     };
 }
 

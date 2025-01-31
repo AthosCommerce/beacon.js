@@ -16,12 +16,15 @@
 import * as runtime from '../runtime';
 import type {
   CartSchema,
+  CartviewSchema,
   Model400Response,
   Model404Response,
 } from '../models/index';
 import {
     CartSchemaFromJSON,
     CartSchemaToJSON,
+    CartviewSchemaFromJSON,
+    CartviewSchemaToJSON,
     Model400ResponseFromJSON,
     Model400ResponseToJSON,
     Model404ResponseFromJSON,
@@ -40,7 +43,7 @@ export interface CartRemoveRequest {
 
 export interface CartViewRequest {
     siteId: string;
-    cartSchema: CartSchema;
+    cartviewSchema: CartviewSchema;
 }
 
 /**
@@ -151,10 +154,10 @@ export class CartApi extends runtime.BaseAPI {
             );
         }
 
-        if (requestParameters['cartSchema'] == null) {
+        if (requestParameters['cartviewSchema'] == null) {
             throw new runtime.RequiredError(
-                'cartSchema',
-                'Required parameter "cartSchema" was null or undefined when calling cartView().'
+                'cartviewSchema',
+                'Required parameter "cartviewSchema" was null or undefined when calling cartView().'
             );
         }
 
@@ -169,7 +172,7 @@ export class CartApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: CartSchemaToJSON(requestParameters['cartSchema']),
+            body: CartviewSchemaToJSON(requestParameters['cartviewSchema']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse<any>(response);

@@ -14,109 +14,68 @@
 
 import { mapValues } from '../runtime';
 /**
- * Error details
+ * Log data about the event
  * @export
- * @interface ShopifyPixelExtensionLogEventData
+ * @interface Log
  */
-export interface ShopifyPixelExtensionLogEventData {
-    /**
-     * Error type
-     * @type {string}
-     * @memberof ShopifyPixelExtensionLogEventData
-     */
-    error: string;
+export interface Log {
     /**
      * Error message
      * @type {string}
-     * @memberof ShopifyPixelExtensionLogEventData
+     * @memberof Log
      */
     message: string;
     /**
-     * URL of the page where the error occurred
-     * @type {string}
-     * @memberof ShopifyPixelExtensionLogEventData
-     */
-    href?: string;
-    /**
-     * Filename of the script where the error occurred
-     * @type {string}
-     * @memberof ShopifyPixelExtensionLogEventData
-     */
-    filename?: string;
-    /**
      * Stack trace of the error
      * @type {string}
-     * @memberof ShopifyPixelExtensionLogEventData
+     * @memberof Log
      */
     stack?: string;
     /**
-     * Column number where the error occurred
-     * @type {number}
-     * @memberof ShopifyPixelExtensionLogEventData
-     */
-    colno?: number;
-    /**
-     * Line number where the error occurred
-     * @type {number}
-     * @memberof ShopifyPixelExtensionLogEventData
-     */
-    lineno?: number;
-    /**
      * Additional optional error details
      * @type {object}
-     * @memberof ShopifyPixelExtensionLogEventData
+     * @memberof Log
      */
     details?: object;
 }
 
 /**
- * Check if a given object implements the ShopifyPixelExtensionLogEventData interface.
+ * Check if a given object implements the Log interface.
  */
-export function instanceOfShopifyPixelExtensionLogEventData(value: object): value is ShopifyPixelExtensionLogEventData {
-    if (!('error' in value) || value['error'] === undefined) return false;
+export function instanceOfLog(value: object): value is Log {
     if (!('message' in value) || value['message'] === undefined) return false;
     return true;
 }
 
-export function ShopifyPixelExtensionLogEventDataFromJSON(json: any): ShopifyPixelExtensionLogEventData {
-    return ShopifyPixelExtensionLogEventDataFromJSONTyped(json, false);
+export function LogFromJSON(json: any): Log {
+    return LogFromJSONTyped(json, false);
 }
 
-export function ShopifyPixelExtensionLogEventDataFromJSONTyped(json: any, ignoreDiscriminator: boolean): ShopifyPixelExtensionLogEventData {
+export function LogFromJSONTyped(json: any, ignoreDiscriminator: boolean): Log {
     if (json == null) {
         return json;
     }
     return {
         
-        'error': json['error'],
         'message': json['message'],
-        'href': json['href'] == null ? undefined : json['href'],
-        'filename': json['filename'] == null ? undefined : json['filename'],
         'stack': json['stack'] == null ? undefined : json['stack'],
-        'colno': json['colno'] == null ? undefined : json['colno'],
-        'lineno': json['lineno'] == null ? undefined : json['lineno'],
         'details': json['details'] == null ? undefined : json['details'],
     };
 }
 
-  export function ShopifyPixelExtensionLogEventDataToJSON(json: any): ShopifyPixelExtensionLogEventData {
-      return ShopifyPixelExtensionLogEventDataToJSONTyped(json, false);
+  export function LogToJSON(json: any): Log {
+      return LogToJSONTyped(json, false);
   }
 
-  export function ShopifyPixelExtensionLogEventDataToJSONTyped(value?: ShopifyPixelExtensionLogEventData | null, ignoreDiscriminator: boolean = false): any {
+  export function LogToJSONTyped(value?: Log | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'error': value['error'],
         'message': value['message'],
-        'href': value['href'],
-        'filename': value['filename'],
         'stack': value['stack'],
-        'colno': value['colno'],
-        'lineno': value['lineno'],
         'details': value['details'],
     };
 }

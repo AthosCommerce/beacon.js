@@ -1,3 +1,4 @@
+.openapi-generator-ignore
 apis/AutocompleteApi.ts
 apis/CartApi.ts
 apis/CategoryApi.ts
@@ -21,6 +22,8 @@ models/AutocompleteSchemaDataPagination.ts
 models/AutocompleteSchemaDataSortInner.ts
 models/CartSchema.ts
 models/CartSchemaData.ts
+models/CartviewSchema.ts
+models/CartviewSchemaData.ts
 models/CategorySchema.ts
 models/CategorySchemaData.ts
 models/CategorySchemaDataMerchandising.ts
@@ -28,12 +31,12 @@ models/Context.ts
 models/ContextAttributionInner.ts
 models/ContextCurrency.ts
 models/Item.ts
+models/Log.ts
 models/Model400Response.ts
 models/Model404Response.ts
 models/OrderTransactionSchema.ts
 models/OrderTransactionSchemaData.ts
 models/PersonalizationLogEvent.ts
-models/PersonalizationLogEventData.ts
 models/Product.ts
 models/ProductPageviewSchema.ts
 models/ProductPageviewSchemaData.ts
@@ -47,11 +50,7 @@ models/SearchSchemaDataMerchandising.ts
 models/SearchSchemaDataMerchandisingTriggeredCampaignsInner.ts
 models/SearchSchemaDataPagination.ts
 models/ShopifyPixelExtensionLogEvent.ts
-models/ShopifyPixelExtensionLogEventContext.ts
-models/ShopifyPixelExtensionLogEventData.ts
 models/ShopperLoginSchema.ts
 models/SnapLogEvent.ts
-models/SnapLogEventData.ts
-models/SnapLogEventDataController.ts
 models/index.ts
 runtime.ts

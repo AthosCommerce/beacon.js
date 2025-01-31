@@ -15614,7 +15614,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/cart.schema'
+              $ref: '#/components/schemas/cartview.schema'
             examples:
               legacy view cart example:
                 $ref: '#/components/examples/update-request-example-view-legacy'
@@ -16348,35 +16348,10 @@ paths:
               required:
                 - data
               properties:
+                context:
+                  $ref: '#/components/schemas/context'
                 data:
-                  description: Error details
-                  type: object
-                  required:
-                    - error
-                    - message
-                    - timestamp
-                    - profile
-                    - href
-                  properties:
-                    error:
-                      description: Error type
-                      type: string
-                    message:
-                      description: Error message
-                      type: string
-                    timestamp:
-                      description: RFC3339 formatted timestamp represents time of event
-                      type: string
-                      format: date-time
-                    profile:
-                      description: Profile tag
-                      type: string
-                    href:
-                      description: Personalized Recommendations request endpoint
-                      type: string
-                    details:
-                      description: Additional optional error details
-                      type: object
+                  $ref: '#/components/schemas/log'
             examples:
               example 1:
                 $ref: '#/components/examples/personalization-request-example-1'
@@ -16767,53 +16742,9 @@ paths:
                 - data
               properties:
                 context:
-                  description: Contextual data about the error
-                  type: object
-                  required:
-                    - IP
-                    - userAgent
-                    - timestamp
-                  properties:
-                    IP:
-                      description: Shopper IP address
-                      type: string
-                    userAgent:
-                      description: Shopper UserAgent
-                      type: string
-                    timestamp:
-                      description: RFC3339 formatted timestamp represents time of event
-                      type: string
+                  $ref: '#/components/schemas/context'
                 data:
-                  description: Error details
-                  type: object
-                  required:
-                    - error
-                    - message
-                  properties:
-                    error:
-                      description: Error type
-                      type: string
-                    message:
-                      description: Error message
-                      type: string
-                    href:
-                      description: URL of the page where the error occurred
-                      type: string
-                    filename:
-                      description: Filename of the script where the error occurred
-                      type: string
-                    stack:
-                      description: Stack trace of the error
-                      type: string
-                    colno:
-                      description: Column number where the error occurred
-                      type: integer
-                    lineno:
-                      description: Line number where the error occurred
-                      type: integer
-                    details:
-                      description: Additional optional error details
-                      type: object
+                  $ref: '#/components/schemas/log'
             examples:
               example 1:
                 $ref: '#/components/examples/shopifypixel-request-example-1'
@@ -17204,63 +17135,9 @@ paths:
                 - data
               properties:
                 context:
-                  description: Contextual data about the error
-                  type: object
-                  required:
-                    - IP
-                    - userAgent
-                    - timestamp
-                  properties:
-                    IP:
-                      description: Shopper IP address
-                      type: string
-                    userAgent:
-                      description: Shopper UserAgent
-                      type: string
-                    timestamp:
-                      description: RFC3339 formatted timestamp represents time of event
-                      type: string
+                  $ref: '#/components/schemas/context'
                 data:
-                  description: Error details
-                  type: object
-                  required:
-                    - error
-                    - message
-                  properties:
-                    error:
-                      description: Error type
-                      type: string
-                    message:
-                      description: Error message
-                      type: string
-                    controller:
-                      description: Controller details
-                      type: object
-                      properties:
-                        type:
-                          description: Controller type
-                          type: string
-                        id:
-                          description: Controller ID
-                          type: string
-                    href:
-                      description: URL of the page where the error occurred
-                      type: string
-                    filename:
-                      description: Filename of the script where the error occurred
-                      type: string
-                    stack:
-                      description: Stack trace of the error
-                      type: string
-                    colno:
-                      description: Column number where the error occurred
-                      type: integer
-                    lineno:
-                      description: Line number where the error occurred
-                      type: integer
-                    details:
-                      description: Additional optional error details
-                      type: object
+                  $ref: '#/components/schemas/log'
             examples:
               example 1:
                 $ref: '#/components/examples/snap-request-example-1'
@@ -18100,31 +17977,6 @@ components:
               description: Tag of the personalized recommendation profile the shopper interacted with
             results:
               $ref: '#/components/schemas/results'
-    cart.schema:
-      title: Shopper update the shopping cart
-      type: object
-      required:
-        - context
-        - data
-      properties:
-        context:
-          $ref: '#/components/schemas/context'
-        data:
-          type: object
-          description: Event details
-          required:
-            - results
-          properties:
-            results:
-              type: array
-              description: Item(s) that modified the cart
-              items:
-                $ref: '#/components/schemas/item'
-            cart:
-              type: array
-              description: Updated current cart contents
-              items:
-                $ref: '#/components/schemas/item'
     product:
       type: object
       description: Product details
@@ -18151,6 +18003,66 @@ components:
         price:
           description: Price of individual item
           type: number
+    cart.schema:
+      title: Shopper update the shopping cart
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          description: Event details
+          required:
+            - results
+          properties:
+            results:
+              type: array
+              description: Product(s) that modified the cart
+              items:
+                $ref: '#/components/schemas/product'
+            cart:
+              type: array
+              description: Updated current cart products
+              items:
+                $ref: '#/components/schemas/product'
+    cartview.schema:
+      title: Shopper viewed the shopping cart
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          description: Event details
+          required:
+            - results
+          properties:
+            results:
+              type: array
+              description: Item(s) currently in the cart
+              items:
+                $ref: '#/components/schemas/item'
+    log:
+      type: object
+      description: Log data about the event
+      required:
+        - message
+      properties:
+        message:
+          description: Error message
+          type: string
+        stack:
+          description: Stack trace of the error
+          type: string
+        details:
+          description: Additional optional error details
+          type: object
   examples:
     request-example-login:
       value:
@@ -18980,7 +18892,7 @@ components:
       value:
         context:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
-          userAgent: asdf
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
           pageUrl: https://bocachica.searchspring.com/cart
           userId: 41f87850-65f5-4546-851c-f166109e57b9
@@ -18998,11 +18910,24 @@ components:
               childSku: BAY79-640-RED
               qty: 1
               price: 39
+          cart:
+            - uid: '0987654321'
+              childUid: '7426853337'
+              sku: BAY79-640
+              childSku: BAY79-640-RED
+              qty: 1
+              price: 39
+            - uid: '0987654321'
+              childUid: '7426853338'
+              sku: BAY79-641
+              childSku: BAY79-641-BLUE
+              qty: 1
+              price: 39
     update-request-example-remove:
       value:
         context:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
-          userAgent: asdf
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
           pageUrl: https://bocachica.searchspring.com/cart
           userId: 41f87850-65f5-4546-851c-f166109e57b9
@@ -19014,17 +18939,24 @@ components:
             code: USD
         data:
           results:
-            - uid: '9876543210'
+            - uid: '0987654321'
               childUid: '7426853337'
               sku: BAY79-640
               childSku: BAY79-640-RED
-              qty: 2
+              qty: 1
+              price: 39
+          cart:
+            - uid: '0987654321'
+              childUid: '7426853338'
+              sku: BAY79-641
+              childSku: BAY79-641-BLUE
+              qty: 1
               price: 39
     update-request-example-view-legacy:
       value:
         context:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
-          userAgent: asdf
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
           pageUrl: https://bocachica.searchspring.com/cart
           userId: 41f87850-65f5-4546-851c-f166109e57b9
@@ -19090,76 +19022,66 @@ components:
               price: 39
     personalization-request-example-1:
       value:
-        data:
-          error: RecommendationServiceNotEnabledError
-          message: q8q4eu is calling the rec service, but is not enabled for recommendations
+        context:
           timestamp: '2024-06-11T17:47:04.075876Z'
-          profile: error-profile
-          href: https://q8q4eu.a.searchspring.io/boost/q8q4eu/recommend?tags=bundle&product=698493
+          pageUrl: https://q8q4eu.a.searchspring.io/boost/q8q4eu/recommend?tags=bundle&product=698493
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 41f87850-c33b-4222-952a-f17db729ea31
+          initiator: searchspring/personalization/recommend
+        data:
+          message: 'RecommendationServiceNotEnabledError: q8q4eu is calling the rec service, but is not enabled for recommendations'
+          timeStamp: 278
+          lineno: 1
+          colno: 8
           details:
-            object:
-              string: a string
-              int: 1
-              float: 1.1
-            array:
-              - '1'
-              - '2'
-            string: another string
-            int: 2
-            float: 1.1
+            profile: bundle
     shopifypixel-request-example-1:
       value:
         context:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
+          pageUrl: https://bocachica.searchspring.com/collections/mens/products/adventure-shorts-pitch-black
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 41f87850-c33b-4222-952a-f17db729ea31
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          currency:
+            code: USD
         data:
-          error: SpecificPixelExtensionError
-          message: reason why there was an error with the pixel extension
-          href: www.somedomain.com
-          filename: someFile.jsx
-          stack: stackTrace
-          colno: 278
-          lineno: 92
-          details:
-            object:
-              string: a string
-              int: 1
-              float: 1.1
-            array:
-              - '1'
-              - '2'
-            string: another string
-            int: 2
-            float: 1.1
+          message: x.forEach is not a function
+          filename: index.js
+          stack: |-
+            TypeError: x.forEach is not a function
+                at <anonymous>:1:8
+          timeStamp: 278
+          lineno: 1
+          colno: 8
     snap-request-example-1:
       value:
         context:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
+          pageUrl: https://bocachica.searchspring.com/collections/mens/products/adventure-shorts-pitch-black
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 41f87850-c33b-4222-952a-f17db729ea31
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          currency:
+            code: USD
         data:
-          error: RuntimeError
-          message: reason why snap threw an error
-          controller:
-            type: testControllerType
-            id: someID
-          href: www.somedomain.com
-          filename: someFile.jsx
-          stack: stackTrace
-          colno: 278
-          lineno: 92
-          details:
-            object:
-              string: a string
-              int: 1
-              float: 1.1
-            array:
-              - '1'
-              - '2'
-            string: another string
-            int: 2
-            float: 1.1
+          message: x.forEach is not a function
+          filename: index.js
+          stack: |-
+            TypeError: x.forEach is not a function
+                at <anonymous>:1:8
+          timeStamp: 278
+          lineno: 1
+          colno: 8
   responses:
     200-response:
       description: OK

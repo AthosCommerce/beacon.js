@@ -13,13 +13,20 @@
  */
 
 import { mapValues } from '../runtime';
-import type { PersonalizationLogEventData } from './PersonalizationLogEventData';
+import type { Context } from './Context';
 import {
-    PersonalizationLogEventDataFromJSON,
-    PersonalizationLogEventDataFromJSONTyped,
-    PersonalizationLogEventDataToJSON,
-    PersonalizationLogEventDataToJSONTyped,
-} from './PersonalizationLogEventData';
+    ContextFromJSON,
+    ContextFromJSONTyped,
+    ContextToJSON,
+    ContextToJSONTyped,
+} from './Context';
+import type { Log } from './Log';
+import {
+    LogFromJSON,
+    LogFromJSONTyped,
+    LogToJSON,
+    LogToJSONTyped,
+} from './Log';
 
 /**
  * 
@@ -29,10 +36,16 @@ import {
 export interface PersonalizationLogEvent {
     /**
      * 
-     * @type {PersonalizationLogEventData}
+     * @type {Context}
      * @memberof PersonalizationLogEvent
      */
-    data: PersonalizationLogEventData;
+    context?: Context;
+    /**
+     * 
+     * @type {Log}
+     * @memberof PersonalizationLogEvent
+     */
+    data: Log;
 }
 
 /**
@@ -53,7 +66,8 @@ export function PersonalizationLogEventFromJSONTyped(json: any, ignoreDiscrimina
     }
     return {
         
-        'data': PersonalizationLogEventDataFromJSON(json['data']),
+        'context': json['context'] == null ? undefined : ContextFromJSON(json['context']),
+        'data': LogFromJSON(json['data']),
     };
 }
 
@@ -68,7 +82,8 @@ export function PersonalizationLogEventFromJSONTyped(json: any, ignoreDiscrimina
 
     return {
         
-        'data': PersonalizationLogEventDataToJSON(value['data']),
+        'context': ContextToJSON(value['context']),
+        'data': LogToJSON(value['data']),
     };
 }
 

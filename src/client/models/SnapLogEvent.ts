@@ -13,20 +13,20 @@
  */
 
 import { mapValues } from '../runtime';
-import type { SnapLogEventData } from './SnapLogEventData';
+import type { Context } from './Context';
 import {
-    SnapLogEventDataFromJSON,
-    SnapLogEventDataFromJSONTyped,
-    SnapLogEventDataToJSON,
-    SnapLogEventDataToJSONTyped,
-} from './SnapLogEventData';
-import type { ShopifyPixelExtensionLogEventContext } from './ShopifyPixelExtensionLogEventContext';
+    ContextFromJSON,
+    ContextFromJSONTyped,
+    ContextToJSON,
+    ContextToJSONTyped,
+} from './Context';
+import type { Log } from './Log';
 import {
-    ShopifyPixelExtensionLogEventContextFromJSON,
-    ShopifyPixelExtensionLogEventContextFromJSONTyped,
-    ShopifyPixelExtensionLogEventContextToJSON,
-    ShopifyPixelExtensionLogEventContextToJSONTyped,
-} from './ShopifyPixelExtensionLogEventContext';
+    LogFromJSON,
+    LogFromJSONTyped,
+    LogToJSON,
+    LogToJSONTyped,
+} from './Log';
 
 /**
  * 
@@ -36,16 +36,16 @@ import {
 export interface SnapLogEvent {
     /**
      * 
-     * @type {ShopifyPixelExtensionLogEventContext}
+     * @type {Context}
      * @memberof SnapLogEvent
      */
-    context: ShopifyPixelExtensionLogEventContext;
+    context: Context;
     /**
      * 
-     * @type {SnapLogEventData}
+     * @type {Log}
      * @memberof SnapLogEvent
      */
-    data: SnapLogEventData;
+    data: Log;
 }
 
 /**
@@ -67,8 +67,8 @@ export function SnapLogEventFromJSONTyped(json: any, ignoreDiscriminator: boolea
     }
     return {
         
-        'context': ShopifyPixelExtensionLogEventContextFromJSON(json['context']),
-        'data': SnapLogEventDataFromJSON(json['data']),
+        'context': ContextFromJSON(json['context']),
+        'data': LogFromJSON(json['data']),
     };
 }
 
@@ -83,8 +83,8 @@ export function SnapLogEventFromJSONTyped(json: any, ignoreDiscriminator: boolea
 
     return {
         
-        'context': ShopifyPixelExtensionLogEventContextToJSON(value['context']),
-        'data': SnapLogEventDataToJSON(value['data']),
+        'context': ContextToJSON(value['context']),
+        'data': LogToJSON(value['data']),
     };
 }
 

@@ -13,72 +13,78 @@
  */
 
 import { mapValues } from '../runtime';
+import type { Context } from './Context';
+import {
+    ContextFromJSON,
+    ContextFromJSONTyped,
+    ContextToJSON,
+    ContextToJSONTyped,
+} from './Context';
+import type { CartviewSchemaData } from './CartviewSchemaData';
+import {
+    CartviewSchemaDataFromJSON,
+    CartviewSchemaDataFromJSONTyped,
+    CartviewSchemaDataToJSON,
+    CartviewSchemaDataToJSONTyped,
+} from './CartviewSchemaData';
+
 /**
- * Contextual data about the error
+ * 
  * @export
- * @interface ShopifyPixelExtensionLogEventContext
+ * @interface CartviewSchema
  */
-export interface ShopifyPixelExtensionLogEventContext {
+export interface CartviewSchema {
     /**
-     * Shopper IP address
-     * @type {string}
-     * @memberof ShopifyPixelExtensionLogEventContext
+     * 
+     * @type {Context}
+     * @memberof CartviewSchema
      */
-    iP: string;
+    context: Context;
     /**
-     * Shopper UserAgent
-     * @type {string}
-     * @memberof ShopifyPixelExtensionLogEventContext
+     * 
+     * @type {CartviewSchemaData}
+     * @memberof CartviewSchema
      */
-    userAgent: string;
-    /**
-     * RFC3339 formatted timestamp represents time of event
-     * @type {string}
-     * @memberof ShopifyPixelExtensionLogEventContext
-     */
-    timestamp: string;
+    data: CartviewSchemaData;
 }
 
 /**
- * Check if a given object implements the ShopifyPixelExtensionLogEventContext interface.
+ * Check if a given object implements the CartviewSchema interface.
  */
-export function instanceOfShopifyPixelExtensionLogEventContext(value: object): value is ShopifyPixelExtensionLogEventContext {
-    if (!('iP' in value) || value['iP'] === undefined) return false;
-    if (!('userAgent' in value) || value['userAgent'] === undefined) return false;
-    if (!('timestamp' in value) || value['timestamp'] === undefined) return false;
+export function instanceOfCartviewSchema(value: object): value is CartviewSchema {
+    if (!('context' in value) || value['context'] === undefined) return false;
+    if (!('data' in value) || value['data'] === undefined) return false;
     return true;
 }
 
-export function ShopifyPixelExtensionLogEventContextFromJSON(json: any): ShopifyPixelExtensionLogEventContext {
-    return ShopifyPixelExtensionLogEventContextFromJSONTyped(json, false);
+export function CartviewSchemaFromJSON(json: any): CartviewSchema {
+    return CartviewSchemaFromJSONTyped(json, false);
 }
 
-export function ShopifyPixelExtensionLogEventContextFromJSONTyped(json: any, ignoreDiscriminator: boolean): ShopifyPixelExtensionLogEventContext {
+export function CartviewSchemaFromJSONTyped(json: any, ignoreDiscriminator: boolean): CartviewSchema {
     if (json == null) {
         return json;
     }
     return {
         
-        'iP': json['IP'],
-        'userAgent': json['userAgent'],
-        'timestamp': json['timestamp'],
+        'context': ContextFromJSON(json['context']),
+        'data': CartviewSchemaDataFromJSON(json['data']),
     };
 }
 
-  export function ShopifyPixelExtensionLogEventContextToJSON(json: any): ShopifyPixelExtensionLogEventContext {
-      return ShopifyPixelExtensionLogEventContextToJSONTyped(json, false);
+  export function CartviewSchemaToJSON(json: any): CartviewSchema {
+      return CartviewSchemaToJSONTyped(json, false);
   }
 
-  export function ShopifyPixelExtensionLogEventContextToJSONTyped(value?: ShopifyPixelExtensionLogEventContext | null, ignoreDiscriminator: boolean = false): any {
+  export function CartviewSchemaToJSONTyped(value?: CartviewSchema | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'IP': value['iP'],
-        'userAgent': value['userAgent'],
-        'timestamp': value['timestamp'],
+        'context': ContextToJSON(value['context']),
+        'data': CartviewSchemaDataToJSON(value['data']),
     };
 }
 

@@ -13,20 +13,20 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ShopifyPixelExtensionLogEventData } from './ShopifyPixelExtensionLogEventData';
+import type { Context } from './Context';
 import {
-    ShopifyPixelExtensionLogEventDataFromJSON,
-    ShopifyPixelExtensionLogEventDataFromJSONTyped,
-    ShopifyPixelExtensionLogEventDataToJSON,
-    ShopifyPixelExtensionLogEventDataToJSONTyped,
-} from './ShopifyPixelExtensionLogEventData';
-import type { ShopifyPixelExtensionLogEventContext } from './ShopifyPixelExtensionLogEventContext';
+    ContextFromJSON,
+    ContextFromJSONTyped,
+    ContextToJSON,
+    ContextToJSONTyped,
+} from './Context';
+import type { Log } from './Log';
 import {
-    ShopifyPixelExtensionLogEventContextFromJSON,
-    ShopifyPixelExtensionLogEventContextFromJSONTyped,
-    ShopifyPixelExtensionLogEventContextToJSON,
-    ShopifyPixelExtensionLogEventContextToJSONTyped,
-} from './ShopifyPixelExtensionLogEventContext';
+    LogFromJSON,
+    LogFromJSONTyped,
+    LogToJSON,
+    LogToJSONTyped,
+} from './Log';
 
 /**
  * 
@@ -36,16 +36,16 @@ import {
 export interface ShopifyPixelExtensionLogEvent {
     /**
      * 
-     * @type {ShopifyPixelExtensionLogEventContext}
+     * @type {Context}
      * @memberof ShopifyPixelExtensionLogEvent
      */
-    context: ShopifyPixelExtensionLogEventContext;
+    context: Context;
     /**
      * 
-     * @type {ShopifyPixelExtensionLogEventData}
+     * @type {Log}
      * @memberof ShopifyPixelExtensionLogEvent
      */
-    data: ShopifyPixelExtensionLogEventData;
+    data: Log;
 }
 
 /**
@@ -67,8 +67,8 @@ export function ShopifyPixelExtensionLogEventFromJSONTyped(json: any, ignoreDisc
     }
     return {
         
-        'context': ShopifyPixelExtensionLogEventContextFromJSON(json['context']),
-        'data': ShopifyPixelExtensionLogEventDataFromJSON(json['data']),
+        'context': ContextFromJSON(json['context']),
+        'data': LogFromJSON(json['data']),
     };
 }
 
@@ -83,8 +83,8 @@ export function ShopifyPixelExtensionLogEventFromJSONTyped(json: any, ignoreDisc
 
     return {
         
-        'context': ShopifyPixelExtensionLogEventContextToJSON(value['context']),
-        'data': ShopifyPixelExtensionLogEventDataToJSON(value['data']),
+        'context': ContextToJSON(value['context']),
+        'data': LogToJSON(value['data']),
     };
 }
 
