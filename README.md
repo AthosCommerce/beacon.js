@@ -1,1 +1,2 @@
 # beacon.js
+
