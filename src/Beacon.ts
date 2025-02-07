@@ -182,10 +182,7 @@ export class Beacon {
 		};
 
 		this.globals = globals;
-<<<<<<< Updated upstream
 		this.pageLoadId = this.generateId();
-=======
->>>>>>> Stashed changes
 	}
 
 	private async getCookie(name: string): Promise<string> {
