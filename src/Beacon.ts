@@ -150,9 +150,8 @@ export class Beacon {
 	};
 
 	private requests: PayloadRequest[] = [];
-	public initialized: Promise<boolean>;
 
-	constructor(globals: BeaconGlobals, config: BeaconConfig) {
+	constructor(globals: BeaconGlobals, config?: BeaconConfig) {
 		if (typeof globals != 'object' || typeof globals.siteId != 'string') {
 			throw new Error(`Invalid config passed to tracker. The "siteId" attribute must be provided.`);
 		}
@@ -165,7 +164,6 @@ export class Beacon {
 			},
 			config || {}
 		);
-		console.log('beacon this.config after merge', this.config);
 
 		if (this.config.mode && ['production', 'development'].includes(this.config.mode)) {
 			this.mode = this.config.mode;
@@ -184,26 +182,6 @@ export class Beacon {
 		};
 
 		this.globals = globals;
-		this.initialized = this.init();
-	}
-
-	async init() {
-		try {
-			this.pageLoadId = this.generateId();
-			this.userId = await this.getUserId();
-			this.sessionId = await this.getSessionId();
-			this.shopperId = await this.getShopperId();
-			this.attribution = await this.getAttribution();
-			if (this.globals.currency?.code) {
-				await this.setCurrency(this.globals.currency);
-			}
-			// concat requests incase requests were queued while awaiting above
-			this.requests = [...this.requests, ...(await this.getRequests())];
-			this.processRequests();
-			return true;
-		} catch {
-			return false;
-		}
 	}
 
 	private async getCookie(name: string): Promise<string> {
@@ -799,16 +777,15 @@ export class Beacon {
 	}
 
 	async getContext(): Promise<Context> {
-		await this.initialized;
 		const context: Context = {
-			userId: this.userId,
-			sessionId: this.sessionId,
-			shopperId: this.shopperId,
-			pageLoadId: this.pageLoadId,
+			userId: this.userId || await this.getUserId(),
+			sessionId: this.sessionId || await this.getSessionId(),
+			shopperId: this.shopperId || await this.getShopperId(),
+			pageLoadId: this.pageLoadId || this.generateId(),
 			timestamp: this.getTimestamp(),
 			pageUrl: this.config.href || (typeof window !== 'undefined' && window.location.href) || '',
 			initiator: `searchspring/${this.config.framework}${this.config.version ? `/${this.config.version}` : ''}`,
-			attribution: this.attribution,
+			attribution: this.attribution || await this.getAttribution(),
 			userAgent: navigator?.userAgent || this.config.userAgent,
 		};
 		if (this.currency.code) {
@@ -850,7 +827,9 @@ export class Beacon {
 
 	private async getUserId(): Promise<string> {
 		try {
-			return await this.getStoredID(USER_ID_KEY, THIRTY_MINUTES);
+			const value = await this.getStoredID(USER_ID_KEY, THIRTY_MINUTES);
+			this.userId = value;
+			return this.userId;
 		} catch (e) {
 			console.error('Failed to get user id:', e);
 			return '';
@@ -858,18 +837,21 @@ export class Beacon {
 	}
 
 	private async getSessionId(): Promise<string> {
-		return await this.getStoredID(SESSION_ID_KEY, 0);
+		const value = await this.getStoredID(SESSION_ID_KEY, 0);
+		this.sessionId = value;
+		return this.sessionId;
 	}
 
 	private async getShopperId(): Promise<string> {
 		let shopperId: string | null = null;
 		try {
 			shopperId = (await this.getCookie(SHOPPER_ID_KEY)) || (await this.getLocalStorageItem(SHOPPER_ID_KEY));
-		} catch (_) {
+			this.shopperId = shopperId;
+		} catch {
 			// noop
 		}
 
-		return shopperId || '';
+		return this.shopperId || '';
 	}
 
 	public async setShopperId(shopperId: string): Promise<void> {
@@ -890,7 +872,7 @@ export class Beacon {
 		let attribution: string | null = null;
 
 		try {
-			const url = new URL((await this.getContext()).pageUrl);
+			const url = new URL(this.config.href || (typeof window !== 'undefined' && window.location.href) || '');
 			attribution = url.searchParams.get(ATTRIBUTION_QUERY_PARAM);
 		} catch (e) {
 			// noop - URL failed to parse empty url
