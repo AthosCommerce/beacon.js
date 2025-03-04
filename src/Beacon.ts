@@ -107,20 +107,20 @@ export type Payload<T> = {
 	data: T;
 };
 
-const REQUEST_GROUPING_TIMEOUT = 200;
+export const REQUEST_GROUPING_TIMEOUT = 200;
 const USER_ID_KEY = 'ssUserId';
 const SESSION_ID_KEY = 'ssSessionId';
 const SHOPPER_ID_KEY = 'ssShopperId';
-const CART_KEY = 'ssCart';
+export const CART_KEY = 'ssCart';
 const VIEWED_KEY = 'ssViewed';
 const REQUESTS_KEY = 'ssRequests';
-const COOKIE_SAMESITE = 'Lax';
+export const COOKIE_SAMESITE = 'Lax';
 const ATTRIBUTION_QUERY_PARAM = 'ss_attribution';
 const ATTRIBUTION_KEY = 'ssAttribution';
 const MAX_EXPIRATION = 47304000000; // 18 months
 const THIRTY_MINUTES = 1800000; // 30 minutes
 const MAX_VIEWED_COUNT = 20;
-const COOKIE_DOMAIN =
+export const COOKIE_DOMAIN =
 	(typeof window !== 'undefined' && window.location.hostname && '.' + window.location.hostname.replace(/^www\./, '')) || undefined;
 
 export class Beacon {
@@ -787,7 +787,7 @@ export class Beacon {
 			pageUrl: this.config.href || (typeof window !== 'undefined' && window.location.href) || '',
 			initiator: `searchspring/${this.config.framework}${this.config.version ? `/${this.config.version}` : ''}`,
 			attribution: this.attribution || await this.getAttribution(),
-			userAgent: navigator?.userAgent || this.config.userAgent,
+			userAgent: (typeof navigator !== 'undefined' && navigator?.userAgent) || this.config.userAgent,
 		};
 		if (this.currency.code) {
 			context.currency = this.currency;
@@ -843,7 +843,7 @@ export class Beacon {
 		return this.sessionId;
 	}
 
-	private async getShopperId(): Promise<string> {
+	public async getShopperId(): Promise<string> {
 		let shopperId: string | null = null;
 		try {
 			shopperId = (await this.getCookie(SHOPPER_ID_KEY)) || (await this.getLocalStorageItem(SHOPPER_ID_KEY));
