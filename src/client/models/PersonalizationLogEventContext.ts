@@ -13,78 +13,62 @@
  */
 
 import { mapValues } from '../runtime';
-import type { Context } from './Context';
-import {
-    ContextFromJSON,
-    ContextFromJSONTyped,
-    ContextToJSON,
-    ContextToJSONTyped,
-} from './Context';
-import type { SearchSchemaData } from './SearchSchemaData';
-import {
-    SearchSchemaDataFromJSON,
-    SearchSchemaDataFromJSONTyped,
-    SearchSchemaDataToJSON,
-    SearchSchemaDataToJSONTyped,
-} from './SearchSchemaData';
-
 /**
- * 
+ * Contextual information about the event
  * @export
- * @interface SearchSchema
+ * @interface PersonalizationLogEventContext
  */
-export interface SearchSchema {
+export interface PersonalizationLogEventContext {
     /**
-     * 
-     * @type {Context}
-     * @memberof SearchSchema
+     * RFC3339 formatted timestamp represents time of event
+     * @type {string}
+     * @memberof PersonalizationLogEventContext
      */
-    context: Context;
+    timestamp: string;
     /**
-     * 
-     * @type {SearchSchemaData}
-     * @memberof SearchSchema
+     * Developer mode flag. If set to `true`, the event data will not populate in reporting
+     * @type {boolean}
+     * @memberof PersonalizationLogEventContext
      */
-    data: SearchSchemaData;
+    dev?: boolean;
 }
 
 /**
- * Check if a given object implements the SearchSchema interface.
+ * Check if a given object implements the PersonalizationLogEventContext interface.
  */
-export function instanceOfSearchSchema(value: object): value is SearchSchema {
-    if (!('context' in value) || value['context'] === undefined) return false;
-    if (!('data' in value) || value['data'] === undefined) return false;
+export function instanceOfPersonalizationLogEventContext(value: object): value is PersonalizationLogEventContext {
+    if (!('timestamp' in value) || value['timestamp'] === undefined) return false;
     return true;
 }
 
-export function SearchSchemaFromJSON(json: any): SearchSchema {
-    return SearchSchemaFromJSONTyped(json, false);
+export function PersonalizationLogEventContextFromJSON(json: any): PersonalizationLogEventContext {
+    return PersonalizationLogEventContextFromJSONTyped(json, false);
 }
 
-export function SearchSchemaFromJSONTyped(json: any, ignoreDiscriminator: boolean): SearchSchema {
+export function PersonalizationLogEventContextFromJSONTyped(json: any, ignoreDiscriminator: boolean): PersonalizationLogEventContext {
     if (json == null) {
         return json;
     }
     return {
         
-        'context': ContextFromJSON(json['context']),
-        'data': SearchSchemaDataFromJSON(json['data']),
+        'timestamp': json['timestamp'],
+        'dev': json['dev'] == null ? undefined : json['dev'],
     };
 }
 
-  export function SearchSchemaToJSON(json: any): SearchSchema {
-      return SearchSchemaToJSONTyped(json, false);
+  export function PersonalizationLogEventContextToJSON(json: any): PersonalizationLogEventContext {
+      return PersonalizationLogEventContextToJSONTyped(json, false);
   }
 
-  export function SearchSchemaToJSONTyped(value?: SearchSchema | null, ignoreDiscriminator: boolean = false): any {
+  export function PersonalizationLogEventContextToJSONTyped(value?: PersonalizationLogEventContext | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'context': ContextToJSON(value['context']),
-        'data': SearchSchemaDataToJSON(value['data']),
+        'timestamp': value['timestamp'],
+        'dev': value['dev'],
     };
 }
 

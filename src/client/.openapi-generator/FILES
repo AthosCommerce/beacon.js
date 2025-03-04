@@ -1,7 +1,9 @@
+.openapi-generator-ignore
 apis/AutocompleteApi.ts
 apis/CartApi.ts
 apis/CategoryApi.ts
 apis/ErrorLogsApi.ts
+apis/MessagingRecommendationsApi.ts
 apis/OrderApi.ts
 apis/ProductApi.ts
 apis/RecommendationsApi.ts
@@ -31,11 +33,15 @@ models/ContextAttributionInner.ts
 models/ContextCurrency.ts
 models/Item.ts
 models/Log.ts
+models/MessagingSchema.ts
+models/MessagingSchemaContext.ts
+models/MessagingSchemaData.ts
 models/Model400Response.ts
 models/Model404Response.ts
 models/OrderTransactionSchema.ts
 models/OrderTransactionSchemaData.ts
 models/PersonalizationLogEvent.ts
+models/PersonalizationLogEventContext.ts
 models/Product.ts
 models/ProductPageviewSchema.ts
 models/ProductPageviewSchemaData.ts

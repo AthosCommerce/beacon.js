@@ -13,78 +13,63 @@
  */
 
 import { mapValues } from '../runtime';
-import type { Context } from './Context';
-import {
-    ContextFromJSON,
-    ContextFromJSONTyped,
-    ContextToJSON,
-    ContextToJSONTyped,
-} from './Context';
-import type { SearchSchemaData } from './SearchSchemaData';
-import {
-    SearchSchemaDataFromJSON,
-    SearchSchemaDataFromJSONTyped,
-    SearchSchemaDataToJSON,
-    SearchSchemaDataToJSONTyped,
-} from './SearchSchemaData';
-
 /**
- * 
+ * Event details
  * @export
- * @interface SearchSchema
+ * @interface MessagingSchemaData
  */
-export interface SearchSchema {
+export interface MessagingSchemaData {
     /**
-     * 
-     * @type {Context}
-     * @memberof SearchSchema
+     * The unique identifier of the recommendation profile
+     * @type {string}
+     * @memberof MessagingSchemaData
      */
-    context: Context;
+    uid: string;
     /**
-     * 
-     * @type {SearchSchemaData}
-     * @memberof SearchSchema
+     * Tag of the messaging recommendation profile the shopper interacted with
+     * @type {string}
+     * @memberof MessagingSchemaData
      */
-    data: SearchSchemaData;
+    tag: string;
 }
 
 /**
- * Check if a given object implements the SearchSchema interface.
+ * Check if a given object implements the MessagingSchemaData interface.
  */
-export function instanceOfSearchSchema(value: object): value is SearchSchema {
-    if (!('context' in value) || value['context'] === undefined) return false;
-    if (!('data' in value) || value['data'] === undefined) return false;
+export function instanceOfMessagingSchemaData(value: object): value is MessagingSchemaData {
+    if (!('uid' in value) || value['uid'] === undefined) return false;
+    if (!('tag' in value) || value['tag'] === undefined) return false;
     return true;
 }
 
-export function SearchSchemaFromJSON(json: any): SearchSchema {
-    return SearchSchemaFromJSONTyped(json, false);
+export function MessagingSchemaDataFromJSON(json: any): MessagingSchemaData {
+    return MessagingSchemaDataFromJSONTyped(json, false);
 }
 
-export function SearchSchemaFromJSONTyped(json: any, ignoreDiscriminator: boolean): SearchSchema {
+export function MessagingSchemaDataFromJSONTyped(json: any, ignoreDiscriminator: boolean): MessagingSchemaData {
     if (json == null) {
         return json;
     }
     return {
         
-        'context': ContextFromJSON(json['context']),
-        'data': SearchSchemaDataFromJSON(json['data']),
+        'uid': json['uid'],
+        'tag': json['tag'],
     };
 }
 
-  export function SearchSchemaToJSON(json: any): SearchSchema {
-      return SearchSchemaToJSONTyped(json, false);
+  export function MessagingSchemaDataToJSON(json: any): MessagingSchemaData {
+      return MessagingSchemaDataToJSONTyped(json, false);
   }
 
-  export function SearchSchemaToJSONTyped(value?: SearchSchema | null, ignoreDiscriminator: boolean = false): any {
+  export function MessagingSchemaDataToJSONTyped(value?: MessagingSchemaData | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'context': ContextToJSON(value['context']),
-        'data': SearchSchemaDataToJSON(value['data']),
+        'uid': value['uid'],
+        'tag': value['tag'],
     };
 }
 

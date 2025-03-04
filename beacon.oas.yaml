@@ -11,7 +11,7 @@ info:
     # Endpoint Details
     Each endpoint begins with `/{siteId}/` - this is a six digit alpha-numeric value ([a-z0-9]{6}) and is unique for each store. Each store's `siteId` can be found in the SMC (Searchspring Management Console).
 
-    Every endpoint accepts _application/json_ POST data.
+    Every endpoint accepts _text/plain_ POST data.
 
     ### List of Endpoints
 
@@ -55,6 +55,12 @@ info:
     [**Order**](#tag/Order)  
     - [/{siteId}/order/transaction](#tag/Order/operation/order-transaction)  
 
+    [**Messaging Recommendations**](#tag/Messaging-Recommendations)
+    - [/{siteId}/messaging/email/render](#tag/Messaging-Recommendations/operation/messaging-email-render)
+    - [/{siteId}/messaging/email/clickthrough](#tag/Messaging-Recommendations/operation/messaging-email-clickthrough)
+    - [/{siteId}/messaging/sms/render](#tag/Messaging-Recommendations/operation/messaging-sms-render)
+    - [/{siteId}/messaging/sms/clickthrough](#tag/Messaging-Recommendations/operation/messaging-sms-clickthrough)
+
     [**Error Logs**](#tag/Error-Logs)
     - [/{siteId}/log/personalization](#tag/Error-Logs/operation/log-personalization)
     - [/{siteId}/log/shopifypixel](#tag/Error-Logs/operation/log-shopifypixel)
@@ -83,6 +89,7 @@ info:
     | attribution.id | This unique identifier is for the attribution. It is typically the profile name. | string |  |
     | currency | Active currency type on the site | object | | 
     | currency.code | currency code in [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html#:~:text=The%20first%20two%20letters%20of,and%20the%20D%20for%20dollar.) format  | string | |
+    | dev | Developer mode flag. If set to `true`, the event data will not populate in reporting | boolean | |
 
 
     ### Event Data Information
@@ -104,6 +111,8 @@ tags:
     description: Cart tracking events
   - name: Order
     description: Order tracking events
+  - name: Messaging Recommendations
+    description: Messaging Recommendations tracking events
   - name: Error Logs
     description: Error log events
   - name: Beacon 1.0.0
@@ -133,7 +142,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               title: Shopper Login Schema
               type: object
@@ -403,7 +412,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/autocomplete.schema'
             examples:
@@ -1316,7 +1325,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/autocomplete.schema'
             examples:
@@ -2229,7 +2238,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/autocomplete.schema'
             examples:
@@ -3142,7 +3151,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/autocomplete.schema'
             examples:
@@ -4055,7 +4064,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               title: Autocomplete Redirect Schema
               type: object
@@ -4984,7 +4993,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/search.schema'
             examples:
@@ -5897,7 +5906,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/search.schema'
             examples:
@@ -6810,7 +6819,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/search.schema'
             examples:
@@ -7723,7 +7732,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/search.schema'
             examples:
@@ -8636,7 +8645,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               title: Search Redirect Schema
               type: object
@@ -9565,7 +9574,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/category.schema'
             examples:
@@ -10478,7 +10487,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/category.schema'
             examples:
@@ -11391,7 +11400,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/category.schema'
             examples:
@@ -12304,7 +12313,7 @@ paths:
         description: Results payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/category.schema'
             examples:
@@ -13217,7 +13226,7 @@ paths:
         description: Recommendations payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/recommendations.schema'
             examples:
@@ -13589,7 +13598,7 @@ paths:
         description: Recommendations payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/recommendations.schema'
             examples:
@@ -13961,7 +13970,7 @@ paths:
         description: Recommendations payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/recommendations.schema'
             examples:
@@ -14333,7 +14342,7 @@ paths:
         description: Recommendations payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/recommendations.schema'
             examples:
@@ -14705,7 +14714,7 @@ paths:
         description: Product page view payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               title: Product Pageview Schema
               type: object
@@ -14999,7 +15008,7 @@ paths:
         description: Cart update payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/cart.schema'
             examples:
@@ -15305,7 +15314,7 @@ paths:
         description: Cart update payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/cart.schema'
             examples:
@@ -15612,7 +15621,7 @@ paths:
         description: Cart update payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               $ref: '#/components/schemas/cartview.schema'
             examples:
@@ -15918,7 +15927,7 @@ paths:
         description: Order transaction payload
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               title: Order Transaction Schema
               type: object
@@ -15935,7 +15944,7 @@ paths:
                     - orderId
                     - transactionTotal
                     - total
-                    - items
+                    - results
                   properties:
                     orderId:
                       description: Unique order ID
@@ -16320,6 +16329,462 @@ paths:
           $ref: '#/components/responses/415-response'
         '500':
           $ref: '#/components/responses/500-response'
+  /{siteId}/email/render:
+    post:
+      tags:
+        - Messaging Recommendations
+      summary: /beacon/v2/{siteId}/messaging/email/render
+      description: This event tracks the rendering of a messaging recommendation section in an email.
+      operationId: messaging-email-render
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the SMC (Searchspring Management Console)
+      requestBody:
+        description: Messaging recommendations payload
+        required: true
+        content:
+          text/plain:
+            schema:
+              $ref: '#/components/schemas/messaging.schema'
+            examples:
+              render example:
+                $ref: '#/components/examples/messaging-request-example'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          description: Missing or invalid POST body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400-response'
+              examples:
+                Missing/invalid JSON POST body:
+                  $ref: '#/components/examples/missing-invalid-post-body'
+                Missing required key-value:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'missing required key-value: data.recId'
+                    data: |-
+                      {
+                          "context": {
+                              "userId": "1234"
+                          },
+                          "data": {
+                              "tag": "profile tag"
+                          }
+                      }
+                Invalid data type:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'invalid data type passed for key: `"data.uid"` (at position 84)'
+                    data: |-
+                      {
+                          "context": {
+                              "userId": "1234"
+                          },
+                          "data": {
+                              "uid": 1234,
+                              "tag": "profile tag"
+                          }
+                      }
+                Unknown field:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'request body contains unknown field: "invalid"'
+                    data: |-
+                      {
+                          "context": {
+                              "userId": "1234"
+                          },
+                          "data": {
+                              "uid": "1234",
+                              "tag": "profile tag",
+                              "invalid": true
+                          }
+                      }
+        '404':
+          description: Invalid path
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404-response'
+              examples:
+                Invalid path or missing siteId:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    messages:
+                      - 'invalid endpoint path or missing siteId in path: `/beacon/v2/recommendations`'
+                Invalid siteId pattern:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    messages:
+                      - 'invalid siteId pattern: received `abc12` - expected pattern `^[a-z0-9]{6}$`'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/email/clickthrough:
+    post:
+      tags:
+        - Messaging Recommendations
+      summary: /beacon/v2/{siteId}/messaging/email/clickthrough
+      description: This event tracks when a shopper clicks through a messaging recommendation section in an email and is navigated to the website.
+      operationId: messaging-email-clickthrough
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the SMC (Searchspring Management Console)
+      requestBody:
+        description: Messaging recommendations payload
+        required: true
+        content:
+          text/plain:
+            schema:
+              $ref: '#/components/schemas/messaging.schema'
+            examples:
+              clickthrough example:
+                $ref: '#/components/examples/messaging-request-example'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          description: Missing or invalid POST body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400-response'
+              examples:
+                Missing/invalid JSON POST body:
+                  $ref: '#/components/examples/missing-invalid-post-body'
+                Missing required key-value:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'missing required key-value: data.recId'
+                    data: |-
+                      {
+                          "context": {
+                              "userId": "1234"
+                          },
+                          "data": {
+                              "tag": "profile tag"
+                          }
+                      }
+                Invalid data type:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'invalid data type passed for key: `"data.uid"` (at position 84)'
+                    data: |-
+                      {
+                          "context": {
+                              "userId": "1234"
+                          },
+                          "data": {
+                              "uid": 1234,
+                              "tag": "profile tag"
+                          }
+                      }
+                Unknown field:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'request body contains unknown field: "invalid"'
+                    data: |-
+                      {
+                          "context": {
+                              "userId": "1234"
+                          },
+                          "data": {
+                              "uid": "1234",
+                              "tag": "profile tag",
+                              "invalid": true
+                          }
+                      }
+        '404':
+          description: Invalid path
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404-response'
+              examples:
+                Invalid path or missing siteId:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    messages:
+                      - 'invalid endpoint path or missing siteId in path: `/beacon/v2/recommendations`'
+                Invalid siteId pattern:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    messages:
+                      - 'invalid siteId pattern: received `abc12` - expected pattern `^[a-z0-9]{6}$`'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/sms/render:
+    post:
+      tags:
+        - Messaging Recommendations
+      summary: /beacon/v2/{siteId}/messaging/sms/render
+      description: This event tracks the rendering of an SMS recommendation section in an SMS text.
+      operationId: messaging-sms-render
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the SMC (Searchspring Management Console)
+      requestBody:
+        description: Messaging recommendations payload
+        required: true
+        content:
+          text/plain:
+            schema:
+              $ref: '#/components/schemas/messaging.schema'
+            examples:
+              render example:
+                $ref: '#/components/examples/messaging-request-example'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          description: Missing or invalid POST body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400-response'
+              examples:
+                Missing/invalid JSON POST body:
+                  $ref: '#/components/examples/missing-invalid-post-body'
+                Missing required key-value:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'missing required key-value: data.recId'
+                    data: |-
+                      {
+                          "context": {
+                              "userId": "1234"
+                          },
+                          "data": {
+                              "tag": "profile tag"
+                          }
+                      }
+                Invalid data type:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'invalid data type passed for key: `"data.uid"` (at position 84)'
+                    data: |-
+                      {
+                          "context": {
+                              "userId": "1234"
+                          },
+                          "data": {
+                              "uid": 1234,
+                              "tag": "profile tag"
+                          }
+                      }
+                Unknown field:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'request body contains unknown field: "invalid"'
+                    data: |-
+                      {
+                          "context": {
+                              "userId": "1234"
+                          },
+                          "data": {
+                              "uid": "1234",
+                              "tag": "profile tag",
+                              "invalid": true
+                          }
+                      }
+        '404':
+          description: Invalid path
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404-response'
+              examples:
+                Invalid path or missing siteId:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    messages:
+                      - 'invalid endpoint path or missing siteId in path: `/beacon/v2/recommendations`'
+                Invalid siteId pattern:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    messages:
+                      - 'invalid siteId pattern: received `abc12` - expected pattern `^[a-z0-9]{6}$`'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/sms/clickthrough:
+    post:
+      tags:
+        - Messaging Recommendations
+      summary: /beacon/v2/{siteId}/messaging/sms/clickthrough
+      description: This event tracks when a shopper clicks through a SMS recommendation section in an SMS text and is navigated to the website.
+      operationId: messaging-sms-clickthrough
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the SMC (Searchspring Management Console)
+      requestBody:
+        description: Messaging recommendations payload
+        required: true
+        content:
+          text/plain:
+            schema:
+              $ref: '#/components/schemas/messaging.schema'
+            examples:
+              clickthrough example:
+                $ref: '#/components/examples/messaging-request-example'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          description: Missing or invalid POST body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400-response'
+              examples:
+                Missing/invalid JSON POST body:
+                  $ref: '#/components/examples/missing-invalid-post-body'
+                Missing required key-value:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'missing required key-value: data.recId'
+                    data: |-
+                      {
+                          "context": {
+                              "userId": "1234"
+                          },
+                          "data": {
+                              "tag": "profile tag"
+                          }
+                      }
+                Invalid data type:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'invalid data type passed for key: `"data.uid"` (at position 84)'
+                    data: |-
+                      {
+                          "context": {
+                              "userId": "1234"
+                          },
+                          "data": {
+                              "uid": 1234,
+                              "tag": "profile tag"
+                          }
+                      }
+                Unknown field:
+                  value:
+                    success: false
+                    error: ValidationError
+                    messages:
+                      - 'request body contains unknown field: "invalid"'
+                    data: |-
+                      {
+                          "context": {
+                              "userId": "1234"
+                          },
+                          "data": {
+                              "uid": "1234",
+                              "tag": "profile tag",
+                              "invalid": true
+                          }
+                      }
+        '404':
+          description: Invalid path
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404-response'
+              examples:
+                Invalid path or missing siteId:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    messages:
+                      - 'invalid endpoint path or missing siteId in path: `/beacon/v2/recommendations`'
+                Invalid siteId pattern:
+                  value:
+                    success: false
+                    error: InvalidPathError
+                    messages:
+                      - 'invalid siteId pattern: received `abc12` - expected pattern `^[a-z0-9]{6}$`'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
   /{siteId}/log/personalization:
     post:
       tags:
@@ -16341,15 +16806,26 @@ paths:
         description: Personalization error log
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               title: personalization log event
               type: object
               required:
+                - context
                 - data
               properties:
                 context:
-                  $ref: '#/components/schemas/context'
+                  description: Contextual information about the event
+                  type: object
+                  required:
+                    - timestamp
+                  properties:
+                    timestamp:
+                      description: RFC3339 formatted timestamp represents time of event
+                      type: string
+                    dev:
+                      type: boolean
+                      description: Developer mode flag. If set to `true`, the event data will not populate in reporting
                 data:
                   $ref: '#/components/schemas/log'
             examples:
@@ -16697,7 +17173,8 @@ paths:
                   value:
                     success: false
                     error: InvalidPathError
-                    message: 'invalid endpoint path or missing siteId in path: `/beacon/v2/order/transaction`'
+                    messages:
+                      - 'invalid endpoint path or missing siteId in path: `/beacon/v2/order/transaction`'
                 Invalid siteId pattern:
                   value:
                     success: false
@@ -16733,7 +17210,7 @@ paths:
         description: Shopify Pixel extension error log
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               title: Shopify Pixel extension log event
               type: object
@@ -17090,7 +17567,8 @@ paths:
                   value:
                     success: false
                     error: InvalidPathError
-                    message: 'invalid endpoint path or missing siteId in path: `/beacon/v2/order/transaction`'
+                    messages:
+                      - 'invalid endpoint path or missing siteId in path: `/beacon/v2/order/transaction`'
                 Invalid siteId pattern:
                   value:
                     success: false
@@ -17126,7 +17604,7 @@ paths:
         description: Snap error log
         required: true
         content:
-          application/json:
+          text/plain:
             schema:
               title: Snap log event
               type: object
@@ -17483,7 +17961,8 @@ paths:
                   value:
                     success: false
                     error: InvalidPathError
-                    message: 'invalid endpoint path or missing siteId in path: `/beacon/v2/order/transaction`'
+                    messages:
+                      - 'invalid endpoint path or missing siteId in path: `/beacon/v2/order/transaction`'
                 Invalid siteId pattern:
                   value:
                     success: false
@@ -17558,6 +18037,9 @@ components:
             code:
               type: string
               description: currency code in [ISO 4217](https://www.iso.org/iso-4217-currency-codes.html#:~:text=The%20first%20two%20letters%20of,and%20the%20D%20for%20dollar.) format
+        dev:
+          type: boolean
+          description: Developer mode flag. If set to `true`, the event data will not populate in reporting
     400-response:
       type: object
       properties:
@@ -17635,6 +18117,9 @@ components:
             correctedQuery:
               type: string
               description: If spell correction occurs, value will be `query.correctedQuery` from the Autocomplete API
+            didYouMean:
+              type: string
+              description: If autocomplete API response returns `didYouMean`, value must be `didYouMean.query`
             rq:
               type: string
               description: Refined query passed as the `rq` query string parameter to the Autocomplete API. This should be omitted if search within search results is not implemented.
@@ -17754,6 +18239,9 @@ components:
             correctedQuery:
               type: string
               description: If spell correction occurs, value will be `query.correctedQuery` from the Search API
+            didYouMean:
+              type: string
+              description: If search API response returns `didYouMean`, value must be `didYouMean.query`
             rq:
               type: string
               description: Refined query passed as the `rq` query string parameter to the Autocomplete API. This should be omitted if search within search results is not implemented.
@@ -18047,7 +18535,42 @@ components:
               type: array
               description: Item(s) currently in the cart
               items:
-                $ref: '#/components/schemas/item'
+                $ref: '#/components/schemas/product'
+    messaging.schema:
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          type: object
+          description: Contextual data about the event
+          required:
+            - userId
+            - timestamp
+          properties:
+            userId:
+              description: The unique identifier of the user
+              type: string
+            timestamp:
+              description: RFC3339 formatted timestamp represents time of event
+              type: string
+            dev:
+              description: Developer mode flag. If set to `true`, the event data will not populate in reporting
+              type: boolean
+        data:
+          type: object
+          description: Event details
+          required:
+            - uid
+            - tag
+          properties:
+            uid:
+              type: string
+              description: The unique identifier of the recommendation profile
+            tag:
+              type: string
+              description: Tag of the messaging recommendation profile the shopper interacted with
     log:
       type: object
       description: Log data about the event
@@ -19020,68 +19543,96 @@ components:
               childSku: BAY79-640-RED
               qty: 2
               price: 39
+    messaging-request-example:
+      value:
+        context:
+          userId: '1234'
+          timestamp: '2024-06-11T17:47:04.075876Z'
+          dev: true
+        data:
+          uid: '1234'
+          tag: profile tag
     personalization-request-example-1:
       value:
         context:
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://q8q4eu.a.searchspring.io/boost/q8q4eu/recommend?tags=bundle&product=698493
-          userId: 41f87850-65f5-4546-851c-f166109e57b9
-          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
-          pageLoadId: 41f87850-c33b-4222-952a-f17db729ea31
-          initiator: searchspring/personalization/recommend
+          dev: true
         data:
-          message: 'RecommendationServiceNotEnabledError: q8q4eu is calling the rec service, but is not enabled for recommendations'
-          timeStamp: 278
-          lineno: 1
-          colno: 8
+          message: q8q4eu is calling the rec service, but is not enabled for recommendations
+          stack: stack_trace
           details:
-            profile: bundle
+            object:
+              string: a string
+              int: 1
+              float: 1.1
+            array:
+              - '1'
+              - '2'
+            string: another string
+            int: 2
+            float: 1.1
     shopifypixel-request-example-1:
       value:
         context:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.searchspring.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://www.bocachica.searchspring.com/login
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 41f87850-c33b-4222-952a-f17db729ea31
           shopperId: user123456
           initiator: searchspring/snap/preact/0.49.1
+          attribution:
+            - type: test
+              id: '1234567890'
           currency:
             code: USD
         data:
-          message: x.forEach is not a function
-          filename: index.js
-          stack: |-
-            TypeError: x.forEach is not a function
-                at <anonymous>:1:8
-          timeStamp: 278
-          lineno: 1
-          colno: 8
+          message: q8q4eu is calling the rec service, but is not enabled for recommendations
+          stack: stack_trace
+          details:
+            object:
+              string: a string
+              int: 1
+              float: 1.1
+            array:
+              - '1'
+              - '2'
+            string: another string
+            int: 2
+            float: 1.1
     snap-request-example-1:
       value:
         context:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.searchspring.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://www.bocachica.searchspring.com/login
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 41f87850-c33b-4222-952a-f17db729ea31
           shopperId: user123456
           initiator: searchspring/snap/preact/0.49.1
+          attribution:
+            - type: test
+              id: '1234567890'
           currency:
             code: USD
         data:
-          message: x.forEach is not a function
-          filename: index.js
-          stack: |-
-            TypeError: x.forEach is not a function
-                at <anonymous>:1:8
-          timeStamp: 278
-          lineno: 1
-          colno: 8
+          message: q8q4eu is calling the rec service, but is not enabled for recommendations
+          stack: stack_trace
+          details:
+            object:
+              string: a string
+              int: 1
+              float: 1.1
+            array:
+              - '1'
+              - '2'
+            string: another string
+            int: 2
+            float: 1.1
   responses:
     200-response:
       description: OK

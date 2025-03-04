@@ -13,78 +13,71 @@
  */
 
 import { mapValues } from '../runtime';
-import type { Context } from './Context';
-import {
-    ContextFromJSON,
-    ContextFromJSONTyped,
-    ContextToJSON,
-    ContextToJSONTyped,
-} from './Context';
-import type { SearchSchemaData } from './SearchSchemaData';
-import {
-    SearchSchemaDataFromJSON,
-    SearchSchemaDataFromJSONTyped,
-    SearchSchemaDataToJSON,
-    SearchSchemaDataToJSONTyped,
-} from './SearchSchemaData';
-
 /**
- * 
+ * Contextual data about the event
  * @export
- * @interface SearchSchema
+ * @interface MessagingSchemaContext
  */
-export interface SearchSchema {
+export interface MessagingSchemaContext {
     /**
-     * 
-     * @type {Context}
-     * @memberof SearchSchema
+     * The unique identifier of the user
+     * @type {string}
+     * @memberof MessagingSchemaContext
      */
-    context: Context;
+    userId: string;
     /**
-     * 
-     * @type {SearchSchemaData}
-     * @memberof SearchSchema
+     * RFC3339 formatted timestamp represents time of event
+     * @type {string}
+     * @memberof MessagingSchemaContext
      */
-    data: SearchSchemaData;
+    timestamp: string;
+    /**
+     * Developer mode flag. If set to `true`, the event data will not populate in reporting
+     * @type {boolean}
+     * @memberof MessagingSchemaContext
+     */
+    dev?: boolean;
 }
 
 /**
- * Check if a given object implements the SearchSchema interface.
+ * Check if a given object implements the MessagingSchemaContext interface.
  */
-export function instanceOfSearchSchema(value: object): value is SearchSchema {
-    if (!('context' in value) || value['context'] === undefined) return false;
-    if (!('data' in value) || value['data'] === undefined) return false;
+export function instanceOfMessagingSchemaContext(value: object): value is MessagingSchemaContext {
+    if (!('userId' in value) || value['userId'] === undefined) return false;
+    if (!('timestamp' in value) || value['timestamp'] === undefined) return false;
     return true;
 }
 
-export function SearchSchemaFromJSON(json: any): SearchSchema {
-    return SearchSchemaFromJSONTyped(json, false);
+export function MessagingSchemaContextFromJSON(json: any): MessagingSchemaContext {
+    return MessagingSchemaContextFromJSONTyped(json, false);
 }
 
-export function SearchSchemaFromJSONTyped(json: any, ignoreDiscriminator: boolean): SearchSchema {
+export function MessagingSchemaContextFromJSONTyped(json: any, ignoreDiscriminator: boolean): MessagingSchemaContext {
     if (json == null) {
         return json;
     }
     return {
         
-        'context': ContextFromJSON(json['context']),
-        'data': SearchSchemaDataFromJSON(json['data']),
+        'userId': json['userId'],
+        'timestamp': json['timestamp'],
+        'dev': json['dev'] == null ? undefined : json['dev'],
     };
 }
 
-  export function SearchSchemaToJSON(json: any): SearchSchema {
-      return SearchSchemaToJSONTyped(json, false);
+  export function MessagingSchemaContextToJSON(json: any): MessagingSchemaContext {
+      return MessagingSchemaContextToJSONTyped(json, false);
   }
 
-  export function SearchSchemaToJSONTyped(value?: SearchSchema | null, ignoreDiscriminator: boolean = false): any {
+  export function MessagingSchemaContextToJSONTyped(value?: MessagingSchemaContext | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'context': ContextToJSON(value['context']),
-        'data': SearchSchemaDataToJSON(value['data']),
+        'userId': value['userId'],
+        'timestamp': value['timestamp'],
+        'dev': value['dev'],
     };
 }
 

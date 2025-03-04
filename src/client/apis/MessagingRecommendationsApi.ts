@@ -15,68 +15,60 @@
 
 import * as runtime from '../runtime';
 import type {
-  AutocompleteRedirectSchema,
-  AutocompleteSchema,
+  MessagingSchema,
   Model400Response,
   Model404Response,
 } from '../models/index';
 import {
-    AutocompleteRedirectSchemaFromJSON,
-    AutocompleteRedirectSchemaToJSON,
-    AutocompleteSchemaFromJSON,
-    AutocompleteSchemaToJSON,
+    MessagingSchemaFromJSON,
+    MessagingSchemaToJSON,
     Model400ResponseFromJSON,
     Model400ResponseToJSON,
     Model404ResponseFromJSON,
     Model404ResponseToJSON,
 } from '../models/index';
 
-export interface AutocompleteAddtocartRequest {
+export interface MessagingEmailClickthroughRequest {
     siteId: string;
-    autocompleteSchema: AutocompleteSchema;
+    messagingSchema: MessagingSchema;
 }
 
-export interface AutocompleteClickthroughRequest {
+export interface MessagingEmailRenderRequest {
     siteId: string;
-    autocompleteSchema: AutocompleteSchema;
+    messagingSchema: MessagingSchema;
 }
 
-export interface AutocompleteImpressionRequest {
+export interface MessagingSmsClickthroughRequest {
     siteId: string;
-    autocompleteSchema: AutocompleteSchema;
+    messagingSchema: MessagingSchema;
 }
 
-export interface AutocompleteRedirectRequest {
+export interface MessagingSmsRenderRequest {
     siteId: string;
-    autocompleteRedirectSchema: AutocompleteRedirectSchema;
-}
-
-export interface AutocompleteRenderRequest {
-    siteId: string;
-    autocompleteSchema: AutocompleteSchema;
+    messagingSchema: MessagingSchema;
 }
 
 /**
  * 
  */
-export class AutocompleteApi extends runtime.BaseAPI {
+export class MessagingRecommendationsApi extends runtime.BaseAPI {
 
     /**
-     * Shopper adds a Searchspring autocomplete result to the cart via a `Quick Add to Cart` button in the Autocomplete Module. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
-     * /beacon/v2/{siteId}/autocomplete/addtocart
+     * This event tracks when a shopper clicks through a messaging recommendation section in an email and is navigated to the website.
+     * /beacon/v2/{siteId}/messaging/email/clickthrough
      */
-    async autocompleteAddtocartRaw(requestParameters: AutocompleteAddtocartRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+    async messagingEmailClickthroughRaw(requestParameters: MessagingEmailClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
             throw new runtime.RequiredError(
                 'siteId',
-                'Required parameter "siteId" was null or undefined when calling autocompleteAddtocart().'
+                'Required parameter "siteId" was null or undefined when calling messagingEmailClickthrough().'
             );
         }
 
-        if (requestParameters['autocompleteSchema'] == null) {
+        if (requestParameters['messagingSchema'] == null) {
             throw new runtime.RequiredError(
-                'autocompleteSchema',
-                'Required parameter "autocompleteSchema" was null or undefined when calling autocompleteAddtocart().'
+                'messagingSchema',
+                'Required parameter "messagingSchema" was null or undefined when calling messagingEmailClickthrough().'
             );
         }
 
@@ -87,41 +79,41 @@ export class AutocompleteApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'text/plain';
 
         const response = await this.request({
-            path: `/{siteId}/autocomplete/addtocart`.replace(`{${"siteId"}}`, encodeURIComponent(String(requestParameters['siteId']))),
+            path: `/{siteId}/email/clickthrough`.replace(`{${"siteId"}}`, encodeURIComponent(String(requestParameters['siteId']))),
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: AutocompleteSchemaToJSON(requestParameters['autocompleteSchema']),
+            body: MessagingSchemaToJSON(requestParameters['messagingSchema']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Shopper adds a Searchspring autocomplete result to the cart via a `Quick Add to Cart` button in the Autocomplete Module. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
-     * /beacon/v2/{siteId}/autocomplete/addtocart
+     * This event tracks when a shopper clicks through a messaging recommendation section in an email and is navigated to the website.
+     * /beacon/v2/{siteId}/messaging/email/clickthrough
      */
-    async autocompleteAddtocart(requestParameters: AutocompleteAddtocartRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
-        const response = await this.autocompleteAddtocartRaw(requestParameters, initOverrides);
+    async messagingEmailClickthrough(requestParameters: MessagingEmailClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.messagingEmailClickthroughRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
-     * Shopper clicks on a Searchspring autocomplete search result rendered in the Autocomplete Module, and is taken to the product detail page (PDP).
-     * /beacon/v2/{siteId}/autocomplete/clickthrough
+     * This event tracks the rendering of a messaging recommendation section in an email.
+     * /beacon/v2/{siteId}/messaging/email/render
      */
-    async autocompleteClickthroughRaw(requestParameters: AutocompleteClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+    async messagingEmailRenderRaw(requestParameters: MessagingEmailRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
             throw new runtime.RequiredError(
                 'siteId',
-                'Required parameter "siteId" was null or undefined when calling autocompleteClickthrough().'
+                'Required parameter "siteId" was null or undefined when calling messagingEmailRender().'
             );
         }
 
-        if (requestParameters['autocompleteSchema'] == null) {
+        if (requestParameters['messagingSchema'] == null) {
             throw new runtime.RequiredError(
-                'autocompleteSchema',
-                'Required parameter "autocompleteSchema" was null or undefined when calling autocompleteClickthrough().'
+                'messagingSchema',
+                'Required parameter "messagingSchema" was null or undefined when calling messagingEmailRender().'
             );
         }
 
@@ -132,41 +124,41 @@ export class AutocompleteApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'text/plain';
 
         const response = await this.request({
-            path: `/{siteId}/autocomplete/clickthrough`.replace(`{${"siteId"}}`, encodeURIComponent(String(requestParameters['siteId']))),
+            path: `/{siteId}/email/render`.replace(`{${"siteId"}}`, encodeURIComponent(String(requestParameters['siteId']))),
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: AutocompleteSchemaToJSON(requestParameters['autocompleteSchema']),
+            body: MessagingSchemaToJSON(requestParameters['messagingSchema']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Shopper clicks on a Searchspring autocomplete search result rendered in the Autocomplete Module, and is taken to the product detail page (PDP).
-     * /beacon/v2/{siteId}/autocomplete/clickthrough
+     * This event tracks the rendering of a messaging recommendation section in an email.
+     * /beacon/v2/{siteId}/messaging/email/render
      */
-    async autocompleteClickthrough(requestParameters: AutocompleteClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
-        const response = await this.autocompleteClickthroughRaw(requestParameters, initOverrides);
+    async messagingEmailRender(requestParameters: MessagingEmailRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.messagingEmailRenderRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
-     * Shopper views the rendered Searchspring autocomplete results in the Autocomplete Module.
-     * /beacon/v2/{siteId}/autocomplete/impression
+     * This event tracks when a shopper clicks through a SMS recommendation section in an SMS text and is navigated to the website.
+     * /beacon/v2/{siteId}/messaging/sms/clickthrough
      */
-    async autocompleteImpressionRaw(requestParameters: AutocompleteImpressionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+    async messagingSmsClickthroughRaw(requestParameters: MessagingSmsClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
             throw new runtime.RequiredError(
                 'siteId',
-                'Required parameter "siteId" was null or undefined when calling autocompleteImpression().'
+                'Required parameter "siteId" was null or undefined when calling messagingSmsClickthrough().'
             );
         }
 
-        if (requestParameters['autocompleteSchema'] == null) {
+        if (requestParameters['messagingSchema'] == null) {
             throw new runtime.RequiredError(
-                'autocompleteSchema',
-                'Required parameter "autocompleteSchema" was null or undefined when calling autocompleteImpression().'
+                'messagingSchema',
+                'Required parameter "messagingSchema" was null or undefined when calling messagingSmsClickthrough().'
             );
         }
 
@@ -177,41 +169,41 @@ export class AutocompleteApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'text/plain';
 
         const response = await this.request({
-            path: `/{siteId}/autocomplete/impression`.replace(`{${"siteId"}}`, encodeURIComponent(String(requestParameters['siteId']))),
+            path: `/{siteId}/sms/clickthrough`.replace(`{${"siteId"}}`, encodeURIComponent(String(requestParameters['siteId']))),
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: AutocompleteSchemaToJSON(requestParameters['autocompleteSchema']),
+            body: MessagingSchemaToJSON(requestParameters['messagingSchema']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Shopper views the rendered Searchspring autocomplete results in the Autocomplete Module.
-     * /beacon/v2/{siteId}/autocomplete/impression
+     * This event tracks when a shopper clicks through a SMS recommendation section in an SMS text and is navigated to the website.
+     * /beacon/v2/{siteId}/messaging/sms/clickthrough
      */
-    async autocompleteImpression(requestParameters: AutocompleteImpressionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
-        const response = await this.autocompleteImpressionRaw(requestParameters, initOverrides);
+    async messagingSmsClickthrough(requestParameters: MessagingSmsClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.messagingSmsClickthroughRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
-     * Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered, but a redirect URL is returned in the Autocomplete API response and the shopper is redirected to the returned redirect URL.
-     * /beacon/v2/{siteId}/autocomplete/redirect
+     * This event tracks the rendering of an SMS recommendation section in an SMS text.
+     * /beacon/v2/{siteId}/messaging/sms/render
      */
-    async autocompleteRedirectRaw(requestParameters: AutocompleteRedirectRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
+    async messagingSmsRenderRaw(requestParameters: MessagingSmsRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
             throw new runtime.RequiredError(
                 'siteId',
-                'Required parameter "siteId" was null or undefined when calling autocompleteRedirect().'
+                'Required parameter "siteId" was null or undefined when calling messagingSmsRender().'
             );
         }
 
-        if (requestParameters['autocompleteRedirectSchema'] == null) {
+        if (requestParameters['messagingSchema'] == null) {
             throw new runtime.RequiredError(
-                'autocompleteRedirectSchema',
-                'Required parameter "autocompleteRedirectSchema" was null or undefined when calling autocompleteRedirect().'
+                'messagingSchema',
+                'Required parameter "messagingSchema" was null or undefined when calling messagingSmsRender().'
             );
         }
 
@@ -222,67 +214,22 @@ export class AutocompleteApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'text/plain';
 
         const response = await this.request({
-            path: `/{siteId}/autocomplete/redirect`.replace(`{${"siteId"}}`, encodeURIComponent(String(requestParameters['siteId']))),
+            path: `/{siteId}/sms/render`.replace(`{${"siteId"}}`, encodeURIComponent(String(requestParameters['siteId']))),
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: AutocompleteRedirectSchemaToJSON(requestParameters['autocompleteRedirectSchema']),
+            body: MessagingSchemaToJSON(requestParameters['messagingSchema']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered, but a redirect URL is returned in the Autocomplete API response and the shopper is redirected to the returned redirect URL.
-     * /beacon/v2/{siteId}/autocomplete/redirect
+     * This event tracks the rendering of an SMS recommendation section in an SMS text.
+     * /beacon/v2/{siteId}/messaging/sms/render
      */
-    async autocompleteRedirect(requestParameters: AutocompleteRedirectRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
-        const response = await this.autocompleteRedirectRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered.
-     * /beacon/v2/{siteId}/autocomplete/render
-     */
-    async autocompleteRenderRaw(requestParameters: AutocompleteRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['siteId'] == null) {
-            throw new runtime.RequiredError(
-                'siteId',
-                'Required parameter "siteId" was null or undefined when calling autocompleteRender().'
-            );
-        }
-
-        if (requestParameters['autocompleteSchema'] == null) {
-            throw new runtime.RequiredError(
-                'autocompleteSchema',
-                'Required parameter "autocompleteSchema" was null or undefined when calling autocompleteRender().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'text/plain';
-
-        const response = await this.request({
-            path: `/{siteId}/autocomplete/render`.replace(`{${"siteId"}}`, encodeURIComponent(String(requestParameters['siteId']))),
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: AutocompleteSchemaToJSON(requestParameters['autocompleteSchema']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     * Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered.
-     * /beacon/v2/{siteId}/autocomplete/render
-     */
-    async autocompleteRender(requestParameters: AutocompleteRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
-        const response = await this.autocompleteRenderRaw(requestParameters, initOverrides);
+    async messagingSmsRender(requestParameters: MessagingSmsRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
+        const response = await this.messagingSmsRenderRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
