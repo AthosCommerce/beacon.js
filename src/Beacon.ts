@@ -108,10 +108,10 @@ export type Payload<T> = {
 
 export const REQUEST_GROUPING_TIMEOUT = 200;
 const USER_ID_KEY = 'ssUserId';
-const SESSION_ID_KEY = 'ssSessionId';
+const SESSION_ID_KEY = 'ssSessionIdNamespace';
 const SHOPPER_ID_KEY = 'ssShopperId';
-export const CART_KEY = 'ssCart';
-const VIEWED_KEY = 'ssViewed';
+export const CART_KEY = 'ssCartProducts';
+const VIEWED_KEY = 'ssViewedProducts';
 export const COOKIE_SAMESITE = 'Lax';
 const ATTRIBUTION_QUERY_PARAM = 'ss_attribution';
 const ATTRIBUTION_KEY = 'ssAttribution';
@@ -125,7 +125,7 @@ export const COOKIE_DOMAIN =
 export class Beacon {
 	private config: BeaconConfig;
 	private mode: 'production' | 'development' = 'production';
-	private globals: BeaconGlobals;
+	public globals: BeaconGlobals;
 	private pageLoadId: string = '';
 	private userId: string = '';
 	private sessionId: string = '';
@@ -134,7 +134,7 @@ export class Beacon {
 	private currency: ContextCurrency = {
 		code: '',
 	};
-	queue: { eventFn: (...args: any[]) => Promise<void>; payload: any }[] = [];
+	queue: { eventFn: (...args: any[]) => void; payload: any }[] = [];
 	batchIntervalTimeout: number | NodeJS.Timeout = 0;
 	private apis: {
 		shopper: ShopperApi;
@@ -183,15 +183,8 @@ export class Beacon {
 		this.pageLoadId = this.generateId();
 	}
 
-	private async getCookie(name: string): Promise<string> {
-		const getCookieFn = this.config.apis?.cookie?.get;
-		if (getCookieFn) {
-			try {
-				return await getCookieFn(name);
-			} catch (e) {
-				console.error('Failed to get cookie using custom API:', e);
-			}
-		} else if (typeof window !== 'undefined') {
+	private getCookie(name: string): string {
+		if (typeof window !== 'undefined') {
 			const cookieName = name + '=';
 			const cookiesList = window.document.cookie.split(';');
 
@@ -212,7 +205,7 @@ export class Beacon {
 	}
 
 	// TODO: in future - when saving cookie value - also prefix key with siteId to support multiple sites on same domain
-	private async setCookie(name: string, value: string, samesite: string, expiration: number, domain?: string): Promise<void> {
+	private setCookie(name: string, value: string, samesite: string, expiration: number, domain?: string): void {
 		let cookie = `${name}=${encodeURIComponent(value)};` + `SameSite=${samesite};` + 'path=/;';
 		if (!(typeof window !== 'undefined' && window.location.protocol == 'http:')) {
 			// adds secure by default and for shopify pixel - only omits secure if protocol is http and not shopify pixel
@@ -230,7 +223,7 @@ export class Beacon {
 		const setCookieFn = this.config.apis?.cookie?.set;
 		if (setCookieFn) {
 			try {
-				await setCookieFn(cookie);
+				setCookieFn(cookie);
 				return;
 			} catch (e) {
 				console.error('Failed to set cookie using custom API:', e);
@@ -240,17 +233,9 @@ export class Beacon {
 		}
 	}
 
-	private async getLocalStorageItem(name: string): Promise<string> {
+	private getLocalStorageItem(name: string): string {
 		let storedValue = '';
-		const getLocalStorageFn = this.config.apis?.localStorage?.getItem;
-		if (getLocalStorageFn) {
-			try {
-				storedValue = (await getLocalStorageFn(name)) || '';
-			} catch (e) {
-				console.error('Failed to get localStorage item using custom API:', e);
-				return '';
-			}
-		} else if (typeof window !== 'undefined') {
+		if (typeof window !== 'undefined') {
 			storedValue = window.localStorage?.getItem(name) || '';
 		}
 
@@ -262,14 +247,14 @@ export class Beacon {
 		}
 	}
 
-	private async setLocalStorageItem(name: string, value: string): Promise<void> {
+	private setLocalStorageItem(name: string, value: string): void {
 		const storedValue = JSON.stringify({
 			[this.globals.siteId]: value,
 		});
 		const setLocalStorageFn = this.config.apis?.localStorage?.setItem;
 		if (setLocalStorageFn) {
 			try {
-				await setLocalStorageFn(name, storedValue);
+				setLocalStorageFn(name, storedValue);
 				return;
 			} catch (e) {
 				console.error('Failed to set localStorage item using custom API:', e);
@@ -282,8 +267,8 @@ export class Beacon {
 
 	storage = {
 		cart: {
-			get: async (): Promise<Product[]> => {
-				const storedProducts = (await this.getCookie(CART_KEY)) || (await this.getLocalStorageItem(CART_KEY));
+			get: (): Product[] => {
+				const storedProducts = this.getCookie(CART_KEY) || this.getLocalStorageItem(CART_KEY);
 				try {
 					const parsedProducts = JSON.parse(storedProducts);
 					return parsedProducts as Product[];
@@ -292,9 +277,9 @@ export class Beacon {
 				}
 				return [];
 			},
-			set: async (products: Product[]): Promise<void> => {
+			set: (products: Product[]): void => {
 				if (products.length) {
-					const currentCartProducts = await this.storage.cart.get();
+					const currentCartProducts = this.storage.cart.get();
 
 					if (typeof products[0] === 'string') {
 						const cartSkus = products.map((sku) => `${sku}`.trim());
@@ -303,18 +288,18 @@ export class Beacon {
 					}
 
 					const storedProducts = JSON.stringify(products);
-					await this.setCookie(CART_KEY, storedProducts, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-					await this.setLocalStorageItem(CART_KEY, storedProducts);
+					this.setCookie(CART_KEY, storedProducts, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
+					this.setLocalStorageItem(CART_KEY, storedProducts);
 
 					const productsHaveChanged = JSON.stringify(currentCartProducts) !== storedProducts;
 					if (productsHaveChanged) {
-						await this.sendPreflight();
+						this.sendPreflight();
 					}
 				}
 			},
-			add: async (products: Product[]): Promise<void> => {
+			add: (products: Product[]): void => {
 				if (products.length) {
-					const existingCartProducts = await this.storage.cart.get();
+					const existingCartProducts = this.storage.cart.get();
 					const cartProducts = [...existingCartProducts];
 					if (typeof products[0] === 'string') {
 						const cartSkus = products.map((sku) => `${sku}`.trim());
@@ -333,18 +318,18 @@ export class Beacon {
 					});
 
 					const storedProducts = JSON.stringify(cartProducts);
-					await this.setCookie(CART_KEY, storedProducts, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-					await this.setLocalStorageItem(CART_KEY, storedProducts);
+					this.setCookie(CART_KEY, storedProducts, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
+					this.setLocalStorageItem(CART_KEY, storedProducts);
 
 					const productsHaveChanged = JSON.stringify(existingCartProducts) !== storedProducts;
 					if (productsHaveChanged) {
-						await this.sendPreflight();
+						this.sendPreflight();
 					}
 				}
 			},
-			remove: async (products: Product[]): Promise<void> => {
+			remove: (products: Product[]): void => {
 				if (products.length) {
-					const existingCartProducts = await this.storage.cart.get();
+					const existingCartProducts = this.storage.cart.get();
 					const cartProducts = [...existingCartProducts];
 
 					if (typeof products[0] === 'string') {
@@ -370,28 +355,28 @@ export class Beacon {
 					const updatedCartProducts = cartProducts.filter((product) => product.qty > 0);
 
 					const storedProducts = JSON.stringify(updatedCartProducts);
-					await this.setCookie(CART_KEY, storedProducts, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-					await this.setLocalStorageItem(CART_KEY, storedProducts);
+					this.setCookie(CART_KEY, storedProducts, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
+					this.setLocalStorageItem(CART_KEY, storedProducts);
 
 					const productsHaveChanged = JSON.stringify(existingCartProducts) !== storedProducts;
 					if (productsHaveChanged) {
-						await this.sendPreflight();
+						this.sendPreflight();
 					}
 				}
 			},
-			clear: async (): Promise<void> => {
-				const products = await this.storage.cart.get();
+			clear: (): void => {
+				const products = this.storage.cart.get();
 				if (products.length) {
-					await this.setCookie(CART_KEY, '', COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-					await this.setLocalStorageItem(CART_KEY, '');
+					this.setCookie(CART_KEY, '', COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
+					this.setLocalStorageItem(CART_KEY, '');
 					// TODO: add clear cookie method? Shopify doesn't have one?
-					await this.sendPreflight();
+					this.sendPreflight();
 				}
 			},
 		},
 		viewed: {
-			get: async (): Promise<string[]> => {
-				const items = (await this.getCookie(VIEWED_KEY)) || (await this.getLocalStorageItem(VIEWED_KEY));
+			get: (): string[] => {
+				const items = this.getCookie(VIEWED_KEY) || this.getLocalStorageItem(VIEWED_KEY);
 				if (!items) {
 					return [];
 				}
@@ -402,13 +387,13 @@ export class Beacon {
 
 	events = {
 		shopper: {
-			login: async (event: Payload<{ id: string }>): Promise<void> => {
-				const setNewId = await this.setShopperId(event.data.id);
-				if(setNewId) {
+			login: (event: Payload<{ id: string }>): void => {
+				const setNewId = this.setShopperId(event.data.id);
+				if (setNewId) {
 					const payload: LoginRequest = {
 						siteId: event?.siteId || this.globals.siteId,
 						shopperLoginSchema: {
-							context: await this.getContext(),
+							context: this.getContext(),
 						},
 					};
 					const request = this.createRequest('shopper', 'login', payload);
@@ -417,11 +402,11 @@ export class Beacon {
 			},
 		},
 		autocomplete: {
-			render: async (event: Payload<AutocompleteSchemaData>): Promise<void> => {
+			render: (event: Payload<AutocompleteSchemaData>): void => {
 				const payload: AutocompleteRenderRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					autocompleteSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -429,11 +414,11 @@ export class Beacon {
 				const request = this.createRequest('autocomplete', 'autocompleteRender', payload);
 				this.queueRequest(request);
 			},
-			impression: async (event: Payload<AutocompleteSchemaData>): Promise<void> => {
+			impression: (event: Payload<AutocompleteSchemaData>): void => {
 				const payload: AutocompleteImpressionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					autocompleteSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -441,11 +426,11 @@ export class Beacon {
 				const request = this.createRequest('autocomplete', 'autocompleteImpression', payload);
 				this.queueRequest(request);
 			},
-			addToCart: async (event: Payload<AutocompleteSchemaData>): Promise<void> => {
+			addToCart: (event: Payload<AutocompleteSchemaData>): void => {
 				const payload: AutocompleteAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					autocompleteSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -453,11 +438,11 @@ export class Beacon {
 				const request = this.createRequest('autocomplete', 'autocompleteAddtocart', payload);
 				this.sendRequests([request]);
 			},
-			clickThrough: async (event: Payload<AutocompleteSchemaData>): Promise<void> => {
+			clickThrough: (event: Payload<AutocompleteSchemaData>): void => {
 				const payload: AutocompleteClickthroughRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					autocompleteSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -465,11 +450,11 @@ export class Beacon {
 				const request = this.createRequest('autocomplete', 'autocompleteClickthrough', payload);
 				this.sendRequests([request]);
 			},
-			redirect: async (event: Payload<AutocompleteRedirectSchemaData>): Promise<void> => {
+			redirect: (event: Payload<AutocompleteRedirectSchemaData>): void => {
 				const payload: AutocompleteRedirectRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					autocompleteRedirectSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -479,11 +464,11 @@ export class Beacon {
 			},
 		},
 		search: {
-			render: async (event: Payload<SearchSchemaData>): Promise<void> => {
+			render: (event: Payload<SearchSchemaData>): void => {
 				const payload: SearchRenderRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					searchSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -491,11 +476,11 @@ export class Beacon {
 				const request = this.createRequest('search', 'searchRender', payload);
 				this.queueRequest(request);
 			},
-			impression: async (event: Payload<SearchSchemaData>): Promise<void> => {
+			impression: (event: Payload<SearchSchemaData>): void => {
 				const payload: SearchImpressionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					searchSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -503,11 +488,11 @@ export class Beacon {
 				const request = this.createRequest('search', 'searchImpression', payload);
 				this.queueRequest(request);
 			},
-			addToCart: async (event: Payload<SearchSchemaData>): Promise<void> => {
+			addToCart: (event: Payload<SearchSchemaData>): void => {
 				const payload: SearchAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					searchSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -515,11 +500,11 @@ export class Beacon {
 				const request = this.createRequest('search', 'searchAddtocart', payload);
 				this.sendRequests([request]);
 			},
-			clickThrough: async (event: Payload<SearchSchemaData>): Promise<void> => {
+			clickThrough: (event: Payload<SearchSchemaData>): void => {
 				const payload: SearchClickthroughRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					searchSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -527,11 +512,11 @@ export class Beacon {
 				const request = this.createRequest('search', 'searchClickthrough', payload);
 				this.sendRequests([request]);
 			},
-			redirect: async (event: Payload<SearchRedirectSchemaData>): Promise<void> => {
+			redirect: (event: Payload<SearchRedirectSchemaData>): void => {
 				const payload: SearchRedirectRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					searchRedirectSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -541,11 +526,11 @@ export class Beacon {
 			},
 		},
 		category: {
-			render: async (event: Payload<CategorySchemaData>): Promise<void> => {
+			render: (event: Payload<CategorySchemaData>): void => {
 				const payload: CategoryRenderRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					categorySchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -553,11 +538,11 @@ export class Beacon {
 				const request = this.createRequest('category', 'categoryRender', payload);
 				this.queueRequest(request);
 			},
-			impression: async (event: Payload<CategorySchemaData>): Promise<void> => {
+			impression: (event: Payload<CategorySchemaData>): void => {
 				const payload: CategoryImpressionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					categorySchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -565,11 +550,11 @@ export class Beacon {
 				const request = this.createRequest('category', 'categoryImpression', payload);
 				this.queueRequest(request);
 			},
-			addToCart: async (event: Payload<CategorySchemaData>): Promise<void> => {
+			addToCart: (event: Payload<CategorySchemaData>): void => {
 				const payload: CategoryAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					categorySchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -577,11 +562,11 @@ export class Beacon {
 				const request = this.createRequest('category', 'categoryAddtocart', payload);
 				this.sendRequests([request]);
 			},
-			clickThrough: async (event: Payload<CategorySchemaData>): Promise<void> => {
+			clickThrough: (event: Payload<CategorySchemaData>): void => {
 				const payload: CategoryClickthroughRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					categorySchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -591,11 +576,11 @@ export class Beacon {
 			},
 		},
 		recommendations: {
-			render: async (event: Payload<RecommendationsSchemaData>): Promise<void> => {
+			render: (event: Payload<RecommendationsSchemaData>): void => {
 				const payload: RecommendationsRenderRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					recommendationsSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -603,11 +588,11 @@ export class Beacon {
 				const request = this.createRequest('recommendations', 'recommendationsRender', payload);
 				this.queueRequest(request);
 			},
-			impression: async (event: Payload<RecommendationsSchemaData>): Promise<void> => {
+			impression: (event: Payload<RecommendationsSchemaData>): void => {
 				const payload: RecommendationsImpressionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					recommendationsSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -615,11 +600,11 @@ export class Beacon {
 				const request = this.createRequest('recommendations', 'recommendationsImpression', payload);
 				this.queueRequest(request);
 			},
-			addToCart: async (event: Payload<RecommendationsSchemaData>): Promise<void> => {
+			addToCart: (event: Payload<RecommendationsSchemaData>): void => {
 				const payload: RecommendationsAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					recommendationsSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -627,11 +612,11 @@ export class Beacon {
 				const request = this.createRequest('recommendations', 'recommendationsAddtocart', payload);
 				this.sendRequests([request]);
 			},
-			clickThrough: async (event: Payload<RecommendationsSchemaData>): Promise<void> => {
+			clickThrough: (event: Payload<RecommendationsSchemaData>): void => {
 				const payload: RecommendationsClickthroughRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					recommendationsSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -641,11 +626,11 @@ export class Beacon {
 			},
 		},
 		product: {
-			pageView: async (event: Payload<ProductPageviewSchemaData>): Promise<void> => {
+			pageView: (event: Payload<ProductPageviewSchemaData>): void => {
 				const payload: ProductPageviewRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					productPageviewSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -656,79 +641,78 @@ export class Beacon {
 				const item = event.data.result;
 				const sku = this.getSku(item);
 				if (sku) {
-					const lastViewedProducts = await this.storage.viewed.get();
+					const lastViewedProducts = this.storage.viewed.get();
 					const uniqueCartItems = Array.from(new Set([sku, ...lastViewedProducts]));
-					await this.setCookie(VIEWED_KEY, uniqueCartItems.slice(0, MAX_VIEWED_COUNT).join(','), COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
-					await this.setLocalStorageItem(VIEWED_KEY, uniqueCartItems.slice(0, MAX_VIEWED_COUNT).join(','));
+					this.setCookie(VIEWED_KEY, uniqueCartItems.slice(0, MAX_VIEWED_COUNT).join(','), COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
+					this.setLocalStorageItem(VIEWED_KEY, uniqueCartItems.slice(0, MAX_VIEWED_COUNT).join(','));
 					if (!lastViewedProducts.includes(sku)) {
-						await this.sendPreflight();
+						this.sendPreflight();
 					}
 				}
 			},
 		},
 		cart: {
-			add: async (event: Payload<CartSchemaData>): Promise<void> => {
+			add: (event: Payload<CartSchemaData>): void => {
 				const payload: CartAddRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					cartSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
-				console.log('cart add payload', payload);
 				const request = this.createRequest('cart', 'cartAdd', payload);
 				this.sendRequests([request]);
-				// await this.storage.cart.add(event.data.results.map((product) => this.getSku(product)));
-				await this.storage.cart.add(event.data.results);
+				// this.storage.cart.add(event.data.results.map((product) => this.getSku(product)));
+				this.storage.cart.add(event.data.results);
 			},
-			remove: async (event: Payload<CartSchemaData>): Promise<void> => {
+			remove: (event: Payload<CartSchemaData>): void => {
 				const payload: CartRemoveRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					cartSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
 
 				const request = this.createRequest('cart', 'cartRemove', payload);
 				this.sendRequests([request]);
-				await this.storage.cart.remove(event.data.results);
+				this.storage.cart.remove(event.data.results);
 			},
-			view: async (event: Payload<CartSchemaData>): Promise<void> => {
+			view: (event: Payload<CartSchemaData>): void => {
 				const payload: CartViewRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					cartviewSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
 
 				const request = this.createRequest('cart', 'cartView', payload);
 				this.sendRequests([request]);
-				await this.storage.cart.set(event.data.results);
+				this.storage.cart.set(event.data.results);
 			},
 		},
 		order: {
-			transaction: async (event: Payload<OrderTransactionSchemaData>): Promise<void> => {
+			transaction: (event: Payload<OrderTransactionSchemaData>): void => {
 				const payload: OrderTransactionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					orderTransactionSchema: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
 
 				const request = this.createRequest('order', 'orderTransaction', payload);
 				this.sendRequests([request]);
-				await this.storage.cart.clear();
+				this.storage.cart.clear();
 			},
 		},
 		error: {
-			shopifypixel: async (event: Payload<Log>): Promise<void> => {
+			shopifypixel: (event: Payload<Log>): void => {
 				const payload: LogShopifypixelRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					shopifyPixelExtensionLogEvent: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -736,11 +720,11 @@ export class Beacon {
 				const request = this.createRequest('error', 'logShopifypixel', payload);
 				this.sendRequests([request]);
 			},
-			snap: async (event: Payload<Log>): Promise<void> => {
+			snap: (event: Payload<Log>): void => {
 				const payload: LogSnapRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					snapLogEvent: {
-						context: await this.getContext(),
+						context: this.getContext(),
 						data: event.data,
 					},
 				};
@@ -761,7 +745,7 @@ export class Beacon {
 	}
 
 	updateContext(key: keyof Context, value: any): void {
-		if(value === undefined) {
+		if (value === undefined) {
 			return;
 		}
 		switch (key) {
@@ -779,14 +763,12 @@ export class Beacon {
 				this.config.userAgent = value;
 				break;
 			case 'dev':
-				if(['production', 'development'].includes(value))
-				this.mode = value;
+				if (['production', 'development'].includes(value)) this.mode = value;
 				break;
 			default:
 				break;
 		}
 	}
-
 
 	// TODO: TODO: is this correct order?
 	getSku(product: Product | Item): string {
@@ -794,16 +776,16 @@ export class Beacon {
 		return `${product.childSku || product.childUid || product.sku || product.uid || ''}`.trim();
 	}
 
-	async getContext(): Promise<Context> {
+	getContext(): Context {
 		const context: Context = {
-			userId: this.userId || await this.getUserId(),
-			sessionId: this.sessionId || await this.getSessionId(),
-			shopperId: this.shopperId || await this.getShopperId(),
+			userId: this.userId || this.getUserId(),
+			sessionId: this.sessionId || this.getSessionId(),
+			shopperId: this.shopperId || this.getShopperId(),
 			pageLoadId: this.pageLoadId || this.generateId(),
 			timestamp: this.getTimestamp(),
 			pageUrl: this.config.href || (typeof window !== 'undefined' && window.location.href) || '',
 			initiator: `searchspring/${this.config.framework}${this.config.version ? `/${this.config.version}` : ''}`,
-			attribution: this.attribution || await this.getAttribution(),
+			attribution: this.attribution || this.getAttribution(),
 			userAgent: this.config.userAgent || (typeof navigator !== 'undefined' && navigator?.userAgent) || '',
 			dev: this.mode === 'development' ? true : undefined,
 		};
@@ -813,16 +795,16 @@ export class Beacon {
 		return context;
 	}
 
-	private async getStoredID(key: string, expiration: number): Promise<string> {
+	private getStoredID(key: string, expiration: number): string {
 		// try to get the value from the cookie
-		const storedCookieValue = await this.getCookie(key);
+		const storedCookieValue = this.getCookie(key);
 		if (storedCookieValue) {
-			await this.setCookie(key, storedCookieValue, COOKIE_SAMESITE, expiration, COOKIE_DOMAIN);
+			this.setCookie(key, storedCookieValue, COOKIE_SAMESITE, expiration, COOKIE_DOMAIN);
 			return storedCookieValue;
 		}
 
 		// try to get the value from the local storage
-		const storedLocalStorageValue = await this.getLocalStorageItem(key);
+		const storedLocalStorageValue = this.getLocalStorageItem(key);
 		let uuid;
 		try {
 			const data = JSON.parse(storedLocalStorageValue);
@@ -838,15 +820,15 @@ export class Beacon {
 				id: uuid || this.generateId(),
 				timestamp: this.getTimestamp(),
 			};
-			await this.setLocalStorageItem(key, JSON.stringify(data));
-			await this.setCookie(key, data.id, COOKIE_SAMESITE, expiration, COOKIE_DOMAIN); // attempt to store in cookie
+			this.setLocalStorageItem(key, JSON.stringify(data));
+			this.setCookie(key, data.id, COOKIE_SAMESITE, expiration, COOKIE_DOMAIN); // attempt to store in cookie
 			return data.id;
 		}
 	}
 
-	private async getUserId(): Promise<string> {
+	private getUserId(): string {
 		try {
-			const value = await this.getStoredID(USER_ID_KEY, THIRTY_MINUTES);
+			const value = this.getStoredID(USER_ID_KEY, THIRTY_MINUTES);
 			this.userId = value;
 			return this.userId;
 		} catch (e) {
@@ -855,16 +837,16 @@ export class Beacon {
 		}
 	}
 
-	private async getSessionId(): Promise<string> {
-		const value = await this.getStoredID(SESSION_ID_KEY, 0);
+	private getSessionId(): string {
+		const value = this.getStoredID(SESSION_ID_KEY, 0);
 		this.sessionId = value;
 		return this.sessionId;
 	}
 
-	public async getShopperId(): Promise<string> {
+	public getShopperId(): string {
 		let shopperId: string | null = null;
 		try {
-			shopperId = (await this.getCookie(SHOPPER_ID_KEY)) || (await this.getLocalStorageItem(SHOPPER_ID_KEY));
+			shopperId = this.getCookie(SHOPPER_ID_KEY) || this.getLocalStorageItem(SHOPPER_ID_KEY);
 			this.shopperId = shopperId;
 		} catch {
 			// noop
@@ -873,21 +855,21 @@ export class Beacon {
 		return this.shopperId || '';
 	}
 
-	public async setShopperId(shopperId: string): Promise<string | void> {
+	public setShopperId(shopperId: string): string | void {
 		if (!shopperId) {
 			return;
 		}
-		const exisitingShopperId = await this.getShopperId();
+		const exisitingShopperId = this.getShopperId();
 		if (exisitingShopperId !== shopperId) {
 			this.shopperId = shopperId;
-			await this.setCookie(SHOPPER_ID_KEY, shopperId, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
-			await this.setLocalStorageItem(SHOPPER_ID_KEY, shopperId);
-			await this.sendPreflight();
+			this.setCookie(SHOPPER_ID_KEY, shopperId, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
+			this.setLocalStorageItem(SHOPPER_ID_KEY, shopperId);
+			this.sendPreflight();
 			return this.shopperId;
 		}
 	}
 
-	private async getAttribution(): Promise<ContextAttributionInner[] | undefined> {
+	private getAttribution(): ContextAttributionInner[] | undefined {
 		let attribution: string | null = null;
 
 		try {
@@ -902,11 +884,11 @@ export class Beacon {
 		if (attribution) {
 			const [type, id] = attribution.split(':');
 			if (type && id) {
-				await this.setCookie(ATTRIBUTION_KEY, attribution, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
+				this.setCookie(ATTRIBUTION_KEY, attribution, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
 				return [{ type, id }];
 			}
 		} else {
-			const storedAttribution = await this.getCookie(ATTRIBUTION_KEY);
+			const storedAttribution = this.getCookie(ATTRIBUTION_KEY);
 			if (storedAttribution) {
 				const [type, id] = storedAttribution.split(':');
 				if (type && id) {
@@ -954,15 +936,21 @@ export class Beacon {
 		}
 	}
 
-	private async sendRequests(requests: PayloadRequest[]): Promise<void> {
+	private sendRequests(requests: PayloadRequest[]): void {
 		for (const request of requests) {
 			const api = this.getApiClient(request.apiType);
 			const apiMethod = request.endpoint as keyof typeof api;
-			api[apiMethod](request.payload, { keepalive: true } as any); // TODO: fix typing
+			api[apiMethod](request.payload, (x) => {
+				// Since Content-Type is text/plain, need to stringify body in an override
+				return {
+					keepalive: true,
+					body: JSON.stringify(x.init.body),
+				} as any; // TODO: fix typing
+			});
 		}
 	}
-	private async processRequests(): Promise<void> {
-		// TODO: remove async so if this is running other events cant get queues - move requests = [] to end of function
+	private processRequests(): void {
+		// TODO: remove so if this is running other events cant get queues - move requests = [] to end of function
 
 		// clone requests to process to allow more requests to be queued while processing
 		const requestToProcess = deepmerge([], this.requests);
@@ -1022,12 +1010,12 @@ export class Beacon {
 
 		this.sendRequests(requestsToSend);
 	}
-	public async sendPreflight(): Promise<void> {
-		const userId = await this.getUserId();
+	public sendPreflight(): void {
+		const userId = this.getUserId();
 		const siteId = this.globals.siteId;
-		const shopper = await this.getShopperId();
-		const cart = await this.storage.cart.get();
-		const lastViewed = await this.storage.viewed.get();
+		const shopper = this.getShopperId();
+		const cart = this.storage.cart.get();
+		const lastViewed = this.storage.viewed.get();
 
 		if (userId && typeof userId == 'string' && siteId && (shopper || cart.length || lastViewed.length)) {
 			const preflightParams: PreflightRequestModel = {
