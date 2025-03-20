@@ -140,7 +140,7 @@ const ATTRIBUTION_KEY = 'ssAttribution';
 const MAX_EXPIRATION = 47304000000; // 18 months
 const THIRTY_MINUTES = 1800000; // 30 minutes
 const MAX_VIEWED_COUNT = 20;
-const EXPIRED_COOKIE = -1000;
+const EXPIRED_COOKIE = -1;
 export const COOKIE_DOMAIN =
 	(typeof window !== 'undefined' && window.location.hostname && '.' + window.location.hostname.replace(/^www\./, '')) || undefined;
 
@@ -218,7 +218,9 @@ export class Beacon {
 			// adds secure by default and for shopify pixel - only omits secure if protocol is http and not shopify pixel
 			cookie += 'Secure;';
 		}
-		if (expiration) {
+		if (expiration === EXPIRED_COOKIE) {
+			cookie += 'expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+		} else if (expiration) {
 			const d = new Date();
 			d.setTime(d.getTime() + expiration);
 			cookie += `expires=${d['toUTCString']()};`;
