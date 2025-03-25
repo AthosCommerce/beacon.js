@@ -1,3 +1,6 @@
+import packageJSON from '../package.json';
+export const { version } = packageJSON;
+
 import { v4 as uuidv4 } from 'uuid';
 import {
 	Context,
@@ -56,6 +59,7 @@ import {
 	LogSnapRequest,
 	Configuration,
 	InitOverrideFunction,
+	FetchAPI,
 } from './client';
 
 declare global {
@@ -72,10 +76,9 @@ export type PreflightRequestModel = {
 	lastViewed?: string[];
 };
 
-type BeaconConfig = {
+export type BeaconConfig = {
 	mode?: 'production' | 'development';
-	framework?: string;
-	version?: string;
+	initiator?: string;
 	apis?: {
 		cookie?: {
 			get: (name?: string) => Promise<string>;
@@ -95,6 +98,7 @@ type BeaconConfig = {
 				origin?: string;
 			};
 		};
+		fetch?: FetchAPI;
 	};
 	href?: string;
 	userAgent?: string;
@@ -142,9 +146,9 @@ export const COOKIE_DOMAIN =
 	(typeof window !== 'undefined' && window.location.hostname && '.' + window.location.hostname.replace(/^www\./, '')) || undefined;
 
 export class Beacon {
-	private config: BeaconConfig;
-	private mode: 'production' | 'development' = 'production';
+	public config: BeaconConfig;
 	public globals: BeaconGlobals;
+	protected mode: 'production' | 'development' = 'production';
 	private pageLoadId: string = '';
 	private userId: string = '';
 	private sessionId: string = '';
@@ -153,8 +157,8 @@ export class Beacon {
 	private currency: ContextCurrency = {
 		code: '',
 	};
-	queue: { eventFn: (...args: any[]) => void; payload: any }[] = [];
-	batchIntervalTimeout: number | NodeJS.Timeout = 0;
+	private initiator: string = '';
+	private batchIntervalTimeout: number | NodeJS.Timeout = 0;
 	private apis: ApiMethodMap;
 
 	private requests: PayloadRequest[] = [];
@@ -164,13 +168,16 @@ export class Beacon {
 			throw new Error(`Invalid config passed to tracker. The "siteId" attribute must be provided.`);
 		}
 
-		this.config = { framework: 'beacon.js', mode: 'production', ...(config || {}) };
+		this.config = { mode: 'production', ...(config || {}) };
 
 		if (this.config.mode && ['production', 'development'].includes(this.config.mode)) {
 			this.mode = this.config.mode;
 		}
+		// TODO: account for standalone beacon.js cdn usage vs package usage
+		this.initiator = this.config.initiator || `beaconjs/${version}`;
 
-		const apiConfig = new Configuration({ basePath: this.config.apis?.requesters?.beacon?.origin });
+		const fetchApi = this.config.apis?.fetch;
+		const apiConfig = new Configuration({ fetchApi, basePath: this.config.apis?.requesters?.beacon?.origin });
 		this.apis = {
 			shopper: new ShopperApi(apiConfig),
 			autocomplete: new AutocompleteApi(apiConfig),
@@ -185,6 +192,10 @@ export class Beacon {
 
 		this.globals = globals;
 		this.pageLoadId = this.generateId();
+
+		if (this.globals.currency) {
+			this.setCurrency(this.globals.currency);
+		}
 	}
 
 	private getCookie(name: string): string {
@@ -272,44 +283,45 @@ export class Beacon {
 	storage = {
 		cart: {
 			get: (): Product[] => {
-				const storedProducts = this.getCookie(CART_KEY) || this.getLocalStorageItem(CART_KEY);
-				try {
-					const parsedProducts = JSON.parse(storedProducts);
-					return parsedProducts as Product[];
-				} catch (_) {
-					// noop
+				// perhaps... always get from storage and return Product[] - storage always has Product[]
+				const storedProducts = this.getLocalStorageItem(CART_KEY);
+				if(storedProducts) {
+					try {
+						const parsedProducts = JSON.parse(storedProducts);
+						return parsedProducts as Product[];	
+					} catch {
+						// corrupted - reset
+						this.setLocalStorageItem(CART_KEY, '');
+						this.setCookie(CART_KEY, '', COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
+					}
+				} else {
+					const storedSkus = this.getCookie(CART_KEY);
+					// split on ',' and remap to Product[], setting qty and price to unknowns (0?)
+					return storedSkus.split(',').filter(sku => sku).map(sku => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
 				}
+				
 				return [];
 			},
 			set: (products: Product[]): void => {
-				if (products.length) {
-					const currentCartProducts = this.storage.cart.get();
+				// store Product[] into storage + store mapped string[] into cookie (for legacy purposes)
+				const currentCartProducts = this.storage.cart.get();
+				
+				const storedProducts = JSON.stringify(products);
+				this.setLocalStorageItem(CART_KEY, storedProducts);
 
-					if (typeof products[0] === 'string') {
-						const cartSkus = products.map((sku) => `${sku}`.trim());
-						const uniqueCartSkus = Array.from(new Set(cartSkus));
-						products = uniqueCartSkus.map((sku) => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
-					}
+				// also set cookie with re-mapping - favoring the more specific variant
+				const storedProductsCookie = products.map(product => this.getProductId(product)).join(',');
+				this.setCookie(CART_KEY, storedProductsCookie, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
 
-					const storedProducts = JSON.stringify(products);
-					this.setCookie(CART_KEY, storedProducts, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-					this.setLocalStorageItem(CART_KEY, storedProducts);
-
-					const productsHaveChanged = JSON.stringify(currentCartProducts) !== storedProducts;
-					if (productsHaveChanged) {
-						this.sendPreflight();
-					}
+				const productsHaveChanged = JSON.stringify(currentCartProducts) !== storedProducts;
+				if (productsHaveChanged) {
+					this.sendPreflight();
 				}
 			},
 			add: (products: Product[]): void => {
 				if (products.length) {
 					const existingCartProducts = this.storage.cart.get();
 					const cartProducts = [...existingCartProducts];
-					if (typeof products[0] === 'string') {
-						const cartSkus = products.map((sku) => `${sku}`.trim());
-						const uniqueCartSkus = Array.from(new Set(cartSkus));
-						products = uniqueCartSkus.map((sku) => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
-					}
 
 					products.reverse().forEach((product) => {
 						const isSkuAlreadyInCart = cartProducts.find((cartProduct) => cartProduct.uid === product.uid);
@@ -321,14 +333,7 @@ export class Beacon {
 						}
 					});
 
-					const storedProducts = JSON.stringify(cartProducts);
-					this.setCookie(CART_KEY, storedProducts, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-					this.setLocalStorageItem(CART_KEY, storedProducts);
-
-					const productsHaveChanged = JSON.stringify(existingCartProducts) !== storedProducts;
-					if (productsHaveChanged) {
-						this.sendPreflight();
-					}
+					this.storage.cart.set(cartProducts);
 				}
 			},
 			remove: (products: Product[]): void => {
@@ -336,59 +341,77 @@ export class Beacon {
 					const existingCartProducts = this.storage.cart.get();
 					const cartProducts = [...existingCartProducts];
 
-					if (typeof products[0] === 'string') {
-						const cartSkus = products.map((sku) => `${sku}`.trim());
-						const uniqueCartSkus = Array.from(new Set(cartSkus));
-						products = uniqueCartSkus.map((sku) => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
-					}
-
 					products.forEach((product) => {
 						const isSkuAlreadyInCart = cartProducts.find((cartProduct) => cartProduct.uid === product.uid);
-						if (!isSkuAlreadyInCart) {
-							// noop
-						} else {
-							if (isSkuAlreadyInCart.qty > 1) {
+						if(isSkuAlreadyInCart) {
+							if (isSkuAlreadyInCart.qty > 0) {
 								isSkuAlreadyInCart.qty -= product.qty || 1;
-							} else {
-								isSkuAlreadyInCart.qty = 0;
 							}
 						}
 					});
 
-					// remove products with qty 0
+					// keep products with qty > 0
 					const updatedCartProducts = cartProducts.filter((product) => product.qty > 0);
 
-					const storedProducts = JSON.stringify(updatedCartProducts);
-					this.setCookie(CART_KEY, storedProducts, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-					this.setLocalStorageItem(CART_KEY, storedProducts);
-
-					const productsHaveChanged = JSON.stringify(existingCartProducts) !== storedProducts;
-					if (productsHaveChanged) {
-						this.sendPreflight();
-					}
+					this.storage.cart.set(updatedCartProducts);
 				}
 			},
 			clear: (): void => {
-				const products = this.storage.cart.get();
-				if (products.length) {
-					this.setCookie(CART_KEY, '', COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-					this.setLocalStorageItem(CART_KEY, '');
-					// TODO: add clear cookie method? Shopify doesn't have one?
-					this.sendPreflight();
-				}
+				this.storage.cart.set([]);
 			},
 		},
 		viewed: {
-			get: (): string[] => {
-				const items = this.getCookie(VIEWED_KEY) || this.getLocalStorageItem(VIEWED_KEY);
-				if (!items) {
-					return [];
+			get: (): Item[] => {
+				const storedItems = this.getLocalStorageItem(VIEWED_KEY);
+				if(storedItems) {
+					try {
+						const parsedItems = JSON.parse(storedItems);
+						return parsedItems as Item[];
+					} catch {
+						// corrupted - reset
+						this.setLocalStorageItem(VIEWED_KEY, '');
+						this.setCookie(VIEWED_KEY, '', COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
+					}
+				} else {
+					const storedSkus = this.getCookie(VIEWED_KEY);
+					// split on ',' and remap to Product[], setting qty and price to unknowns (0?)
+					return storedSkus.split(',').filter(sku => sku).map(sku => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
 				}
-				return items.split(',');
+				return [];
 			},
-			set: (items: string[]): void => {
-				this.setCookie(VIEWED_KEY, items.join(','), COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
-				this.setLocalStorageItem(VIEWED_KEY, items.join(','));
+			set: (products: (Item | Product)[]): void => {
+				const currentViewedItems = this.storage.viewed.get();
+				// remove qty and price if product is provided
+				const normalizedItems: Item[] = products.map(item => ({ sku: item.sku, uid: item.uid, childUid: item.childUid, childSku: item.childSku })).slice(0, MAX_VIEWED_COUNT);
+				const storedItems = JSON.stringify(normalizedItems);
+				this.setLocalStorageItem(VIEWED_KEY, storedItems);
+				
+				// also set cookie with re-mapping - favoring the more specific variant
+				const storedProductsCookie = normalizedItems.map(item => this.getProductId(item)).join(',');
+				this.setCookie(VIEWED_KEY, storedProductsCookie, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
+
+				const productsHaveChanged = JSON.stringify(currentViewedItems) !== storedItems;
+				if (productsHaveChanged) {
+					this.sendPreflight();
+				}
+			},
+			add: (products: (Item | Product)[]): void => {
+				// the order of the stored items matters - most recently viewed should be in front of array?
+				if (products.length) {
+					const viewedProducts = this.storage.viewed.get();
+					products.forEach((product) => {
+						const item: Item = { sku: product.sku, uid: product.uid, childUid: product.childUid, childSku: product.childSku };
+						const isItemAlreadyViewed = viewedProducts.find((viewedProduct) => viewedProduct.uid === item.uid && viewedProduct.sku === item.sku && viewedProduct.childUid === item.childUid && viewedProduct.childSku === item.childSku);
+						if (isItemAlreadyViewed) {
+							// item has been viewed remove it from array
+							const index = viewedProducts.indexOf(isItemAlreadyViewed);
+							viewedProducts.splice(index, 1);
+						}
+						// add item to front of array
+						viewedProducts.unshift(item);
+					});
+					this.storage.viewed.set(viewedProducts);
+				}
 			},
 		},
 	};
@@ -647,17 +670,7 @@ export class Beacon {
 				this.sendRequests([request]);
 
 				const item = event.data.result;
-				const sku = this.getSku(item);
-				if (sku) {
-					const lastViewedProducts = this.storage.viewed.get();
-					const uniqueCartItems = Array.from(new Set([sku, ...lastViewedProducts])).slice(0, MAX_VIEWED_COUNT);
-
-					this.storage.viewed.set(uniqueCartItems);
-
-					if (!lastViewedProducts.includes(sku)) {
-						this.sendPreflight();
-					}
-				}
+				this.storage.viewed.add([item]);
 			},
 		},
 		cart: {
@@ -778,12 +791,6 @@ export class Beacon {
 		}
 	}
 
-	// TODO: TODO: is this correct order?
-	getSku(product: Product | Item): string {
-		// product page view event for setting last viewed products
-		return `${product.childSku || product.childUid || product.sku || product.uid || ''}`.trim();
-	}
-
 	getContext(): Context {
 		const context: Context = {
 			userId: this.userId || this.getUserId(),
@@ -792,13 +799,13 @@ export class Beacon {
 			pageLoadId: this.pageLoadId,
 			timestamp: this.getTimestamp(),
 			pageUrl: this.config.href || (typeof window !== 'undefined' && window.location.href) || '',
-			initiator: `searchspring/${this.config.framework}${this.config.version ? `/${this.config.version}` : ''}`,
+			initiator: this.initiator,
 			attribution: this.attribution || this.getAttribution(),
 			userAgent: this.config.userAgent || (typeof navigator !== 'undefined' && navigator?.userAgent) || '',
 			dev: this.mode === 'development' ? true : undefined,
 		};
 		if (this.currency.code) {
-			context.currency = this.currency;
+			context.currency = { ...this.currency };
 		}
 		return context;
 	}
@@ -902,7 +909,7 @@ export class Beacon {
 		}
 
 		if (urlAttribution) {
-			const [type, id] = urlAttribution.split(':');
+			const [type, id] = decodeURIComponent(urlAttribution).split(':');
 			if (type && id && !attribution.find((attr) => attr.type === type && attr.id === id)) {
 				attribution.unshift({ type, id });
 			}
@@ -912,7 +919,7 @@ export class Beacon {
 			this.setCookie(ATTRIBUTION_KEY, JSON.stringify(attribution), COOKIE_SAMESITE, THIRTY_MINUTES, COOKIE_DOMAIN);
 			this.setLocalStorageItem(ATTRIBUTION_KEY, JSON.stringify(attribution));
 			this.attribution = attribution;
-			return attribution;
+			return [...attribution];
 		}
 	}
 
@@ -1024,13 +1031,13 @@ export class Beacon {
 		this.sendRequests(requestsToSend);
 	}
 
-	public sendPreflight(overrides?: { userId: string; siteId: string; shopper: string; cart: Product[]; lastViewed: string[] }): void {
+	public sendPreflight(overrides?: { userId: string; siteId: string; shopper: string; cart: Product[]; lastViewed: Item[] }): void {
 		const userId = overrides?.userId || this.getUserId();
 		const siteId = overrides?.siteId || this.globals.siteId;
 		const shopper = overrides?.shopper || this.getShopperId();
 		const cart = overrides?.cart || this.storage.cart.get();
 		const lastViewed = overrides?.lastViewed || this.storage.viewed.get();
-
+		
 		if (userId && typeof userId == 'string' && siteId && (shopper || cart.length || lastViewed.length)) {
 			const preflightParams: PreflightRequestModel = {
 				userId,
@@ -1041,17 +1048,17 @@ export class Beacon {
 				preflightParams.shopper = shopper;
 			}
 			if (cart.length) {
-				preflightParams.cart = cart.map((item) => this.getSku(item));
+				preflightParams.cart = cart.map((item) => this.getProductId(item));
 			}
 			if (lastViewed.length) {
-				preflightParams.lastViewed = lastViewed;
+				preflightParams.lastViewed = lastViewed.map((item) => this.getProductId(item));
 			}
 
 			const origin = this.config.apis?.requesters?.personalization?.origin || `https://${siteId}.a.searchspring.io`;
 			const endpoint = `${origin}/api/personalization/preflightCache`;
 
-			if (typeof fetch !== 'undefined') {
-				fetch(endpoint, {
+			if (this.config.apis?.fetch || typeof fetch !== 'undefined') {
+				(this.config.apis?.fetch || fetch)(endpoint, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -1061,6 +1068,10 @@ export class Beacon {
 				});
 			}
 		}
+	}
+
+	protected getProductId(product: Product | Item): string {
+		return `${product.childUid || product.childSku || product.uid || product.sku || ''}`.trim();
 	}
 }
 

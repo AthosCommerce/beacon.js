@@ -186,36 +186,6 @@ describe('Beacon', () => {
 				multiQuantityTestProduct,
 			];
 
-			it('can set, get, and remove cart products as string array', () => {
-				const mockProductIds = ['productUid1', 'productUid1', 'productUid2'];
-				// @ts-ignore - legacy string array support
-				beacon.storage.cart.set(mockProductIds);
-
-				// beacon cart getter
-				const cartData = beacon.storage.cart.get();
-				const updatedCartData = mockProductIds.slice(1).map((id) => ({ uid: id, sku: id, qty: 1, price: 0 }));
-				expect(cartData).toStrictEqual(updatedCartData);
-
-				// remove cart data
-				const idToRemove = updatedCartData[updatedCartData.length - 1].uid;
-				expect(idToRemove).toBe('productUid2');
-				// @ts-ignore - legacy string array support
-				beacon.storage.cart.remove([idToRemove]);
-				const removedCartData = beacon.storage.cart.get();
-
-				expect(removedCartData).toStrictEqual([{ uid: 'productUid1', sku: 'productUid1', qty: 1, price: 0 }]);
-			});
-
-			it('can add and get cart products as string array', () => {
-				const mockProductIds = ['productUid1', 'productUid1', 'productUid2'];
-				// @ts-ignore - legacy string array support
-				beacon.storage.cart.add(mockProductIds);
-
-				// beacon cart getter
-				const cartData = beacon.storage.cart.get();
-				expect(cartData).toStrictEqual(mockProductIds.slice(1).map((id) => ({ uid: id, sku: id, qty: 1, price: 0 })));
-			});
-
 			it('can set and get cart products', () => {
 				beacon.storage.cart.set(mockProducts);
 
@@ -223,8 +193,9 @@ describe('Beacon', () => {
 				const cartData = beacon.storage.cart.get();
 				expect(cartData).toEqual(mockProducts);
 
+
 				// cookie contains cart data
-				expect(global.document.cookie).toContain(`${CART_KEY}=${encodeURIComponent(JSON.stringify(mockProducts))}`);
+				expect(global.document.cookie).toContain(`${CART_KEY}=${encodeURIComponent(mockProducts.map(product => product.childUid || product.childSku || product.uid || product.sku).join(','))}`);
 
 				// localStorage contains cart data
 				expect(localStorageMock.setItem).toHaveBeenCalled();
@@ -279,7 +250,7 @@ describe('Beacon', () => {
 				expect(global.document.cookie).toContain(`${CART_KEY}=;`);
 				const rawClearedItem = localStorageMock.getItem(CART_KEY)!;
 				const clearedData = JSON.parse(rawClearedItem);
-				expect(clearedData[mockGlobals.siteId]).toBe('');
+				expect(clearedData[mockGlobals.siteId]).toBe('[]');
 			});
 		});
 		describe.skip('Custom APIs', () => {
@@ -399,7 +370,7 @@ describe('Beacon', () => {
 			expect(context1.pageUrl).toBe(context2.pageUrl);
 			expect(context1.initiator).toBe(context2.initiator);
 			expect(context1.userAgent).toBe(context2.userAgent);
-			expect(context1.currency).toBe(context2.currency);
+			expect(context1.currency).toStrictEqual(context2.currency);
 			expect(context1.attribution).toStrictEqual(context2.attribution);
 
 			// should be different timestamps
