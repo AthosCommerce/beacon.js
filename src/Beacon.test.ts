@@ -225,7 +225,7 @@ describe('Beacon', () => {
 				expect(id2).toStrictEqual(expect.any(String));
 				expect(id1).toBe(id2);
 
-				await new Promise((resolve) => setTimeout(resolve, expiration));
+				await new Promise((resolve) => setTimeout(resolve, expiration + 100));
 
 				const id3 = beacon['getStoredId']('key', expiration);
 				expect(id3).toStrictEqual(expect.any(String));
