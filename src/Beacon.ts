@@ -1,3 +1,6 @@
+import packageJSON from '../package.json';
+export const { version } = packageJSON;
+
 import { v4 as uuidv4 } from 'uuid';
 import {
 	Context,
@@ -56,6 +59,7 @@ import {
 	LogSnapRequest,
 	Configuration,
 	InitOverrideFunction,
+	FetchAPI,
 } from './client';
 
 declare global {
@@ -72,10 +76,9 @@ export type PreflightRequestModel = {
 	lastViewed?: string[];
 };
 
-type BeaconConfig = {
+export type BeaconConfig = {
 	mode?: 'production' | 'development';
-	framework?: string;
-	version?: string;
+	initiator?: string;
 	apis?: {
 		cookie?: {
 			get: (name?: string) => Promise<string>;
@@ -95,6 +98,7 @@ type BeaconConfig = {
 				origin?: string;
 			};
 		};
+		fetch?: FetchAPI;
 	};
 	href?: string;
 	userAgent?: string;
@@ -119,7 +123,7 @@ export interface PayloadRequest {
 	apiType: keyof ApiMethodMap;
 	endpoint: string;
 	payload: any;
-};
+}
 
 export type Payload<T> = {
 	siteId?: string;
@@ -138,13 +142,14 @@ const ATTRIBUTION_KEY = 'ssAttribution';
 const MAX_EXPIRATION = 47304000000; // 18 months
 const THIRTY_MINUTES = 1800000; // 30 minutes
 const MAX_VIEWED_COUNT = 20;
+const EXPIRED_COOKIE = -1;
 export const COOKIE_DOMAIN =
 	(typeof window !== 'undefined' && window.location.hostname && '.' + window.location.hostname.replace(/^www\./, '')) || undefined;
 
 export class Beacon {
-	private config: BeaconConfig;
-	private mode: 'production' | 'development' = 'production';
+	public config: BeaconConfig;
 	public globals: BeaconGlobals;
+	protected mode: 'production' | 'development' = 'production';
 	private pageLoadId: string = '';
 	private userId: string = '';
 	private sessionId: string = '';
@@ -153,8 +158,8 @@ export class Beacon {
 	private currency: ContextCurrency = {
 		code: '',
 	};
-	queue: { eventFn: (...args: any[]) => void; payload: any }[] = [];
-	batchIntervalTimeout: number | NodeJS.Timeout = 0;
+	private initiator: string = '';
+	private batchIntervalTimeout: number | NodeJS.Timeout = 0;
 	private apis: ApiMethodMap;
 
 	private requests: PayloadRequest[] = [];
@@ -164,13 +169,16 @@ export class Beacon {
 			throw new Error(`Invalid config passed to tracker. The "siteId" attribute must be provided.`);
 		}
 
-		this.config = { framework: 'beacon.js', mode: 'production', ...(config || {}) };
+		this.config = { mode: 'production', ...(config || {}) };
 
 		if (this.config.mode && ['production', 'development'].includes(this.config.mode)) {
 			this.mode = this.config.mode;
 		}
+		// TODO: account for standalone beacon.js cdn usage vs package usage
+		this.initiator = this.config.initiator || `beaconjs/${version}`;
 
-		const apiConfig = new Configuration({ basePath: this.config.apis?.requesters?.beacon?.origin });
+		const fetchApi = this.config.apis?.fetch;
+		const apiConfig = new Configuration({ fetchApi, basePath: this.config.apis?.requesters?.beacon?.origin });
 		this.apis = {
 			shopper: new ShopperApi(apiConfig),
 			autocomplete: new AutocompleteApi(apiConfig),
@@ -185,6 +193,10 @@ export class Beacon {
 
 		this.globals = globals;
 		this.pageLoadId = this.generateId();
+
+		if (this.globals.currency) {
+			this.setCurrency(this.globals.currency);
+		}
 	}
 
 	private getCookie(name: string): string {
@@ -208,14 +220,15 @@ export class Beacon {
 		return '';
 	}
 
-	// TODO: in future - when saving cookie value - also prefix key with siteId to support multiple sites on same domain
 	private setCookie(name: string, value: string, samesite: string, expiration: number, domain?: string): void {
 		let cookie = `${name}=${encodeURIComponent(value)};` + `SameSite=${samesite};` + 'path=/;';
 		if (!(typeof window !== 'undefined' && window.location.protocol == 'http:')) {
 			// adds secure by default and for shopify pixel - only omits secure if protocol is http and not shopify pixel
 			cookie += 'Secure;';
 		}
-		if (expiration) {
+		if (expiration === EXPIRED_COOKIE) {
+			cookie += 'expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+		} else if (expiration) {
 			const d = new Date();
 			d.setTime(d.getTime() + expiration);
 			cookie += `expires=${d['toUTCString']()};`;
@@ -272,63 +285,64 @@ export class Beacon {
 	storage = {
 		cart: {
 			get: (): Product[] => {
-				const storedProducts = this.getCookie(CART_KEY) || this.getLocalStorageItem(CART_KEY);
-				try {
-					const parsedProducts = JSON.parse(storedProducts);
-					return parsedProducts as Product[];
-				} catch (_) {
-					// noop
+				// perhaps... always get from storage and return Product[] - storage always has Product[]
+				const storedProducts = this.getLocalStorageItem(CART_KEY);
+				if (storedProducts) {
+					try {
+						const parsedProducts = JSON.parse(storedProducts);
+						return parsedProducts as Product[];
+					} catch {
+						// corrupted - reset
+						this.setLocalStorageItem(CART_KEY, '');
+						this.setCookie(CART_KEY, '', COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
+					}
+				} else {
+					const storedSkus = this.getCookie(CART_KEY);
+					// split on ',' and remap to Product[], setting qty and price to unknowns (0?)
+					return storedSkus
+						.split(',')
+						.filter((sku) => sku)
+						.map((sku) => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
 				}
+
 				return [];
 			},
 			set: (products: Product[]): void => {
-				if (products.length) {
-					const currentCartProducts = this.storage.cart.get();
+				// store Product[] into storage + store mapped string[] into cookie (for legacy purposes)
+				const currentCartProducts = this.storage.cart.get();
 
-					if (typeof products[0] === 'string') {
-						const cartSkus = products.map((sku) => `${sku}`.trim());
-						const uniqueCartSkus = Array.from(new Set(cartSkus));
-						products = uniqueCartSkus.map((sku) => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
-					}
+				const storedProducts = JSON.stringify(products);
+				this.setLocalStorageItem(CART_KEY, storedProducts);
 
-					const storedProducts = JSON.stringify(products);
-					this.setCookie(CART_KEY, storedProducts, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-					this.setLocalStorageItem(CART_KEY, storedProducts);
+				// also set cookie with re-mapping - favoring the more specific variant
+				const storedProductsCookie = products.map((product) => this.getProductId(product)).join(',');
+				this.setCookie(CART_KEY, storedProductsCookie, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
 
-					const productsHaveChanged = JSON.stringify(currentCartProducts) !== storedProducts;
-					if (productsHaveChanged) {
-						this.sendPreflight();
-					}
+				const productsHaveChanged = JSON.stringify(currentCartProducts) !== storedProducts;
+				if (productsHaveChanged) {
+					this.sendPreflight();
 				}
 			},
 			add: (products: Product[]): void => {
 				if (products.length) {
 					const existingCartProducts = this.storage.cart.get();
 					const cartProducts = [...existingCartProducts];
-					if (typeof products[0] === 'string') {
-						const cartSkus = products.map((sku) => `${sku}`.trim());
-						const uniqueCartSkus = Array.from(new Set(cartSkus));
-						products = uniqueCartSkus.map((sku) => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
-					}
 
-					products.reverse().forEach((product) => {
-						const isSkuAlreadyInCart = cartProducts.find((cartProduct) => cartProduct.uid === product.uid);
-						if (!isSkuAlreadyInCart) {
-							cartProducts.unshift(product);
-						} else {
-							isSkuAlreadyInCart.qty += product.qty;
-							isSkuAlreadyInCart.price = product.price || isSkuAlreadyInCart.price;
-						}
-					});
+					products
+						.filter((product) => typeof product === 'object' && product.uid)
+						.reverse()
+						.forEach((product) => {
+							// ensure objects have properties
+							const isSkuAlreadyInCart = cartProducts.find((cartProduct) => cartProduct.uid === product.uid);
+							if (!isSkuAlreadyInCart) {
+								cartProducts.unshift(product);
+							} else {
+								isSkuAlreadyInCart.qty += product.qty;
+								isSkuAlreadyInCart.price = product.price || isSkuAlreadyInCart.price;
+							}
+						});
 
-					const storedProducts = JSON.stringify(cartProducts);
-					this.setCookie(CART_KEY, storedProducts, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-					this.setLocalStorageItem(CART_KEY, storedProducts);
-
-					const productsHaveChanged = JSON.stringify(existingCartProducts) !== storedProducts;
-					if (productsHaveChanged) {
-						this.sendPreflight();
-					}
+					this.storage.cart.set(cartProducts);
 				}
 			},
 			remove: (products: Product[]): void => {
@@ -336,66 +350,95 @@ export class Beacon {
 					const existingCartProducts = this.storage.cart.get();
 					const cartProducts = [...existingCartProducts];
 
-					if (typeof products[0] === 'string') {
-						const cartSkus = products.map((sku) => `${sku}`.trim());
-						const uniqueCartSkus = Array.from(new Set(cartSkus));
-						products = uniqueCartSkus.map((sku) => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
-					}
-
 					products.forEach((product) => {
 						const isSkuAlreadyInCart = cartProducts.find((cartProduct) => cartProduct.uid === product.uid);
-						if (!isSkuAlreadyInCart) {
-							// noop
-						} else {
-							if (isSkuAlreadyInCart.qty > 1) {
+						if (isSkuAlreadyInCart) {
+							if (isSkuAlreadyInCart.qty > 0) {
 								isSkuAlreadyInCart.qty -= product.qty || 1;
-							} else {
-								isSkuAlreadyInCart.qty = 0;
 							}
 						}
 					});
 
-					// remove products with qty 0
+					// keep products with qty > 0
 					const updatedCartProducts = cartProducts.filter((product) => product.qty > 0);
 
-					const storedProducts = JSON.stringify(updatedCartProducts);
-					this.setCookie(CART_KEY, storedProducts, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-					this.setLocalStorageItem(CART_KEY, storedProducts);
-
-					const productsHaveChanged = JSON.stringify(existingCartProducts) !== storedProducts;
-					if (productsHaveChanged) {
-						this.sendPreflight();
-					}
+					this.storage.cart.set(updatedCartProducts);
 				}
 			},
 			clear: (): void => {
-				const products = this.storage.cart.get();
-				if (products.length) {
-					this.setCookie(CART_KEY, '', COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-					this.setLocalStorageItem(CART_KEY, '');
-					// TODO: add clear cookie method? Shopify doesn't have one?
-					this.sendPreflight();
-				}
+				this.storage.cart.set([]);
 			},
 		},
 		viewed: {
-			get: (): string[] => {
-				const items = this.getCookie(VIEWED_KEY) || this.getLocalStorageItem(VIEWED_KEY);
-				if (!items) {
-					return [];
+			get: (): Item[] => {
+				const storedItems = this.getLocalStorageItem(VIEWED_KEY);
+				if (storedItems) {
+					try {
+						const parsedItems = JSON.parse(storedItems);
+						return parsedItems as Item[];
+					} catch {
+						// corrupted - reset
+						this.setLocalStorageItem(VIEWED_KEY, '');
+						this.setCookie(VIEWED_KEY, '', COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
+					}
+				} else {
+					const storedSkus = this.getCookie(VIEWED_KEY);
+					// split on ',' and remap to Product[], setting qty and price to unknowns (0?)
+					return storedSkus
+						.split(',')
+						.filter((sku) => sku)
+						.map((sku) => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
 				}
-				return items.split(',');
+				return [];
 			},
-			set: (items: string[]): void => {
-				this.setCookie(VIEWED_KEY, items.join(','), COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
-				this.setLocalStorageItem(VIEWED_KEY, items.join(','));
+			set: (products: (Item | Product)[]): void => {
+				const currentViewedItems = this.storage.viewed.get();
+				// remove qty and price if product is provided
+				const normalizedItems: Item[] = products
+					.map((item) => ({ sku: item.sku, uid: item.uid, childUid: item.childUid, childSku: item.childSku }))
+					.slice(0, MAX_VIEWED_COUNT);
+				const storedItems = JSON.stringify(normalizedItems);
+				this.setLocalStorageItem(VIEWED_KEY, storedItems);
+
+				// also set cookie with re-mapping - favoring the more specific variant
+				const storedProductsCookie = normalizedItems.map((item) => this.getProductId(item)).join(',');
+				this.setCookie(VIEWED_KEY, storedProductsCookie, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
+
+				const productsHaveChanged = JSON.stringify(currentViewedItems) !== storedItems;
+				if (productsHaveChanged) {
+					this.sendPreflight();
+				}
+			},
+			add: (products: (Item | Product)[]): void => {
+				// the order of the stored items matters - most recently viewed should be in front of array?
+				if (products.length) {
+					const viewedProducts = this.storage.viewed.get();
+					products.forEach((product) => {
+						const item: Item = { sku: product.sku, uid: product.uid, childUid: product.childUid, childSku: product.childSku };
+						const isItemAlreadyViewed = viewedProducts.find(
+							(viewedProduct) =>
+								viewedProduct.uid === item.uid &&
+								viewedProduct.sku === item.sku &&
+								viewedProduct.childUid === item.childUid &&
+								viewedProduct.childSku === item.childSku
+						);
+						if (isItemAlreadyViewed) {
+							// item has been viewed remove it from array
+							const index = viewedProducts.indexOf(isItemAlreadyViewed);
+							viewedProducts.splice(index, 1);
+						}
+						// add item to front of array
+						viewedProducts.unshift(item);
+					});
+					this.storage.viewed.set(viewedProducts);
+				}
 			},
 		},
 	};
 
 	events = {
 		shopper: {
-			login: (event: Payload<{ id: string }>): void => {
+			login: (event: Payload<{ id: string }>): LoginRequest | void => {
 				const setNewId = this.setShopperId(event.data.id);
 				if (setNewId) {
 					const payload: LoginRequest = {
@@ -406,11 +449,12 @@ export class Beacon {
 					};
 					const request = this.createRequest('shopper', 'login', payload);
 					this.sendRequests([request]);
+					return payload;
 				}
 			},
 		},
 		autocomplete: {
-			render: (event: Payload<AutocompleteSchemaData>): void => {
+			render: (event: Payload<AutocompleteSchemaData>): AutocompleteRenderRequest => {
 				const payload: AutocompleteRenderRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					autocompleteSchema: {
@@ -421,8 +465,9 @@ export class Beacon {
 
 				const request = this.createRequest('autocomplete', 'autocompleteRender', payload);
 				this.queueRequest(request);
+				return payload;
 			},
-			impression: (event: Payload<AutocompleteSchemaData>): void => {
+			impression: (event: Payload<AutocompleteSchemaData>): AutocompleteImpressionRequest => {
 				const payload: AutocompleteImpressionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					autocompleteSchema: {
@@ -433,8 +478,9 @@ export class Beacon {
 
 				const request = this.createRequest('autocomplete', 'autocompleteImpression', payload);
 				this.queueRequest(request);
+				return payload;
 			},
-			addToCart: (event: Payload<AutocompleteSchemaData>): void => {
+			addToCart: (event: Payload<AutocompleteSchemaData>): AutocompleteAddtocartRequest => {
 				const payload: AutocompleteAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					autocompleteSchema: {
@@ -445,8 +491,9 @@ export class Beacon {
 
 				const request = this.createRequest('autocomplete', 'autocompleteAddtocart', payload);
 				this.sendRequests([request]);
+				return payload;
 			},
-			clickThrough: (event: Payload<AutocompleteSchemaData>): void => {
+			clickThrough: (event: Payload<AutocompleteSchemaData>): AutocompleteClickthroughRequest => {
 				const payload: AutocompleteClickthroughRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					autocompleteSchema: {
@@ -457,8 +504,9 @@ export class Beacon {
 
 				const request = this.createRequest('autocomplete', 'autocompleteClickthrough', payload);
 				this.sendRequests([request]);
+				return payload;
 			},
-			redirect: (event: Payload<AutocompleteRedirectSchemaData>): void => {
+			redirect: (event: Payload<AutocompleteRedirectSchemaData>): AutocompleteRedirectRequest => {
 				const payload: AutocompleteRedirectRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					autocompleteRedirectSchema: {
@@ -469,10 +517,11 @@ export class Beacon {
 
 				const request = this.createRequest('autocomplete', 'autocompleteRedirect', payload);
 				this.sendRequests([request]);
+				return payload;
 			},
 		},
 		search: {
-			render: (event: Payload<SearchSchemaData>): void => {
+			render: (event: Payload<SearchSchemaData>): SearchRenderRequest => {
 				const payload: SearchRenderRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					searchSchema: {
@@ -483,8 +532,9 @@ export class Beacon {
 
 				const request = this.createRequest('search', 'searchRender', payload);
 				this.queueRequest(request);
+				return payload;
 			},
-			impression: (event: Payload<SearchSchemaData>): void => {
+			impression: (event: Payload<SearchSchemaData>): SearchImpressionRequest => {
 				const payload: SearchImpressionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					searchSchema: {
@@ -495,8 +545,9 @@ export class Beacon {
 
 				const request = this.createRequest('search', 'searchImpression', payload);
 				this.queueRequest(request);
+				return payload;
 			},
-			addToCart: (event: Payload<SearchSchemaData>): void => {
+			addToCart: (event: Payload<SearchSchemaData>): SearchAddtocartRequest => {
 				const payload: SearchAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					searchSchema: {
@@ -507,8 +558,9 @@ export class Beacon {
 
 				const request = this.createRequest('search', 'searchAddtocart', payload);
 				this.sendRequests([request]);
+				return payload;
 			},
-			clickThrough: (event: Payload<SearchSchemaData>): void => {
+			clickThrough: (event: Payload<SearchSchemaData>): SearchClickthroughRequest => {
 				const payload: SearchClickthroughRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					searchSchema: {
@@ -519,8 +571,9 @@ export class Beacon {
 
 				const request = this.createRequest('search', 'searchClickthrough', payload);
 				this.sendRequests([request]);
+				return payload;
 			},
-			redirect: (event: Payload<SearchRedirectSchemaData>): void => {
+			redirect: (event: Payload<SearchRedirectSchemaData>): SearchRedirectRequest => {
 				const payload: SearchRedirectRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					searchRedirectSchema: {
@@ -531,10 +584,11 @@ export class Beacon {
 
 				const request = this.createRequest('search', 'searchRedirect', payload);
 				this.sendRequests([request]);
+				return payload;
 			},
 		},
 		category: {
-			render: (event: Payload<CategorySchemaData>): void => {
+			render: (event: Payload<CategorySchemaData>): CategoryRenderRequest => {
 				const payload: CategoryRenderRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					categorySchema: {
@@ -545,8 +599,9 @@ export class Beacon {
 
 				const request = this.createRequest('category', 'categoryRender', payload);
 				this.queueRequest(request);
+				return payload;
 			},
-			impression: (event: Payload<CategorySchemaData>): void => {
+			impression: (event: Payload<CategorySchemaData>): CategoryImpressionRequest => {
 				const payload: CategoryImpressionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					categorySchema: {
@@ -557,8 +612,9 @@ export class Beacon {
 
 				const request = this.createRequest('category', 'categoryImpression', payload);
 				this.queueRequest(request);
+				return payload;
 			},
-			addToCart: (event: Payload<CategorySchemaData>): void => {
+			addToCart: (event: Payload<CategorySchemaData>): CategoryAddtocartRequest => {
 				const payload: CategoryAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					categorySchema: {
@@ -569,8 +625,9 @@ export class Beacon {
 
 				const request = this.createRequest('category', 'categoryAddtocart', payload);
 				this.sendRequests([request]);
+				return payload;
 			},
-			clickThrough: (event: Payload<CategorySchemaData>): void => {
+			clickThrough: (event: Payload<CategorySchemaData>): CategoryClickthroughRequest => {
 				const payload: CategoryClickthroughRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					categorySchema: {
@@ -581,10 +638,11 @@ export class Beacon {
 
 				const request = this.createRequest('category', 'categoryClickthrough', payload);
 				this.sendRequests([request]);
+				return payload;
 			},
 		},
 		recommendations: {
-			render: (event: Payload<RecommendationsSchemaData>): void => {
+			render: (event: Payload<RecommendationsSchemaData>): RecommendationsRenderRequest => {
 				const payload: RecommendationsRenderRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					recommendationsSchema: {
@@ -595,8 +653,9 @@ export class Beacon {
 
 				const request = this.createRequest('recommendations', 'recommendationsRender', payload);
 				this.queueRequest(request);
+				return payload;
 			},
-			impression: (event: Payload<RecommendationsSchemaData>): void => {
+			impression: (event: Payload<RecommendationsSchemaData>): RecommendationsImpressionRequest => {
 				const payload: RecommendationsImpressionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					recommendationsSchema: {
@@ -607,8 +666,9 @@ export class Beacon {
 
 				const request = this.createRequest('recommendations', 'recommendationsImpression', payload);
 				this.queueRequest(request);
+				return payload;
 			},
-			addToCart: (event: Payload<RecommendationsSchemaData>): void => {
+			addToCart: (event: Payload<RecommendationsSchemaData>): RecommendationsAddtocartRequest => {
 				const payload: RecommendationsAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					recommendationsSchema: {
@@ -619,8 +679,9 @@ export class Beacon {
 
 				const request = this.createRequest('recommendations', 'recommendationsAddtocart', payload);
 				this.sendRequests([request]);
+				return payload;
 			},
-			clickThrough: (event: Payload<RecommendationsSchemaData>): void => {
+			clickThrough: (event: Payload<RecommendationsSchemaData>): RecommendationsClickthroughRequest => {
 				const payload: RecommendationsClickthroughRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					recommendationsSchema: {
@@ -631,10 +692,11 @@ export class Beacon {
 
 				const request = this.createRequest('recommendations', 'recommendationsClickthrough', payload);
 				this.sendRequests([request]);
+				return payload;
 			},
 		},
 		product: {
-			pageView: (event: Payload<ProductPageviewSchemaData>): void => {
+			pageView: (event: Payload<ProductPageviewSchemaData>): ProductPageviewRequest => {
 				const payload: ProductPageviewRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					productPageviewSchema: {
@@ -647,21 +709,12 @@ export class Beacon {
 				this.sendRequests([request]);
 
 				const item = event.data.result;
-				const sku = this.getSku(item);
-				if (sku) {
-					const lastViewedProducts = this.storage.viewed.get();
-					const uniqueCartItems = Array.from(new Set([sku, ...lastViewedProducts])).slice(0, MAX_VIEWED_COUNT);
-
-					this.storage.viewed.set(uniqueCartItems);
-
-					if (!lastViewedProducts.includes(sku)) {
-						this.sendPreflight();
-					}
-				}
+				this.storage.viewed.add([item]);
+				return payload;
 			},
 		},
 		cart: {
-			add: (event: Payload<CartSchemaData>): void => {
+			add: (event: Payload<CartSchemaData>): CartAddRequest => {
 				const payload: CartAddRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					cartSchema: {
@@ -672,8 +725,9 @@ export class Beacon {
 				const request = this.createRequest('cart', 'cartAdd', payload);
 				this.sendRequests([request]);
 				this.storage.cart.add(event.data.results);
+				return payload;
 			},
-			remove: (event: Payload<CartSchemaData>): void => {
+			remove: (event: Payload<CartSchemaData>): CartRemoveRequest => {
 				const payload: CartRemoveRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					cartSchema: {
@@ -685,8 +739,9 @@ export class Beacon {
 				const request = this.createRequest('cart', 'cartRemove', payload);
 				this.sendRequests([request]);
 				this.storage.cart.remove(event.data.results);
+				return payload;
 			},
-			view: (event: Payload<CartSchemaData>): void => {
+			view: (event: Payload<CartSchemaData>): CartViewRequest => {
 				const payload: CartViewRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					cartviewSchema: {
@@ -698,10 +753,11 @@ export class Beacon {
 				const request = this.createRequest('cart', 'cartView', payload);
 				this.sendRequests([request]);
 				this.storage.cart.set(event.data.results);
+				return payload;
 			},
 		},
 		order: {
-			transaction: (event: Payload<OrderTransactionSchemaData>): void => {
+			transaction: (event: Payload<OrderTransactionSchemaData>): OrderTransactionRequest => {
 				const payload: OrderTransactionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					orderTransactionSchema: {
@@ -713,10 +769,11 @@ export class Beacon {
 				const request = this.createRequest('order', 'orderTransaction', payload);
 				this.sendRequests([request]);
 				this.storage.cart.clear();
+				return payload;
 			},
 		},
 		error: {
-			shopifypixel: (event: Payload<Log>): void => {
+			shopifypixel: (event: Payload<Log>): LogShopifypixelRequest => {
 				const payload: LogShopifypixelRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					shopifyPixelExtensionLogEvent: {
@@ -727,8 +784,9 @@ export class Beacon {
 
 				const request = this.createRequest('error', 'logShopifypixel', payload);
 				this.sendRequests([request]);
+				return payload;
 			},
-			snap: (event: Payload<Log>): void => {
+			snap: (event: Payload<Log>): LogSnapRequest => {
 				const payload: LogSnapRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					snapLogEvent: {
@@ -739,6 +797,7 @@ export class Beacon {
 
 				const request = this.createRequest('error', 'logSnap', payload);
 				this.sendRequests([request]);
+				return payload;
 			},
 		},
 	};
@@ -778,27 +837,21 @@ export class Beacon {
 		}
 	}
 
-	// TODO: TODO: is this correct order?
-	getSku(product: Product | Item): string {
-		// product page view event for setting last viewed products
-		return `${product.childSku || product.childUid || product.sku || product.uid || ''}`.trim();
-	}
-
 	getContext(): Context {
 		const context: Context = {
-			userId: this.userId || this.getUserId(),
-			sessionId: this.sessionId || this.getSessionId(),
-			shopperId: this.shopperId || this.getShopperId(),
-			pageLoadId: this.pageLoadId,
+			userAgent: this.config.userAgent || (typeof navigator !== 'undefined' && navigator?.userAgent) || '',
 			timestamp: this.getTimestamp(),
 			pageUrl: this.config.href || (typeof window !== 'undefined' && window.location.href) || '',
-			initiator: `searchspring/${this.config.framework}${this.config.version ? `/${this.config.version}` : ''}`,
-			attribution: this.attribution || this.getAttribution(),
-			userAgent: this.config.userAgent || (typeof navigator !== 'undefined' && navigator?.userAgent) || '',
+			userId: this.userId || this.getUserId(),
+			sessionId: this.sessionId || this.getSessionId(),
+			pageLoadId: this.pageLoadId,
+			shopperId: this.shopperId || this.getShopperId(),
+			initiator: this.initiator,
 			dev: this.mode === 'development' ? true : undefined,
+			attribution: this.attribution || this.getAttribution(),
 		};
 		if (this.currency.code) {
-			context.currency = this.currency;
+			context.currency = { ...this.currency };
 		}
 		return context;
 	}
@@ -902,9 +955,13 @@ export class Beacon {
 		}
 
 		if (urlAttribution) {
-			const [type, id] = urlAttribution.split(':');
-			if (type && id && !attribution.find((attr) => attr.type === type && attr.id === id)) {
-				attribution.unshift({ type, id });
+			try {
+				const [type, id] = decodeURIComponent(urlAttribution).split(':');
+				if (type && id && !attribution.find((attr) => attr.type === type && attr.id === id)) {
+					attribution.unshift({ type, id });
+				}
+			} catch {
+				// noop - failed to decode url attribution
 			}
 		}
 
@@ -912,7 +969,7 @@ export class Beacon {
 			this.setCookie(ATTRIBUTION_KEY, JSON.stringify(attribution), COOKIE_SAMESITE, THIRTY_MINUTES, COOKIE_DOMAIN);
 			this.setLocalStorageItem(ATTRIBUTION_KEY, JSON.stringify(attribution));
 			this.attribution = attribution;
-			return attribution;
+			return [...attribution];
 		}
 	}
 
@@ -956,16 +1013,17 @@ export class Beacon {
 			const apiMethod = request.endpoint;
 
 			const initOverrides: InitOverrideFunction = async ({ init }) => {
-				return Promise.resolve({
+				return {
 					keepalive: true,
 					body: JSON.stringify(init.body),
-				});
+				};
 			};
 
-			(api as any)[apiMethod](request.payload, initOverrides);
+			// typing is difficult due to dynamic API and method call
+			(api as any)[apiMethod as keyof typeof api](request.payload, initOverrides);
 		}
 	}
-	
+
 	private processRequests(): void {
 		const data = this.requests.reduce<{
 			nonBatched: PayloadRequest[];
@@ -1024,7 +1082,7 @@ export class Beacon {
 		this.sendRequests(requestsToSend);
 	}
 
-	public sendPreflight(overrides?: { userId: string; siteId: string; shopper: string; cart: Product[]; lastViewed: string[] }): void {
+	public sendPreflight(overrides?: { userId: string; siteId: string; shopper: string; cart: Product[]; lastViewed: Item[] }): void {
 		const userId = overrides?.userId || this.getUserId();
 		const siteId = overrides?.siteId || this.globals.siteId;
 		const shopper = overrides?.shopper || this.getShopperId();
@@ -1041,17 +1099,17 @@ export class Beacon {
 				preflightParams.shopper = shopper;
 			}
 			if (cart.length) {
-				preflightParams.cart = cart.map((item) => this.getSku(item));
+				preflightParams.cart = cart.map((item) => this.getProductId(item));
 			}
 			if (lastViewed.length) {
-				preflightParams.lastViewed = lastViewed;
+				preflightParams.lastViewed = lastViewed.map((item) => this.getProductId(item));
 			}
 
 			const origin = this.config.apis?.requesters?.personalization?.origin || `https://${siteId}.a.searchspring.io`;
 			const endpoint = `${origin}/api/personalization/preflightCache`;
 
-			if (typeof fetch !== 'undefined') {
-				fetch(endpoint, {
+			if (this.config.apis?.fetch || typeof fetch !== 'undefined') {
+				(this.config.apis?.fetch || fetch)(endpoint, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -1061,6 +1119,10 @@ export class Beacon {
 				});
 			}
 		}
+	}
+
+	protected getProductId(product: Product | Item): string {
+		return `${product.childUid || product.childSku || product.uid || product.sku || ''}`.trim();
 	}
 }
 
