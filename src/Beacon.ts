@@ -123,7 +123,7 @@ export interface PayloadRequest {
 	apiType: keyof ApiMethodMap;
 	endpoint: string;
 	payload: any;
-};
+}
 
 export type Payload<T> = {
 	siteId?: string;
@@ -287,10 +287,10 @@ export class Beacon {
 			get: (): Product[] => {
 				// perhaps... always get from storage and return Product[] - storage always has Product[]
 				const storedProducts = this.getLocalStorageItem(CART_KEY);
-				if(storedProducts) {
+				if (storedProducts) {
 					try {
 						const parsedProducts = JSON.parse(storedProducts);
-						return parsedProducts as Product[];	
+						return parsedProducts as Product[];
 					} catch {
 						// corrupted - reset
 						this.setLocalStorageItem(CART_KEY, '');
@@ -299,20 +299,23 @@ export class Beacon {
 				} else {
 					const storedSkus = this.getCookie(CART_KEY);
 					// split on ',' and remap to Product[], setting qty and price to unknowns (0?)
-					return storedSkus.split(',').filter(sku => sku).map(sku => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
+					return storedSkus
+						.split(',')
+						.filter((sku) => sku)
+						.map((sku) => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
 				}
-				
+
 				return [];
 			},
 			set: (products: Product[]): void => {
 				// store Product[] into storage + store mapped string[] into cookie (for legacy purposes)
 				const currentCartProducts = this.storage.cart.get();
-				
+
 				const storedProducts = JSON.stringify(products);
 				this.setLocalStorageItem(CART_KEY, storedProducts);
 
 				// also set cookie with re-mapping - favoring the more specific variant
-				const storedProductsCookie = products.map(product => this.getProductId(product)).join(',');
+				const storedProductsCookie = products.map((product) => this.getProductId(product)).join(',');
 				this.setCookie(CART_KEY, storedProductsCookie, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
 
 				const productsHaveChanged = JSON.stringify(currentCartProducts) !== storedProducts;
@@ -325,16 +328,19 @@ export class Beacon {
 					const existingCartProducts = this.storage.cart.get();
 					const cartProducts = [...existingCartProducts];
 
-					products.filter(product => typeof product === 'object' && product.uid).reverse().forEach((product) => {
-						// ensure objects have properties
-						const isSkuAlreadyInCart = cartProducts.find((cartProduct) => cartProduct.uid === product.uid);
-						if (!isSkuAlreadyInCart) {
-							cartProducts.unshift(product);
-						} else {
-							isSkuAlreadyInCart.qty += product.qty;
-							isSkuAlreadyInCart.price = product.price || isSkuAlreadyInCart.price;
-						}
-					});
+					products
+						.filter((product) => typeof product === 'object' && product.uid)
+						.reverse()
+						.forEach((product) => {
+							// ensure objects have properties
+							const isSkuAlreadyInCart = cartProducts.find((cartProduct) => cartProduct.uid === product.uid);
+							if (!isSkuAlreadyInCart) {
+								cartProducts.unshift(product);
+							} else {
+								isSkuAlreadyInCart.qty += product.qty;
+								isSkuAlreadyInCart.price = product.price || isSkuAlreadyInCart.price;
+							}
+						});
 
 					this.storage.cart.set(cartProducts);
 				}
@@ -346,7 +352,7 @@ export class Beacon {
 
 					products.forEach((product) => {
 						const isSkuAlreadyInCart = cartProducts.find((cartProduct) => cartProduct.uid === product.uid);
-						if(isSkuAlreadyInCart) {
+						if (isSkuAlreadyInCart) {
 							if (isSkuAlreadyInCart.qty > 0) {
 								isSkuAlreadyInCart.qty -= product.qty || 1;
 							}
@@ -366,7 +372,7 @@ export class Beacon {
 		viewed: {
 			get: (): Item[] => {
 				const storedItems = this.getLocalStorageItem(VIEWED_KEY);
-				if(storedItems) {
+				if (storedItems) {
 					try {
 						const parsedItems = JSON.parse(storedItems);
 						return parsedItems as Item[];
@@ -378,19 +384,24 @@ export class Beacon {
 				} else {
 					const storedSkus = this.getCookie(VIEWED_KEY);
 					// split on ',' and remap to Product[], setting qty and price to unknowns (0?)
-					return storedSkus.split(',').filter(sku => sku).map(sku => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
+					return storedSkus
+						.split(',')
+						.filter((sku) => sku)
+						.map((sku) => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
 				}
 				return [];
 			},
 			set: (products: (Item | Product)[]): void => {
 				const currentViewedItems = this.storage.viewed.get();
 				// remove qty and price if product is provided
-				const normalizedItems: Item[] = products.map(item => ({ sku: item.sku, uid: item.uid, childUid: item.childUid, childSku: item.childSku })).slice(0, MAX_VIEWED_COUNT);
+				const normalizedItems: Item[] = products
+					.map((item) => ({ sku: item.sku, uid: item.uid, childUid: item.childUid, childSku: item.childSku }))
+					.slice(0, MAX_VIEWED_COUNT);
 				const storedItems = JSON.stringify(normalizedItems);
 				this.setLocalStorageItem(VIEWED_KEY, storedItems);
-				
+
 				// also set cookie with re-mapping - favoring the more specific variant
-				const storedProductsCookie = normalizedItems.map(item => this.getProductId(item)).join(',');
+				const storedProductsCookie = normalizedItems.map((item) => this.getProductId(item)).join(',');
 				this.setCookie(VIEWED_KEY, storedProductsCookie, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
 
 				const productsHaveChanged = JSON.stringify(currentViewedItems) !== storedItems;
@@ -404,7 +415,13 @@ export class Beacon {
 					const viewedProducts = this.storage.viewed.get();
 					products.forEach((product) => {
 						const item: Item = { sku: product.sku, uid: product.uid, childUid: product.childUid, childSku: product.childSku };
-						const isItemAlreadyViewed = viewedProducts.find((viewedProduct) => viewedProduct.uid === item.uid && viewedProduct.sku === item.sku && viewedProduct.childUid === item.childUid && viewedProduct.childSku === item.childSku);
+						const isItemAlreadyViewed = viewedProducts.find(
+							(viewedProduct) =>
+								viewedProduct.uid === item.uid &&
+								viewedProduct.sku === item.sku &&
+								viewedProduct.childUid === item.childUid &&
+								viewedProduct.childSku === item.childSku
+						);
 						if (isItemAlreadyViewed) {
 							// item has been viewed remove it from array
 							const index = viewedProducts.indexOf(isItemAlreadyViewed);
@@ -996,17 +1013,17 @@ export class Beacon {
 			const apiMethod = request.endpoint;
 
 			const initOverrides: InitOverrideFunction = async ({ init }) => {
-				return ({
+				return {
 					keepalive: true,
 					body: JSON.stringify(init.body),
-				});
+				};
 			};
 
 			// typing is difficult due to dynamic API and method call
 			(api as any)[apiMethod as keyof typeof api](request.payload, initOverrides);
 		}
 	}
-	
+
 	private processRequests(): void {
 		const data = this.requests.reduce<{
 			nonBatched: PayloadRequest[];
@@ -1071,7 +1088,7 @@ export class Beacon {
 		const shopper = overrides?.shopper || this.getShopperId();
 		const cart = overrides?.cart || this.storage.cart.get();
 		const lastViewed = overrides?.lastViewed || this.storage.viewed.get();
-		
+
 		if (userId && typeof userId == 'string' && siteId && (shopper || cart.length || lastViewed.length)) {
 			const preflightParams: PreflightRequestModel = {
 				userId,

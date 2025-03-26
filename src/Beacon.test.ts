@@ -9,13 +9,7 @@ import {
 	PayloadRequest,
 	REQUEST_GROUPING_TIMEOUT,
 } from './Beacon';
-import {
-	AutocompleteSchema,
-	CategorySchema,
-	ContextCurrency,
-	Product,
-	RecommendationsSchema,
-} from './client';
+import { AutocompleteSchema, CategorySchema, ContextCurrency, Product, RecommendationsSchema } from './client';
 
 const resetAllCookies = () => {
 	const cookies = document.cookie.split(';');
@@ -32,11 +26,11 @@ jest.spyOn(global.window, 'fetch').mockImplementation(() => Promise.resolve({ st
 
 describe('Beacon', () => {
 	let beacon: Beacon;
-	const mockFetchApi = jest.fn().mockResolvedValue(Promise.resolve({ status: 200, json: () => Promise.resolve({}) } ));
+	const mockFetchApi = jest.fn().mockResolvedValue(Promise.resolve({ status: 200, json: () => Promise.resolve({}) }));
 	const mockGlobals = { siteId: 'test-site-id' };
 	const mockConfig = {
 		apis: {
-			fetch: mockFetchApi
+			fetch: mockFetchApi,
 		},
 		mode: 'development' as const,
 	};
@@ -101,9 +95,10 @@ describe('Beacon', () => {
 				const cartData = beacon.storage.cart.get();
 				expect(cartData).toEqual(mockProducts);
 
-
 				// cookie contains cart data
-				expect(global.document.cookie).toContain(`${CART_KEY}=${encodeURIComponent(mockProducts.map(product => product.childUid || product.childSku || product.uid || product.sku).join(','))}`);
+				expect(global.document.cookie).toContain(
+					`${CART_KEY}=${encodeURIComponent(mockProducts.map((product) => product.childUid || product.childSku || product.uid || product.sku).join(','))}`
+				);
 
 				// localStorage contains cart data
 				expect(localStorageMock.setItem).toHaveBeenCalled();
@@ -371,7 +366,7 @@ describe('Beacon', () => {
 			},
 			keepalive: true,
 			method: 'POST',
-		}
+		};
 		describe('Shopper Login', () => {
 			it('can process login event', async () => {
 				const spy = jest.spyOn(beacon['apis'].shopper, 'login');
@@ -390,37 +385,37 @@ describe('Beacon', () => {
 		});
 		describe('Autocomplete', () => {
 			const data = { ...baseSearchSchema };
-			
+
 			it('can process render event', async () => {
-				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteRender')
+				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteRender');
 
 				const payload = beacon.events.autocomplete.render({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.autocompleteSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
 			});
 			it('can process impression event', async () => {
-				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteImpression')
+				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteImpression');
 				const payload = beacon.events.autocomplete.impression({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.autocompleteSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
 			});
 			it('can process addToCart event', async () => {
-				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteAddtocart')
+				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteAddtocart');
 				const payload = beacon.events.autocomplete.addToCart({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.autocompleteSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
 			});
 			it('can process clickThrough event', async () => {
-				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteClickthrough')
+				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteClickthrough');
 				const payload = beacon.events.autocomplete.clickThrough({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -429,13 +424,13 @@ describe('Beacon', () => {
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
 			});
 			it('can process redirect event', async () => {
-				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteRedirect')
+				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteRedirect');
 				const data = {
 					redirect: '/new-url',
 				};
 				const payload = beacon.events.autocomplete.redirect({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.autocompleteRedirectSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -447,7 +442,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].search, 'searchRender');
 				const payload = beacon.events.search.render({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.searchSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -456,7 +451,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].search, 'searchImpression');
 				const payload = beacon.events.search.impression({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.searchSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -465,7 +460,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].search, 'searchAddtocart');
 				const payload = beacon.events.search.addToCart({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.searchSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -486,7 +481,7 @@ describe('Beacon', () => {
 				};
 				const payload = beacon.events.search.redirect({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.searchRedirectSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -499,7 +494,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryRender');
 				const payload = beacon.events.category.render({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.categorySchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -508,7 +503,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryImpression');
 				const payload = beacon.events.category.impression({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.categorySchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -517,7 +512,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryAddtocart');
 				const payload = beacon.events.category.addToCart({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.categorySchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -526,7 +521,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryClickthrough');
 				const payload = beacon.events.category.clickThrough({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.categorySchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -541,7 +536,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsRender');
 				const payload = beacon.events.recommendations.render({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.recommendationsSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -550,7 +545,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsImpression');
 				const payload = beacon.events.recommendations.impression({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.recommendationsSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -582,7 +577,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
 				const payload = beacon.events.product.pageView({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.productPageviewSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -605,14 +600,14 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].cart, 'cartAdd');
 				const payload = beacon.events.cart.add({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify({
 					...payload.cartSchema,
 					data: {
 						...payload.cartSchema.data,
-						results: payload.cartSchema.data.results // calls storage.cart.add which reverses the array
-					}
+						results: payload.cartSchema.data.results, // calls storage.cart.add which reverses the array
+					},
 				});
 				expect(mockFetchApi).toHaveBeenNthCalledWith(2, expect.any(String), { body, ...otherFetchParams });
 			});
@@ -620,7 +615,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].cart, 'cartRemove');
 				const payload = beacon.events.cart.remove({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.cartSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -629,7 +624,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].cart, 'cartView');
 				const payload = beacon.events.cart.view({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.cartviewSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -657,7 +652,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].order, 'orderTransaction');
 				const payload = beacon.events.order.transaction({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
-				
+
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.orderTransactionSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
@@ -949,8 +944,8 @@ describe('Beacon', () => {
 		});
 	});
 
-    describe('sendPreflight', () => {
-        it('can sendPreflight via POST', async () => {
+	describe('sendPreflight', () => {
+		it('can sendPreflight via POST', async () => {
 			// only add 1 product to be under threshold and still generate GET request
 			const items = [{ uid: 'uid123', sku: 'sku123', childUid: 'childUid123', childSku: 'childSku123', qty: 1, price: 10.99 }];
 
@@ -963,18 +958,18 @@ describe('Beacon', () => {
 				userId: beacon.getUserId(),
 				siteId: beacon.globals.siteId,
 				cart: items,
-			}
+			};
 			expect(mockFetchApi).toHaveBeenCalledWith(`https://${mockGlobals.siteId}.a.searchspring.io/api/personalization/preflightCache`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
 					...body,
-					cart: items.map(item => item.childUid || item.childSku || item.uid || item.sku)
+					cart: items.map((item) => item.childUid || item.childSku || item.uid || item.sku),
 				}),
-                keepalive: true,
-            });
+				keepalive: true,
+			});
 		});
-    });
+	});
 });
