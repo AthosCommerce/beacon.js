@@ -606,7 +606,7 @@ describe('Beacon', () => {
 					...payload.cartSchema,
 					data: {
 						...payload.cartSchema.data,
-						results: payload.cartSchema.data.results, // calls storage.cart.add which reverses the array
+						results: payload.cartSchema.data.results,
 					},
 				});
 				expect(mockFetchApi).toHaveBeenNthCalledWith(2, expect.any(String), { body, ...otherFetchParams });
