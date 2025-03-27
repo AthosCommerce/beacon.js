@@ -1109,6 +1109,7 @@ describe('Beacon', () => {
 
 			const body = {
 				userId: beacon.getUserId(),
+				// @ts-ignore - accessing protected property
 				siteId: beacon.globals.siteId,
 				cart: items,
 			};
