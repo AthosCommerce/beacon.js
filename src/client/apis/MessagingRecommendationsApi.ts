@@ -54,8 +54,8 @@ export interface MessagingSmsRenderRequest {
 export class MessagingRecommendationsApi extends runtime.BaseAPI {
 
     /**
-     * This event tracks when a shopper clicks through a messaging recommendation section in an email and is navigated to the website.
-     * /beacon/v2/{siteId}/messaging/email/clickthrough
+     * <i>/beacon/v2/{siteId}/messaging/email/clickthrough</i><br><br>This event tracks when a shopper clicks through a messaging recommendation section in an email and is navigated to the website.
+     * email/clickthrough
      */
     async messagingEmailClickthroughRaw(requestParameters: MessagingEmailClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -90,8 +90,8 @@ export class MessagingRecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event tracks when a shopper clicks through a messaging recommendation section in an email and is navigated to the website.
-     * /beacon/v2/{siteId}/messaging/email/clickthrough
+     * <i>/beacon/v2/{siteId}/messaging/email/clickthrough</i><br><br>This event tracks when a shopper clicks through a messaging recommendation section in an email and is navigated to the website.
+     * email/clickthrough
      */
     async messagingEmailClickthrough(requestParameters: MessagingEmailClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.messagingEmailClickthroughRaw(requestParameters, initOverrides);
@@ -99,8 +99,8 @@ export class MessagingRecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event tracks the rendering of a messaging recommendation section in an email.
-     * /beacon/v2/{siteId}/messaging/email/render
+     * <i>/beacon/v2/{siteId}/messaging/email/render</i><br><br>This event tracks the rendering of a messaging recommendation section in an email.
+     * email/render
      */
     async messagingEmailRenderRaw(requestParameters: MessagingEmailRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -135,8 +135,8 @@ export class MessagingRecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event tracks the rendering of a messaging recommendation section in an email.
-     * /beacon/v2/{siteId}/messaging/email/render
+     * <i>/beacon/v2/{siteId}/messaging/email/render</i><br><br>This event tracks the rendering of a messaging recommendation section in an email.
+     * email/render
      */
     async messagingEmailRender(requestParameters: MessagingEmailRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.messagingEmailRenderRaw(requestParameters, initOverrides);
@@ -144,8 +144,8 @@ export class MessagingRecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event tracks when a shopper clicks through a SMS recommendation section in an SMS text and is navigated to the website.
-     * /beacon/v2/{siteId}/messaging/sms/clickthrough
+     * <i>/beacon/v2/{siteId}/messaging/sms/clickthrough</i><br><br>This event tracks when a shopper clicks through a SMS recommendation section in an SMS text and is navigated to the website.
+     * sms/clickthrough
      */
     async messagingSmsClickthroughRaw(requestParameters: MessagingSmsClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -180,8 +180,8 @@ export class MessagingRecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event tracks when a shopper clicks through a SMS recommendation section in an SMS text and is navigated to the website.
-     * /beacon/v2/{siteId}/messaging/sms/clickthrough
+     * <i>/beacon/v2/{siteId}/messaging/sms/clickthrough</i><br><br>This event tracks when a shopper clicks through a SMS recommendation section in an SMS text and is navigated to the website.
+     * sms/clickthrough
      */
     async messagingSmsClickthrough(requestParameters: MessagingSmsClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.messagingSmsClickthroughRaw(requestParameters, initOverrides);
@@ -189,8 +189,8 @@ export class MessagingRecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event tracks the rendering of an SMS recommendation section in an SMS text.
-     * /beacon/v2/{siteId}/messaging/sms/render
+     * <i>/beacon/v2/{siteId}/messaging/sms/render</i><br><br>This event tracks the rendering of an SMS recommendation section in an SMS text.
+     * sms/render
      */
     async messagingSmsRenderRaw(requestParameters: MessagingSmsRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -225,8 +225,8 @@ export class MessagingRecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event tracks the rendering of an SMS recommendation section in an SMS text.
-     * /beacon/v2/{siteId}/messaging/sms/render
+     * <i>/beacon/v2/{siteId}/messaging/sms/render</i><br><br>This event tracks the rendering of an SMS recommendation section in an SMS text.
+     * sms/render
      */
     async messagingSmsRender(requestParameters: MessagingSmsRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.messagingSmsRenderRaw(requestParameters, initOverrides);

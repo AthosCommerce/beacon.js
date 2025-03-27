@@ -15,12 +15,15 @@
 
 import * as runtime from '../runtime';
 import type {
+  AutocompleteAddtocartSchema,
   AutocompleteRedirectSchema,
   AutocompleteSchema,
   Model400Response,
   Model404Response,
 } from '../models/index';
 import {
+    AutocompleteAddtocartSchemaFromJSON,
+    AutocompleteAddtocartSchemaToJSON,
     AutocompleteRedirectSchemaFromJSON,
     AutocompleteRedirectSchemaToJSON,
     AutocompleteSchemaFromJSON,
@@ -33,7 +36,7 @@ import {
 
 export interface AutocompleteAddtocartRequest {
     siteId: string;
-    autocompleteSchema: AutocompleteSchema;
+    autocompleteAddtocartSchema: AutocompleteAddtocartSchema;
 }
 
 export interface AutocompleteClickthroughRequest {
@@ -62,8 +65,8 @@ export interface AutocompleteRenderRequest {
 export class AutocompleteApi extends runtime.BaseAPI {
 
     /**
-     * Shopper adds a Searchspring autocomplete result to the cart via a `Quick Add to Cart` button in the Autocomplete Module. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
-     * /beacon/v2/{siteId}/autocomplete/addtocart
+     * <i>/beacon/v2/{siteId}/autocomplete/addtocart</i><br><br>Shopper adds a Searchspring autocomplete result to the cart via a `Quick Add to Cart` button in the Autocomplete Module. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+     * addtocart
      */
     async autocompleteAddtocartRaw(requestParameters: AutocompleteAddtocartRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -73,10 +76,10 @@ export class AutocompleteApi extends runtime.BaseAPI {
             );
         }
 
-        if (requestParameters['autocompleteSchema'] == null) {
+        if (requestParameters['autocompleteAddtocartSchema'] == null) {
             throw new runtime.RequiredError(
-                'autocompleteSchema',
-                'Required parameter "autocompleteSchema" was null or undefined when calling autocompleteAddtocart().'
+                'autocompleteAddtocartSchema',
+                'Required parameter "autocompleteAddtocartSchema" was null or undefined when calling autocompleteAddtocart().'
             );
         }
 
@@ -91,15 +94,15 @@ export class AutocompleteApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: AutocompleteSchemaToJSON(requestParameters['autocompleteSchema']),
+            body: AutocompleteAddtocartSchemaToJSON(requestParameters['autocompleteAddtocartSchema']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Shopper adds a Searchspring autocomplete result to the cart via a `Quick Add to Cart` button in the Autocomplete Module. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
-     * /beacon/v2/{siteId}/autocomplete/addtocart
+     * <i>/beacon/v2/{siteId}/autocomplete/addtocart</i><br><br>Shopper adds a Searchspring autocomplete result to the cart via a `Quick Add to Cart` button in the Autocomplete Module. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+     * addtocart
      */
     async autocompleteAddtocart(requestParameters: AutocompleteAddtocartRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.autocompleteAddtocartRaw(requestParameters, initOverrides);
@@ -107,8 +110,8 @@ export class AutocompleteApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper clicks on a Searchspring autocomplete search result rendered in the Autocomplete Module, and is taken to the product detail page (PDP).
-     * /beacon/v2/{siteId}/autocomplete/clickthrough
+     * <i>/beacon/v2/{siteId}/autocomplete/clickthrough</i><br><br>Shopper clicks on a Searchspring autocomplete search result rendered in the Autocomplete Module, and is taken to the product detail page (PDP).
+     * clickthrough
      */
     async autocompleteClickthroughRaw(requestParameters: AutocompleteClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -143,8 +146,8 @@ export class AutocompleteApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper clicks on a Searchspring autocomplete search result rendered in the Autocomplete Module, and is taken to the product detail page (PDP).
-     * /beacon/v2/{siteId}/autocomplete/clickthrough
+     * <i>/beacon/v2/{siteId}/autocomplete/clickthrough</i><br><br>Shopper clicks on a Searchspring autocomplete search result rendered in the Autocomplete Module, and is taken to the product detail page (PDP).
+     * clickthrough
      */
     async autocompleteClickthrough(requestParameters: AutocompleteClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.autocompleteClickthroughRaw(requestParameters, initOverrides);
@@ -152,8 +155,8 @@ export class AutocompleteApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper views the rendered Searchspring autocomplete results in the Autocomplete Module.
-     * /beacon/v2/{siteId}/autocomplete/impression
+     * <i>/beacon/v2/{siteId}/autocomplete/impression</i><br><br>Shopper views the rendered Searchspring autocomplete results in the Autocomplete Module.
+     * impression
      */
     async autocompleteImpressionRaw(requestParameters: AutocompleteImpressionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -188,8 +191,8 @@ export class AutocompleteApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper views the rendered Searchspring autocomplete results in the Autocomplete Module.
-     * /beacon/v2/{siteId}/autocomplete/impression
+     * <i>/beacon/v2/{siteId}/autocomplete/impression</i><br><br>Shopper views the rendered Searchspring autocomplete results in the Autocomplete Module.
+     * impression
      */
     async autocompleteImpression(requestParameters: AutocompleteImpressionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.autocompleteImpressionRaw(requestParameters, initOverrides);
@@ -197,8 +200,8 @@ export class AutocompleteApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered, but a redirect URL is returned in the Autocomplete API response and the shopper is redirected to the returned redirect URL.
-     * /beacon/v2/{siteId}/autocomplete/redirect
+     * <i>/beacon/v2/{siteId}/autocomplete/redirect</i><br><br>Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered, but a redirect URL is returned in the Autocomplete API response and the shopper is redirected to the returned redirect URL.
+     * redirect
      */
     async autocompleteRedirectRaw(requestParameters: AutocompleteRedirectRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -233,8 +236,8 @@ export class AutocompleteApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered, but a redirect URL is returned in the Autocomplete API response and the shopper is redirected to the returned redirect URL.
-     * /beacon/v2/{siteId}/autocomplete/redirect
+     * <i>/beacon/v2/{siteId}/autocomplete/redirect</i><br><br>Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered, but a redirect URL is returned in the Autocomplete API response and the shopper is redirected to the returned redirect URL.
+     * redirect
      */
     async autocompleteRedirect(requestParameters: AutocompleteRedirectRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.autocompleteRedirectRaw(requestParameters, initOverrides);
@@ -242,8 +245,8 @@ export class AutocompleteApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered.
-     * /beacon/v2/{siteId}/autocomplete/render
+     * <i>/beacon/v2/{siteId}/autocomplete/render</i><br><br>Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered.
+     * render
      */
     async autocompleteRenderRaw(requestParameters: AutocompleteRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -278,8 +281,8 @@ export class AutocompleteApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered.
-     * /beacon/v2/{siteId}/autocomplete/render
+     * <i>/beacon/v2/{siteId}/autocomplete/render</i><br><br>Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered.
+     * render
      */
     async autocompleteRender(requestParameters: AutocompleteRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.autocompleteRenderRaw(requestParameters, initOverrides);

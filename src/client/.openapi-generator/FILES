@@ -1,3 +1,4 @@
+.openapi-generator-ignore
 apis/AutocompleteApi.ts
 apis/CartApi.ts
 apis/CategoryApi.ts
@@ -10,6 +11,8 @@ apis/SearchApi.ts
 apis/ShopperApi.ts
 apis/index.ts
 index.ts
+models/AutocompleteAddtocartSchema.ts
+models/AutocompleteAddtocartSchemaData.ts
 models/AutocompleteRedirectSchema.ts
 models/AutocompleteRedirectSchemaData.ts
 models/AutocompleteSchema.ts
@@ -24,6 +27,8 @@ models/CartSchema.ts
 models/CartSchemaData.ts
 models/CartviewSchema.ts
 models/CartviewSchemaData.ts
+models/CategoryAddtocartSchema.ts
+models/CategoryAddtocartSchemaData.ts
 models/CategorySchema.ts
 models/CategorySchemaData.ts
 models/CategorySchemaDataMerchandising.ts
@@ -44,8 +49,12 @@ models/PersonalizationLogEventContext.ts
 models/Product.ts
 models/ProductPageviewSchema.ts
 models/ProductPageviewSchemaData.ts
+models/RecommendationsAddtocartSchema.ts
+models/RecommendationsAddtocartSchemaData.ts
 models/RecommendationsSchema.ts
 models/RecommendationsSchemaData.ts
+models/SearchAddtocartSchema.ts
+models/SearchAddtocartSchemaData.ts
 models/SearchRedirectSchema.ts
 models/SearchRedirectSchemaData.ts
 models/SearchSchema.ts

@@ -1,5 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
+export * from './AutocompleteAddtocartSchema';
+export * from './AutocompleteAddtocartSchemaData';
 export * from './AutocompleteRedirectSchema';
 export * from './AutocompleteRedirectSchemaData';
 export * from './AutocompleteSchema';
@@ -14,6 +16,8 @@ export * from './CartSchema';
 export * from './CartSchemaData';
 export * from './CartviewSchema';
 export * from './CartviewSchemaData';
+export * from './CategoryAddtocartSchema';
+export * from './CategoryAddtocartSchemaData';
 export * from './CategorySchema';
 export * from './CategorySchemaData';
 export * from './CategorySchemaDataMerchandising';
@@ -34,8 +38,12 @@ export * from './PersonalizationLogEventContext';
 export * from './Product';
 export * from './ProductPageviewSchema';
 export * from './ProductPageviewSchemaData';
+export * from './RecommendationsAddtocartSchema';
+export * from './RecommendationsAddtocartSchemaData';
 export * from './RecommendationsSchema';
 export * from './RecommendationsSchemaData';
+export * from './SearchAddtocartSchema';
+export * from './SearchAddtocartSchemaData';
 export * from './SearchRedirectSchema';
 export * from './SearchRedirectSchemaData';
 export * from './SearchSchema';

@@ -12,75 +12,147 @@
  * Do not edit the class manually.
  */
 
-
-import * as runtime from '../runtime';
-import type {
-  Model400Response,
-  Model404Response,
-  ProductPageviewSchema,
-} from '../models/index';
+import { mapValues } from '../runtime';
+import type { AutocompleteSchemaDataFilterInner } from './AutocompleteSchemaDataFilterInner';
 import {
-    Model400ResponseFromJSON,
-    Model400ResponseToJSON,
-    Model404ResponseFromJSON,
-    Model404ResponseToJSON,
-    ProductPageviewSchemaFromJSON,
-    ProductPageviewSchemaToJSON,
-} from '../models/index';
+    AutocompleteSchemaDataFilterInnerFromJSON,
+    AutocompleteSchemaDataFilterInnerFromJSONTyped,
+    AutocompleteSchemaDataFilterInnerToJSON,
+    AutocompleteSchemaDataFilterInnerToJSONTyped,
+} from './AutocompleteSchemaDataFilterInner';
+import type { Product } from './Product';
+import {
+    ProductFromJSON,
+    ProductFromJSONTyped,
+    ProductToJSON,
+    ProductToJSONTyped,
+} from './Product';
+import type { CategorySchemaDataMerchandising } from './CategorySchemaDataMerchandising';
+import {
+    CategorySchemaDataMerchandisingFromJSON,
+    CategorySchemaDataMerchandisingFromJSONTyped,
+    CategorySchemaDataMerchandisingToJSON,
+    CategorySchemaDataMerchandisingToJSONTyped,
+} from './CategorySchemaDataMerchandising';
+import type { AutocompleteSchemaDataSortInner } from './AutocompleteSchemaDataSortInner';
+import {
+    AutocompleteSchemaDataSortInnerFromJSON,
+    AutocompleteSchemaDataSortInnerFromJSONTyped,
+    AutocompleteSchemaDataSortInnerToJSON,
+    AutocompleteSchemaDataSortInnerToJSONTyped,
+} from './AutocompleteSchemaDataSortInner';
+import type { SearchSchemaDataPagination } from './SearchSchemaDataPagination';
+import {
+    SearchSchemaDataPaginationFromJSON,
+    SearchSchemaDataPaginationFromJSONTyped,
+    SearchSchemaDataPaginationToJSON,
+    SearchSchemaDataPaginationToJSONTyped,
+} from './SearchSchemaDataPagination';
+import type { AutocompleteSchemaDataBgfilterInner } from './AutocompleteSchemaDataBgfilterInner';
+import {
+    AutocompleteSchemaDataBgfilterInnerFromJSON,
+    AutocompleteSchemaDataBgfilterInnerFromJSONTyped,
+    AutocompleteSchemaDataBgfilterInnerToJSON,
+    AutocompleteSchemaDataBgfilterInnerToJSONTyped,
+} from './AutocompleteSchemaDataBgfilterInner';
 
-export interface ProductPageviewRequest {
-    siteId: string;
-    productPageviewSchema: ProductPageviewSchema;
+/**
+ * Event details
+ * @export
+ * @interface CategoryAddtocartSchemaData
+ */
+export interface CategoryAddtocartSchemaData {
+    /**
+     * Refined query passed as the `rq` query string parameter to the Search API. This should be omitted if search within search results is not implemented.
+     * @type {string}
+     * @memberof CategoryAddtocartSchemaData
+     */
+    rq?: string;
+    /**
+     * List of active background filters passed to the Search API
+     * @type {Array<AutocompleteSchemaDataBgfilterInner>}
+     * @memberof CategoryAddtocartSchemaData
+     */
+    bgfilter?: Array<AutocompleteSchemaDataBgfilterInner>;
+    /**
+     * List of active filters passed to the Search API
+     * @type {Array<AutocompleteSchemaDataFilterInner>}
+     * @memberof CategoryAddtocartSchemaData
+     */
+    filter?: Array<AutocompleteSchemaDataFilterInner>;
+    /**
+     * List of active sorts passed to the Autocomplete API
+     * @type {Array<AutocompleteSchemaDataSortInner>}
+     * @memberof CategoryAddtocartSchemaData
+     */
+    sort?: Array<AutocompleteSchemaDataSortInner>;
+    /**
+     * 
+     * @type {SearchSchemaDataPagination}
+     * @memberof CategoryAddtocartSchemaData
+     */
+    pagination: SearchSchemaDataPagination;
+    /**
+     * 
+     * @type {CategorySchemaDataMerchandising}
+     * @memberof CategoryAddtocartSchemaData
+     */
+    merchandising?: CategorySchemaDataMerchandising;
+    /**
+     * Products added to the cart
+     * @type {Array<Product>}
+     * @memberof CategoryAddtocartSchemaData
+     */
+    results: Array<Product>;
 }
 
 /**
- * 
+ * Check if a given object implements the CategoryAddtocartSchemaData interface.
  */
-export class ProductApi extends runtime.BaseAPI {
-
-    /**
-     * <i>/beacon/v2/{siteId}/product/pageview</i><br><br>Shopper has navigated to a product detail page (PDP).
-     * pageview
-     */
-    async productPageviewRaw(requestParameters: ProductPageviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['siteId'] == null) {
-            throw new runtime.RequiredError(
-                'siteId',
-                'Required parameter "siteId" was null or undefined when calling productPageview().'
-            );
-        }
-
-        if (requestParameters['productPageviewSchema'] == null) {
-            throw new runtime.RequiredError(
-                'productPageviewSchema',
-                'Required parameter "productPageviewSchema" was null or undefined when calling productPageview().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'text/plain';
-
-        const response = await this.request({
-            path: `/{siteId}/product/pageview`.replace(`{${"siteId"}}`, encodeURIComponent(String(requestParameters['siteId']))),
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: ProductPageviewSchemaToJSON(requestParameters['productPageviewSchema']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     * <i>/beacon/v2/{siteId}/product/pageview</i><br><br>Shopper has navigated to a product detail page (PDP).
-     * pageview
-     */
-    async productPageview(requestParameters: ProductPageviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
-        const response = await this.productPageviewRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
+export function instanceOfCategoryAddtocartSchemaData(value: object): value is CategoryAddtocartSchemaData {
+    if (!('pagination' in value) || value['pagination'] === undefined) return false;
+    if (!('results' in value) || value['results'] === undefined) return false;
+    return true;
 }
+
+export function CategoryAddtocartSchemaDataFromJSON(json: any): CategoryAddtocartSchemaData {
+    return CategoryAddtocartSchemaDataFromJSONTyped(json, false);
+}
+
+export function CategoryAddtocartSchemaDataFromJSONTyped(json: any, ignoreDiscriminator: boolean): CategoryAddtocartSchemaData {
+    if (json == null) {
+        return json;
+    }
+    return {
+        
+        'rq': json['rq'] == null ? undefined : json['rq'],
+        'bgfilter': json['bgfilter'] == null ? undefined : ((json['bgfilter'] as Array<any>).map(AutocompleteSchemaDataBgfilterInnerFromJSON)),
+        'filter': json['filter'] == null ? undefined : ((json['filter'] as Array<any>).map(AutocompleteSchemaDataFilterInnerFromJSON)),
+        'sort': json['sort'] == null ? undefined : ((json['sort'] as Array<any>).map(AutocompleteSchemaDataSortInnerFromJSON)),
+        'pagination': SearchSchemaDataPaginationFromJSON(json['pagination']),
+        'merchandising': json['merchandising'] == null ? undefined : CategorySchemaDataMerchandisingFromJSON(json['merchandising']),
+        'results': ((json['results'] as Array<any>).map(ProductFromJSON)),
+    };
+}
+
+  export function CategoryAddtocartSchemaDataToJSON(json: any): CategoryAddtocartSchemaData {
+      return CategoryAddtocartSchemaDataToJSONTyped(json, false);
+  }
+
+  export function CategoryAddtocartSchemaDataToJSONTyped(value?: CategoryAddtocartSchemaData | null, ignoreDiscriminator: boolean = false): any {
+    if (value == null) {
+        return value;
+    }
+
+    return {
+        
+        'rq': value['rq'],
+        'bgfilter': value['bgfilter'] == null ? undefined : ((value['bgfilter'] as Array<any>).map(AutocompleteSchemaDataBgfilterInnerToJSON)),
+        'filter': value['filter'] == null ? undefined : ((value['filter'] as Array<any>).map(AutocompleteSchemaDataFilterInnerToJSON)),
+        'sort': value['sort'] == null ? undefined : ((value['sort'] as Array<any>).map(AutocompleteSchemaDataSortInnerToJSON)),
+        'pagination': SearchSchemaDataPaginationToJSON(value['pagination']),
+        'merchandising': CategorySchemaDataMerchandisingToJSON(value['merchandising']),
+        'results': ((value['results'] as Array<any>).map(ProductToJSON)),
+    };
+}
+

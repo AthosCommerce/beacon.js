@@ -52,8 +52,8 @@ export interface CartViewRequest {
 export class CartApi extends runtime.BaseAPI {
 
     /**
-     * Shopper adds additional item quantities to an item in the cart via the cart page or a slideout cart.
-     * /beacon/v2/{siteId}/cart/add
+     * <i>/beacon/v2/{siteId}/cart/add</i><br><br>Shopper adds additional item quantities to an item in the cart via the cart page or a slideout cart.
+     * add
      */
     async cartAddRaw(requestParameters: CartAddRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -88,8 +88,8 @@ export class CartApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper adds additional item quantities to an item in the cart via the cart page or a slideout cart.
-     * /beacon/v2/{siteId}/cart/add
+     * <i>/beacon/v2/{siteId}/cart/add</i><br><br>Shopper adds additional item quantities to an item in the cart via the cart page or a slideout cart.
+     * add
      */
     async cartAdd(requestParameters: CartAddRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.cartAddRaw(requestParameters, initOverrides);
@@ -97,8 +97,8 @@ export class CartApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper removes an item or reduces an items quantity in the cart via the cart page or a slideout cart.
-     * /beacon/v2/{siteId}/cart/remove
+     * <i>/beacon/v2/{siteId}/cart/remove</i><br><br>Shopper removes an item or reduces an items quantity in the cart via the cart page or a slideout cart.
+     * remove
      */
     async cartRemoveRaw(requestParameters: CartRemoveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -133,8 +133,8 @@ export class CartApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper removes an item or reduces an items quantity in the cart via the cart page or a slideout cart.
-     * /beacon/v2/{siteId}/cart/remove
+     * <i>/beacon/v2/{siteId}/cart/remove</i><br><br>Shopper removes an item or reduces an items quantity in the cart via the cart page or a slideout cart.
+     * remove
      */
     async cartRemove(requestParameters: CartRemoveRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.cartRemoveRaw(requestParameters, initOverrides);
@@ -142,8 +142,8 @@ export class CartApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper views the cart contents. **Usage of this endpoint MUST be omitted.**
-     * /beacon/v2/{siteId}/cart/view
+     * <i>/beacon/v2/{siteId}/cart/view</i><br><br>Shopper views the cart contents. **Usage of this endpoint MUST be omitted.**
+     * view
      * @deprecated
      */
     async cartViewRaw(requestParameters: CartViewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
@@ -179,8 +179,8 @@ export class CartApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper views the cart contents. **Usage of this endpoint MUST be omitted.**
-     * /beacon/v2/{siteId}/cart/view
+     * <i>/beacon/v2/{siteId}/cart/view</i><br><br>Shopper views the cart contents. **Usage of this endpoint MUST be omitted.**
+     * view
      * @deprecated
      */
     async cartView(requestParameters: CartViewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {

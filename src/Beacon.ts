@@ -60,6 +60,11 @@ import {
 	Configuration,
 	InitOverrideFunction,
 	FetchAPI,
+	AutocompleteAddtocartSchemaData,
+	SearchAddtocartSchemaData,
+	CategoryAddtocartSchemaData,
+	RecommendationsAddtocartSchemaData,
+	CartviewSchemaData,
 } from './client';
 
 declare global {
@@ -147,8 +152,8 @@ export const COOKIE_DOMAIN =
 	(typeof window !== 'undefined' && window.location.hostname && '.' + window.location.hostname.replace(/^www\./, '')) || undefined;
 
 export class Beacon {
-	public config: BeaconConfig;
-	public globals: BeaconGlobals;
+	protected config: BeaconConfig;
+	protected globals: BeaconGlobals;
 	protected mode: 'production' | 'development' = 'production';
 	private pageLoadId: string = '';
 	private userId: string = '';
@@ -480,10 +485,14 @@ export class Beacon {
 				this.queueRequest(request);
 				return payload;
 			},
-			addToCart: (event: Payload<AutocompleteSchemaData>): AutocompleteAddtocartRequest => {
+			addToCart: (event: Payload<AutocompleteAddtocartSchemaData>): AutocompleteAddtocartRequest => {
+				if(event.data.results) {
+					this.storage.cart.add(event.data.results);
+				}
+
 				const payload: AutocompleteAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					autocompleteSchema: {
+					autocompleteAddtocartSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -547,10 +556,14 @@ export class Beacon {
 				this.queueRequest(request);
 				return payload;
 			},
-			addToCart: (event: Payload<SearchSchemaData>): SearchAddtocartRequest => {
+			addToCart: (event: Payload<SearchAddtocartSchemaData>): SearchAddtocartRequest => {
+				if(event.data.results) {
+					this.storage.cart.add(event.data.results)
+				}
+
 				const payload: SearchAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					searchSchema: {
+					searchAddtocartSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -614,10 +627,14 @@ export class Beacon {
 				this.queueRequest(request);
 				return payload;
 			},
-			addToCart: (event: Payload<CategorySchemaData>): CategoryAddtocartRequest => {
+			addToCart: (event: Payload<CategoryAddtocartSchemaData>): CategoryAddtocartRequest => {
+				if(event.data.results) {
+					this.storage.cart.add(event.data.results)
+				}
+
 				const payload: CategoryAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					categorySchema: {
+					categoryAddtocartSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -668,10 +685,14 @@ export class Beacon {
 				this.queueRequest(request);
 				return payload;
 			},
-			addToCart: (event: Payload<RecommendationsSchemaData>): RecommendationsAddtocartRequest => {
+			addToCart: (event: Payload<RecommendationsAddtocartSchemaData>): RecommendationsAddtocartRequest => {
+				if(event.data.results) {
+					this.storage.cart.add(event.data.results)
+				}
+
 				const payload: RecommendationsAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					recommendationsSchema: {
+					recommendationsAddtocartSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -715,33 +736,58 @@ export class Beacon {
 		},
 		cart: {
 			add: (event: Payload<CartSchemaData>): CartAddRequest => {
+				const data = {
+					...event.data,
+				}
+
+				if (!data.cart) {
+					if(data.results) {
+						this.storage.cart.add(data.results)
+					}
+					data.cart = this.storage.cart.get();
+				} else {
+					this.storage.cart.set(data.cart);
+				}
+
 				const payload: CartAddRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					cartSchema: {
 						context: this.getContext(),
-						data: event.data,
+						data,
 					},
 				};
 				const request = this.createRequest('cart', 'cartAdd', payload);
 				this.sendRequests([request]);
-				this.storage.cart.add(event.data.results);
+
 				return payload;
 			},
 			remove: (event: Payload<CartSchemaData>): CartRemoveRequest => {
+				const data = {
+					...event.data,
+				}
+				if (!data.cart) {
+					if(data.results) {
+						this.storage.cart.remove(data.results)
+					}
+					data.cart = this.storage.cart.get();
+				} else {
+					this.storage.cart.set(data.cart)
+				}
+
 				const payload: CartRemoveRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					cartSchema: {
 						context: this.getContext(),
-						data: event.data,
+						data,
 					},
 				};
 
 				const request = this.createRequest('cart', 'cartRemove', payload);
 				this.sendRequests([request]);
-				this.storage.cart.remove(event.data.results);
+
 				return payload;
 			},
-			view: (event: Payload<CartSchemaData>): CartViewRequest => {
+			view: (event: Payload<CartviewSchemaData>): CartViewRequest => {
 				const payload: CartViewRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					cartviewSchema: {

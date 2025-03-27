@@ -15,11 +15,14 @@
 
 import * as runtime from '../runtime';
 import type {
+  CategoryAddtocartSchema,
   CategorySchema,
   Model400Response,
   Model404Response,
 } from '../models/index';
 import {
+    CategoryAddtocartSchemaFromJSON,
+    CategoryAddtocartSchemaToJSON,
     CategorySchemaFromJSON,
     CategorySchemaToJSON,
     Model400ResponseFromJSON,
@@ -30,7 +33,7 @@ import {
 
 export interface CategoryAddtocartRequest {
     siteId: string;
-    categorySchema: CategorySchema;
+    categoryAddtocartSchema: CategoryAddtocartSchema;
 }
 
 export interface CategoryClickthroughRequest {
@@ -54,8 +57,8 @@ export interface CategoryRenderRequest {
 export class CategoryApi extends runtime.BaseAPI {
 
     /**
-     * Shopper lands on a category results page where Searchspring results are rendered, and adds a result to the cart via a `Quick Add to Cart` button. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
-     * /beacon/v2/{siteId}/category/addtocart
+     * <i>/beacon/v2/{siteId}/category/addtocart</i><br><br>Shopper lands on a category results page where Searchspring results are rendered, and adds a result to the cart via a `Quick Add to Cart` button. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+     * addtocart
      */
     async categoryAddtocartRaw(requestParameters: CategoryAddtocartRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -65,10 +68,10 @@ export class CategoryApi extends runtime.BaseAPI {
             );
         }
 
-        if (requestParameters['categorySchema'] == null) {
+        if (requestParameters['categoryAddtocartSchema'] == null) {
             throw new runtime.RequiredError(
-                'categorySchema',
-                'Required parameter "categorySchema" was null or undefined when calling categoryAddtocart().'
+                'categoryAddtocartSchema',
+                'Required parameter "categoryAddtocartSchema" was null or undefined when calling categoryAddtocart().'
             );
         }
 
@@ -83,15 +86,15 @@ export class CategoryApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: CategorySchemaToJSON(requestParameters['categorySchema']),
+            body: CategoryAddtocartSchemaToJSON(requestParameters['categoryAddtocartSchema']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Shopper lands on a category results page where Searchspring results are rendered, and adds a result to the cart via a `Quick Add to Cart` button. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
-     * /beacon/v2/{siteId}/category/addtocart
+     * <i>/beacon/v2/{siteId}/category/addtocart</i><br><br>Shopper lands on a category results page where Searchspring results are rendered, and adds a result to the cart via a `Quick Add to Cart` button. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+     * addtocart
      */
     async categoryAddtocart(requestParameters: CategoryAddtocartRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.categoryAddtocartRaw(requestParameters, initOverrides);
@@ -99,8 +102,8 @@ export class CategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper lands on a category results page, clicks on a Searchspring result, and will be taken to the product detail page (PDP).
-     * /beacon/v2/{siteId}/category/clickthrough
+     * <i>/beacon/v2/{siteId}/category/clickthrough</i><br><br>Shopper lands on a category results page, clicks on a Searchspring result, and will be taken to the product detail page (PDP).
+     * clickthrough
      */
     async categoryClickthroughRaw(requestParameters: CategoryClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -135,8 +138,8 @@ export class CategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper lands on a category results page, clicks on a Searchspring result, and will be taken to the product detail page (PDP).
-     * /beacon/v2/{siteId}/category/clickthrough
+     * <i>/beacon/v2/{siteId}/category/clickthrough</i><br><br>Shopper lands on a category results page, clicks on a Searchspring result, and will be taken to the product detail page (PDP).
+     * clickthrough
      */
     async categoryClickthrough(requestParameters: CategoryClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.categoryClickthroughRaw(requestParameters, initOverrides);
@@ -144,8 +147,8 @@ export class CategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper lands on a category results page and Searchspring results receive an impression.
-     * /beacon/v2/{siteId}/category/impression
+     * <i>/beacon/v2/{siteId}/category/impression</i><br><br>Shopper lands on a category results page and Searchspring results receive an impression.
+     * impression
      */
     async categoryImpressionRaw(requestParameters: CategoryImpressionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -180,8 +183,8 @@ export class CategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper lands on a category results page and Searchspring results receive an impression.
-     * /beacon/v2/{siteId}/category/impression
+     * <i>/beacon/v2/{siteId}/category/impression</i><br><br>Shopper lands on a category results page and Searchspring results receive an impression.
+     * impression
      */
     async categoryImpression(requestParameters: CategoryImpressionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.categoryImpressionRaw(requestParameters, initOverrides);
@@ -189,8 +192,8 @@ export class CategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper lands on a category results page and Searchspring results are rendered.
-     * /beacon/v2/{siteId}/category/render
+     * <i>/beacon/v2/{siteId}/category/render</i><br><br>Shopper lands on a category results page and Searchspring results are rendered.
+     * render
      */
     async categoryRenderRaw(requestParameters: CategoryRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -225,8 +228,8 @@ export class CategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper lands on a category results page and Searchspring results are rendered.
-     * /beacon/v2/{siteId}/category/render
+     * <i>/beacon/v2/{siteId}/category/render</i><br><br>Shopper lands on a category results page and Searchspring results are rendered.
+     * render
      */
     async categoryRender(requestParameters: CategoryRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.categoryRenderRaw(requestParameters, initOverrides);

@@ -16,7 +16,8 @@
     "dev": "tsc --watch",
     "commit": "cz",
     "test": "jest",
-    "generate": "openapi-generator-cli generate -i ./beacon.oas.yaml -g typescript-fetch -o ./src/client",
+		"test:watch": "jest --watch",
+    "generate": "rm -fr ./src/client &&  openapi-generator-cli generate -i ./beacon.v2.oas.yaml -g typescript-fetch -o ./src/client",
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "prepare": "husky",
@@ -24,7 +25,6 @@
     "postversion": "git push && git push --tags"
   },
   "dependencies": {
-    "deepmerge": "4.3.1",
     "uuid": "11.1.0"
   },
   "devDependencies": {

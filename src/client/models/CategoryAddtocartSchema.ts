@@ -12,75 +12,79 @@
  * Do not edit the class manually.
  */
 
-
-import * as runtime from '../runtime';
-import type {
-  Model400Response,
-  Model404Response,
-  ProductPageviewSchema,
-} from '../models/index';
+import { mapValues } from '../runtime';
+import type { Context } from './Context';
 import {
-    Model400ResponseFromJSON,
-    Model400ResponseToJSON,
-    Model404ResponseFromJSON,
-    Model404ResponseToJSON,
-    ProductPageviewSchemaFromJSON,
-    ProductPageviewSchemaToJSON,
-} from '../models/index';
-
-export interface ProductPageviewRequest {
-    siteId: string;
-    productPageviewSchema: ProductPageviewSchema;
-}
+    ContextFromJSON,
+    ContextFromJSONTyped,
+    ContextToJSON,
+    ContextToJSONTyped,
+} from './Context';
+import type { CategoryAddtocartSchemaData } from './CategoryAddtocartSchemaData';
+import {
+    CategoryAddtocartSchemaDataFromJSON,
+    CategoryAddtocartSchemaDataFromJSONTyped,
+    CategoryAddtocartSchemaDataToJSON,
+    CategoryAddtocartSchemaDataToJSONTyped,
+} from './CategoryAddtocartSchemaData';
 
 /**
  * 
+ * @export
+ * @interface CategoryAddtocartSchema
  */
-export class ProductApi extends runtime.BaseAPI {
-
+export interface CategoryAddtocartSchema {
     /**
-     * <i>/beacon/v2/{siteId}/product/pageview</i><br><br>Shopper has navigated to a product detail page (PDP).
-     * pageview
+     * 
+     * @type {Context}
+     * @memberof CategoryAddtocartSchema
      */
-    async productPageviewRaw(requestParameters: ProductPageviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['siteId'] == null) {
-            throw new runtime.RequiredError(
-                'siteId',
-                'Required parameter "siteId" was null or undefined when calling productPageview().'
-            );
-        }
-
-        if (requestParameters['productPageviewSchema'] == null) {
-            throw new runtime.RequiredError(
-                'productPageviewSchema',
-                'Required parameter "productPageviewSchema" was null or undefined when calling productPageview().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'text/plain';
-
-        const response = await this.request({
-            path: `/{siteId}/product/pageview`.replace(`{${"siteId"}}`, encodeURIComponent(String(requestParameters['siteId']))),
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: ProductPageviewSchemaToJSON(requestParameters['productPageviewSchema']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
+    context: Context;
     /**
-     * <i>/beacon/v2/{siteId}/product/pageview</i><br><br>Shopper has navigated to a product detail page (PDP).
-     * pageview
+     * 
+     * @type {CategoryAddtocartSchemaData}
+     * @memberof CategoryAddtocartSchema
      */
-    async productPageview(requestParameters: ProductPageviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
-        const response = await this.productPageviewRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
+    data: CategoryAddtocartSchemaData;
 }
+
+/**
+ * Check if a given object implements the CategoryAddtocartSchema interface.
+ */
+export function instanceOfCategoryAddtocartSchema(value: object): value is CategoryAddtocartSchema {
+    if (!('context' in value) || value['context'] === undefined) return false;
+    if (!('data' in value) || value['data'] === undefined) return false;
+    return true;
+}
+
+export function CategoryAddtocartSchemaFromJSON(json: any): CategoryAddtocartSchema {
+    return CategoryAddtocartSchemaFromJSONTyped(json, false);
+}
+
+export function CategoryAddtocartSchemaFromJSONTyped(json: any, ignoreDiscriminator: boolean): CategoryAddtocartSchema {
+    if (json == null) {
+        return json;
+    }
+    return {
+        
+        'context': ContextFromJSON(json['context']),
+        'data': CategoryAddtocartSchemaDataFromJSON(json['data']),
+    };
+}
+
+  export function CategoryAddtocartSchemaToJSON(json: any): CategoryAddtocartSchema {
+      return CategoryAddtocartSchemaToJSONTyped(json, false);
+  }
+
+  export function CategoryAddtocartSchemaToJSONTyped(value?: CategoryAddtocartSchema | null, ignoreDiscriminator: boolean = false): any {
+    if (value == null) {
+        return value;
+    }
+
+    return {
+        
+        'context': ContextToJSON(value['context']),
+        'data': CategoryAddtocartSchemaDataToJSON(value['data']),
+    };
+}
+

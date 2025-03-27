@@ -17,6 +17,7 @@ import * as runtime from '../runtime';
 import type {
   Model400Response,
   Model404Response,
+  RecommendationsAddtocartSchema,
   RecommendationsSchema,
 } from '../models/index';
 import {
@@ -24,13 +25,15 @@ import {
     Model400ResponseToJSON,
     Model404ResponseFromJSON,
     Model404ResponseToJSON,
+    RecommendationsAddtocartSchemaFromJSON,
+    RecommendationsAddtocartSchemaToJSON,
     RecommendationsSchemaFromJSON,
     RecommendationsSchemaToJSON,
 } from '../models/index';
 
 export interface RecommendationsAddtocartRequest {
     siteId: string;
-    recommendationsSchema: RecommendationsSchema;
+    recommendationsAddtocartSchema: RecommendationsAddtocartSchema;
 }
 
 export interface RecommendationsClickthroughRequest {
@@ -54,8 +57,8 @@ export interface RecommendationsRenderRequest {
 export class RecommendationsApi extends runtime.BaseAPI {
 
     /**
-     * Shopper adds a Searchspring personalized recommendation result to the cart via a `Quick Add to Cart` button in the rendered product card. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
-     * /beacon/v2/{siteId}/recommendations/addtocart
+     * <i>/beacon/v2/{siteId}/recommendations/addtocart</i><br><br>Shopper adds a Searchspring personalized recommendation result to the cart via a `Quick Add to Cart` button in the rendered product card. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+     * addtocart
      */
     async recommendationsAddtocartRaw(requestParameters: RecommendationsAddtocartRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -65,10 +68,10 @@ export class RecommendationsApi extends runtime.BaseAPI {
             );
         }
 
-        if (requestParameters['recommendationsSchema'] == null) {
+        if (requestParameters['recommendationsAddtocartSchema'] == null) {
             throw new runtime.RequiredError(
-                'recommendationsSchema',
-                'Required parameter "recommendationsSchema" was null or undefined when calling recommendationsAddtocart().'
+                'recommendationsAddtocartSchema',
+                'Required parameter "recommendationsAddtocartSchema" was null or undefined when calling recommendationsAddtocart().'
             );
         }
 
@@ -83,15 +86,15 @@ export class RecommendationsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: RecommendationsSchemaToJSON(requestParameters['recommendationsSchema']),
+            body: RecommendationsAddtocartSchemaToJSON(requestParameters['recommendationsAddtocartSchema']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * Shopper adds a Searchspring personalized recommendation result to the cart via a `Quick Add to Cart` button in the rendered product card. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
-     * /beacon/v2/{siteId}/recommendations/addtocart
+     * <i>/beacon/v2/{siteId}/recommendations/addtocart</i><br><br>Shopper adds a Searchspring personalized recommendation result to the cart via a `Quick Add to Cart` button in the rendered product card. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+     * addtocart
      */
     async recommendationsAddtocart(requestParameters: RecommendationsAddtocartRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.recommendationsAddtocartRaw(requestParameters, initOverrides);
@@ -99,8 +102,8 @@ export class RecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper clicks on a rendered Searchspring personalized recommended result, and is taken to the product detail page (PDP).
-     * /beacon/v2/{siteId}/recommendations/clickthrough
+     * <i>/beacon/v2/{siteId}/recommendations/clickthrough</i><br><br>Shopper clicks on a rendered Searchspring personalized recommended result, and is taken to the product detail page (PDP).
+     * clickthrough
      */
     async recommendationsClickthroughRaw(requestParameters: RecommendationsClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -135,8 +138,8 @@ export class RecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper clicks on a rendered Searchspring personalized recommended result, and is taken to the product detail page (PDP).
-     * /beacon/v2/{siteId}/recommendations/clickthrough
+     * <i>/beacon/v2/{siteId}/recommendations/clickthrough</i><br><br>Shopper clicks on a rendered Searchspring personalized recommended result, and is taken to the product detail page (PDP).
+     * clickthrough
      */
     async recommendationsClickthrough(requestParameters: RecommendationsClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.recommendationsClickthroughRaw(requestParameters, initOverrides);
@@ -144,8 +147,8 @@ export class RecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper scrolls into view rendered Searchspring personalized recommended results. Results sent ***must*** only be results in the shoppers view at the time of the event.
-     * /beacon/v2/{siteId}/recommendations/impression
+     * <i>/beacon/v2/{siteId}/recommendations/impression</i><br><br>Shopper scrolls into view rendered Searchspring personalized recommended results. Results sent ***must*** only be results in the shoppers view at the time of the event.
+     * impression
      */
     async recommendationsImpressionRaw(requestParameters: RecommendationsImpressionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -180,8 +183,8 @@ export class RecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper scrolls into view rendered Searchspring personalized recommended results. Results sent ***must*** only be results in the shoppers view at the time of the event.
-     * /beacon/v2/{siteId}/recommendations/impression
+     * <i>/beacon/v2/{siteId}/recommendations/impression</i><br><br>Shopper scrolls into view rendered Searchspring personalized recommended results. Results sent ***must*** only be results in the shoppers view at the time of the event.
+     * impression
      */
     async recommendationsImpression(requestParameters: RecommendationsImpressionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.recommendationsImpressionRaw(requestParameters, initOverrides);
@@ -189,8 +192,8 @@ export class RecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper navigates to a page where Searchspring personalized recommendations are requested from the [Personalized Recommendations API endpoint](https://docs.searchspring.com/reference/get-recommendations) and rendered on the page.
-     * /beacon/v2/{siteId}/recommendations/render
+     * <i>/beacon/v2/{siteId}/recommendations/render</i><br><br>Shopper navigates to a page where Searchspring personalized recommendations are requested from the [Personalized Recommendations API endpoint](https://docs.searchspring.com/reference/get-recommendations) and rendered on the page.
+     * render
      */
     async recommendationsRenderRaw(requestParameters: RecommendationsRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -225,8 +228,8 @@ export class RecommendationsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper navigates to a page where Searchspring personalized recommendations are requested from the [Personalized Recommendations API endpoint](https://docs.searchspring.com/reference/get-recommendations) and rendered on the page.
-     * /beacon/v2/{siteId}/recommendations/render
+     * <i>/beacon/v2/{siteId}/recommendations/render</i><br><br>Shopper navigates to a page where Searchspring personalized recommendations are requested from the [Personalized Recommendations API endpoint](https://docs.searchspring.com/reference/get-recommendations) and rendered on the page.
+     * render
      */
     async recommendationsRender(requestParameters: RecommendationsRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.recommendationsRenderRaw(requestParameters, initOverrides);

@@ -55,8 +55,8 @@ export interface LogSnapRequest {
 export class ErrorLogsApi extends runtime.BaseAPI {
 
     /**
-     * Personalization error log events
-     * /beacon/v2/{siteId}/log/personalization
+     * <i>/beacon/v2/{siteId}/log/personalization</i><br><br>Personalization error log events
+     * personalization
      */
     async logPersonalizationRaw(requestParameters: LogPersonalizationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -91,8 +91,8 @@ export class ErrorLogsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Personalization error log events
-     * /beacon/v2/{siteId}/log/personalization
+     * <i>/beacon/v2/{siteId}/log/personalization</i><br><br>Personalization error log events
+     * personalization
      */
     async logPersonalization(requestParameters: LogPersonalizationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.logPersonalizationRaw(requestParameters, initOverrides);
@@ -100,8 +100,8 @@ export class ErrorLogsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopify Pixel Extension error log events
-     * /beacon/v2/{siteId}/log/shopifypixel
+     * <i>/beacon/v2/{siteId}/log/shopifypixel</i><br><br>Shopify Pixel Extension error log events
+     * shopifypixel
      */
     async logShopifypixelRaw(requestParameters: LogShopifypixelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -136,8 +136,8 @@ export class ErrorLogsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopify Pixel Extension error log events
-     * /beacon/v2/{siteId}/log/shopifypixel
+     * <i>/beacon/v2/{siteId}/log/shopifypixel</i><br><br>Shopify Pixel Extension error log events
+     * shopifypixel
      */
     async logShopifypixel(requestParameters: LogShopifypixelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.logShopifypixelRaw(requestParameters, initOverrides);
@@ -145,8 +145,8 @@ export class ErrorLogsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Snap error log events
-     * /beacon/v2/{siteId}/log/snap
+     * <i>/beacon/v2/{siteId}/log/snap</i><br><br>Snap error log events
+     * snap
      */
     async logSnapRaw(requestParameters: LogSnapRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -181,8 +181,8 @@ export class ErrorLogsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Snap error log events
-     * /beacon/v2/{siteId}/log/snap
+     * <i>/beacon/v2/{siteId}/log/snap</i><br><br>Snap error log events
+     * snap
      */
     async logSnap(requestParameters: LogSnapRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.logSnapRaw(requestParameters, initOverrides);

@@ -1,5 +1,5 @@
 {
-    "compilerOptions": {
+		"compilerOptions": {
 		"target": "es2020",
 		"module": "es2020",
 		"declaration": true,
@@ -12,7 +12,7 @@
 		],
 		"resolveJsonModule": true,
 		"strict": true,
-        "outDir": "./dist/esm",
+		"outDir": "./dist/esm",
 	},
 	"exclude": [
 		"**/node_modules/*",
