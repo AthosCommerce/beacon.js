@@ -39,8 +39,8 @@ export interface OrderTransactionRequest {
 export class OrderApi extends runtime.BaseAPI {
 
     /**
-     * Shopper has completed an order transaction. Tracks order contents.
-     * /beacon/v2/{siteId}/order/transaction
+     * <i>/beacon/v2/{siteId}/order/transaction</i><br><br>Shopper has completed an order transaction. Tracks order contents.
+     * transaction
      */
     async orderTransactionRaw(requestParameters: OrderTransactionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -75,8 +75,8 @@ export class OrderApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper has completed an order transaction. Tracks order contents.
-     * /beacon/v2/{siteId}/order/transaction
+     * <i>/beacon/v2/{siteId}/order/transaction</i><br><br>Shopper has completed an order transaction. Tracks order contents.
+     * transaction
      */
     async orderTransaction(requestParameters: OrderTransactionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.orderTransactionRaw(requestParameters, initOverrides);

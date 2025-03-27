@@ -95,8 +95,6 @@ info:
     ### Event Data Information
     Each beacon event must also include a `data` object in the payload. Every event has its own unique properties and values - see the specific events for those details.
 tags:
-  - name: Shopper
-    description: Shopper tracking events
   - name: Autocomplete
     description: Autocomplete Module tracking events. Payload data sourced from the [Autocomplete API](https://docs.searchspring.com/reference/get-autocomplete) request parameters and response body.
   - name: Search
@@ -105,18 +103,18 @@ tags:
     description: Category results page tracking events. Payload data sourced from the [Search API](https://docs.searchspring.com/reference/get-search) request parameters and response body. **If you are not integrating Searchspring on category pages, omit the usage of these endpoints.**
   - name: Recommendations
     description: Personalized recommendations tracking events. Payload data sourced from the Personalized Recommendations API response.
+  - name: Messaging Recommendations
+    description: Messaging Recommendations tracking events
+  - name: Shopper
+    description: Shopper tracking events
   - name: Product
     description: Product tracking events
   - name: Cart
     description: Cart tracking events
   - name: Order
     description: Order tracking events
-  - name: Messaging Recommendations
-    description: Messaging Recommendations tracking events
   - name: Error Logs
     description: Error log events
-  - name: Beacon 1.0.0
-    description: Deprecated beacon version
 servers:
   - url: https://beacon.searchspring.io/beacon/v2
     description: Beacon v2
@@ -125,8 +123,8 @@ paths:
     post:
       tags:
         - Shopper
-      summary: /beacon/v2/{siteId}/shopper/login
-      description: Shopper successfully logs into their account.
+      summary: login
+      description: <i>/beacon/v2/{siteId}/shopper/login</i><br><br>Shopper successfully logs into their account.
       operationId: login
       security:
         - {}
@@ -395,8 +393,8 @@ paths:
     post:
       tags:
         - Autocomplete
-      summary: /beacon/v2/{siteId}/autocomplete/render
-      description: Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered.
+      summary: render
+      description: <i>/beacon/v2/{siteId}/autocomplete/render</i><br><br>Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered.
       operationId: autocomplete-render
       security:
         - {}
@@ -1308,8 +1306,8 @@ paths:
     post:
       tags:
         - Autocomplete
-      summary: /beacon/v2/{siteId}/autocomplete/impression
-      description: Shopper views the rendered Searchspring autocomplete results in the Autocomplete Module.
+      summary: impression
+      description: <i>/beacon/v2/{siteId}/autocomplete/impression</i><br><br>Shopper views the rendered Searchspring autocomplete results in the Autocomplete Module.
       operationId: autocomplete-impression
       security:
         - {}
@@ -2221,8 +2219,8 @@ paths:
     post:
       tags:
         - Autocomplete
-      summary: /beacon/v2/{siteId}/autocomplete/addtocart
-      description: Shopper adds a Searchspring autocomplete result to the cart via a `Quick Add to Cart` button in the Autocomplete Module. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+      summary: addtocart
+      description: <i>/beacon/v2/{siteId}/autocomplete/addtocart</i><br><br>Shopper adds a Searchspring autocomplete result to the cart via a `Quick Add to Cart` button in the Autocomplete Module. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
       operationId: autocomplete-addtocart
       security:
         - {}
@@ -2240,7 +2238,7 @@ paths:
         content:
           text/plain:
             schema:
-              $ref: '#/components/schemas/autocomplete.schema'
+              $ref: '#/components/schemas/autocomplete.addtocart.schema'
             examples:
               addtocart example:
                 $ref: '#/components/examples/autocomplete-results-addtocart-example'
@@ -3134,8 +3132,8 @@ paths:
     post:
       tags:
         - Autocomplete
-      summary: /beacon/v2/{siteId}/autocomplete/clickthrough
-      description: Shopper clicks on a Searchspring autocomplete search result rendered in the Autocomplete Module, and is taken to the product detail page (PDP).
+      summary: clickthrough
+      description: <i>/beacon/v2/{siteId}/autocomplete/clickthrough</i><br><br>Shopper clicks on a Searchspring autocomplete search result rendered in the Autocomplete Module, and is taken to the product detail page (PDP).
       operationId: autocomplete-clickthrough
       security:
         - {}
@@ -4047,8 +4045,8 @@ paths:
     post:
       tags:
         - Autocomplete
-      summary: /beacon/v2/{siteId}/autocomplete/redirect
-      description: Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered, but a redirect URL is returned in the Autocomplete API response and the shopper is redirected to the returned redirect URL.
+      summary: redirect
+      description: <i>/beacon/v2/{siteId}/autocomplete/redirect</i><br><br>Shopper types in the searchbar and an Autocomplete Module with Searchspring autocomplete search results are rendered, but a redirect URL is returned in the Autocomplete API response and the shopper is redirected to the returned redirect URL.
       operationId: autocomplete-redirect
       security:
         - {}
@@ -4976,8 +4974,8 @@ paths:
     post:
       tags:
         - Search
-      summary: /beacon/v2/{siteId}/search/render
-      description: This event should be triggered when a shopper lands on a search results page and Searchspring search results are rendered.
+      summary: render
+      description: <i>/beacon/v2/{siteId}/search/render</i><br><br>This event should be triggered when a shopper lands on a search results page and Searchspring search results are rendered.
       operationId: search-render
       security:
         - {}
@@ -5889,8 +5887,8 @@ paths:
     post:
       tags:
         - Search
-      summary: /beacon/v2/{siteId}/search/impression
-      description: This event should be triggered when a shopper lands on a search results page and Searchspring search results receive an impression.
+      summary: impression
+      description: <i>/beacon/v2/{siteId}/search/impression</i><br><br>This event should be triggered when a shopper lands on a search results page and Searchspring search results receive an impression.
       operationId: search-impression
       security:
         - {}
@@ -6802,8 +6800,8 @@ paths:
     post:
       tags:
         - Search
-      summary: /beacon/v2/{siteId}/search/addtocart
-      description: This event should be triggered when a shopper lands on a search results page where Searchspring search results are rendered, and adds a result to the cart via a `Quick Add to Cart` button. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+      summary: addtocart
+      description: <i>/beacon/v2/{siteId}/search/addtocart</i><br><br>This event should be triggered when a shopper lands on a search results page where Searchspring search results are rendered, and adds a result to the cart via a `Quick Add to Cart` button. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
       operationId: search-addtocart
       security:
         - {}
@@ -6821,7 +6819,7 @@ paths:
         content:
           text/plain:
             schema:
-              $ref: '#/components/schemas/search.schema'
+              $ref: '#/components/schemas/search.addtocart.schema'
             examples:
               addtocart example:
                 $ref: '#/components/examples/search-results-addtocart-example'
@@ -7715,8 +7713,8 @@ paths:
     post:
       tags:
         - Search
-      summary: /beacon/v2/{siteId}/search/clickthrough
-      description: This event should be triggered when a shopper lands on a search results page, clicks on a Searchspring search result, and will be taken to the product detail page (PDP).
+      summary: clickthrough
+      description: <i>/beacon/v2/{siteId}/search/clickthrough</i><br><br>This event should be triggered when a shopper lands on a search results page, clicks on a Searchspring search result, and will be taken to the product detail page (PDP).
       operationId: search-clickthrough
       security:
         - {}
@@ -8628,8 +8626,8 @@ paths:
     post:
       tags:
         - Search
-      summary: /beacon/v2/{siteId}/search/redirect
-      description: This event should be triggered after a shopper lands on a search results page where Searchspring search results are rendered, but a redirect URL is returned in the Search API response and the shopper is redirected to the returned redirect URL.
+      summary: redirect
+      description: <i>/beacon/v2/{siteId}/search/redirect</i><br><br>This event should be triggered after a shopper lands on a search results page where Searchspring search results are rendered, but a redirect URL is returned in the Search API response and the shopper is redirected to the returned redirect URL.
       operationId: search-redirect
       security:
         - {}
@@ -9557,8 +9555,8 @@ paths:
     post:
       tags:
         - Category
-      summary: /beacon/v2/{siteId}/category/render
-      description: Shopper lands on a category results page and Searchspring results are rendered.
+      summary: render
+      description: <i>/beacon/v2/{siteId}/category/render</i><br><br>Shopper lands on a category results page and Searchspring results are rendered.
       operationId: category-render
       security:
         - {}
@@ -10470,8 +10468,8 @@ paths:
     post:
       tags:
         - Category
-      summary: /beacon/v2/{siteId}/category/impression
-      description: Shopper lands on a category results page and Searchspring results receive an impression.
+      summary: impression
+      description: <i>/beacon/v2/{siteId}/category/impression</i><br><br>Shopper lands on a category results page and Searchspring results receive an impression.
       operationId: category-impression
       security:
         - {}
@@ -11383,8 +11381,8 @@ paths:
     post:
       tags:
         - Category
-      summary: /beacon/v2/{siteId}/category/addtocart
-      description: Shopper lands on a category results page where Searchspring results are rendered, and adds a result to the cart via a `Quick Add to Cart` button. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+      summary: addtocart
+      description: <i>/beacon/v2/{siteId}/category/addtocart</i><br><br>Shopper lands on a category results page where Searchspring results are rendered, and adds a result to the cart via a `Quick Add to Cart` button. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
       operationId: category-addtocart
       security:
         - {}
@@ -11402,7 +11400,7 @@ paths:
         content:
           text/plain:
             schema:
-              $ref: '#/components/schemas/category.schema'
+              $ref: '#/components/schemas/category.addtocart.schema'
             examples:
               addtocart example:
                 $ref: '#/components/examples/category-results-addtocart-example'
@@ -12296,8 +12294,8 @@ paths:
     post:
       tags:
         - Category
-      summary: /beacon/v2/{siteId}/category/clickthrough
-      description: Shopper lands on a category results page, clicks on a Searchspring result, and will be taken to the product detail page (PDP).
+      summary: clickthrough
+      description: <i>/beacon/v2/{siteId}/category/clickthrough</i><br><br>Shopper lands on a category results page, clicks on a Searchspring result, and will be taken to the product detail page (PDP).
       operationId: category-clickthrough
       security:
         - {}
@@ -13209,8 +13207,8 @@ paths:
     post:
       tags:
         - Recommendations
-      summary: /beacon/v2/{siteId}/recommendations/render
-      description: Shopper navigates to a page where Searchspring personalized recommendations are requested from the [Personalized Recommendations API endpoint](https://docs.searchspring.com/reference/get-recommendations) and rendered on the page.
+      summary: render
+      description: <i>/beacon/v2/{siteId}/recommendations/render</i><br><br>Shopper navigates to a page where Searchspring personalized recommendations are requested from the [Personalized Recommendations API endpoint](https://docs.searchspring.com/reference/get-recommendations) and rendered on the page.
       operationId: recommendations-render
       security:
         - {}
@@ -13581,8 +13579,8 @@ paths:
     post:
       tags:
         - Recommendations
-      summary: /beacon/v2/{siteId}/recommendations/impression
-      description: Shopper scrolls into view rendered Searchspring personalized recommended results. Results sent ***must*** only be results in the shoppers view at the time of the event.
+      summary: impression
+      description: <i>/beacon/v2/{siteId}/recommendations/impression</i><br><br>Shopper scrolls into view rendered Searchspring personalized recommended results. Results sent ***must*** only be results in the shoppers view at the time of the event.
       operationId: recommendations-impression
       security:
         - {}
@@ -13953,8 +13951,8 @@ paths:
     post:
       tags:
         - Recommendations
-      summary: /beacon/v2/{siteId}/recommendations/addtocart
-      description: Shopper adds a Searchspring personalized recommendation result to the cart via a `Quick Add to Cart` button in the rendered product card. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+      summary: addtocart
+      description: <i>/beacon/v2/{siteId}/recommendations/addtocart</i><br><br>Shopper adds a Searchspring personalized recommendation result to the cart via a `Quick Add to Cart` button in the rendered product card. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
       operationId: recommendations-addtocart
       security:
         - {}
@@ -13972,7 +13970,7 @@ paths:
         content:
           text/plain:
             schema:
-              $ref: '#/components/schemas/recommendations.schema'
+              $ref: '#/components/schemas/recommendations.addtocart.schema'
             examples:
               render example:
                 $ref: '#/components/examples/recommendations-request-example-addtocart'
@@ -14325,8 +14323,8 @@ paths:
     post:
       tags:
         - Recommendations
-      summary: /beacon/v2/{siteId}/recommendations/clickthrough
-      description: Shopper clicks on a rendered Searchspring personalized recommended result, and is taken to the product detail page (PDP).
+      summary: clickthrough
+      description: <i>/beacon/v2/{siteId}/recommendations/clickthrough</i><br><br>Shopper clicks on a rendered Searchspring personalized recommended result, and is taken to the product detail page (PDP).
       operationId: recommendations-clickthrough
       security:
         - {}
@@ -14697,8 +14695,8 @@ paths:
     post:
       tags:
         - Product
-      summary: /beacon/v2/{siteId}/product/pageview
-      description: Shopper has navigated to a product detail page (PDP).
+      summary: pageview
+      description: <i>/beacon/v2/{siteId}/product/pageview</i><br><br>Shopper has navigated to a product detail page (PDP).
       operationId: product-pageview
       security:
         - {}
@@ -14991,8 +14989,8 @@ paths:
     post:
       tags:
         - Cart
-      summary: /beacon/v2/{siteId}/cart/add
-      description: Shopper adds additional item quantities to an item in the cart via the cart page or a slideout cart.
+      summary: add
+      description: <i>/beacon/v2/{siteId}/cart/add</i><br><br>Shopper adds additional item quantities to an item in the cart via the cart page or a slideout cart.
       operationId: cart-add
       security:
         - {}
@@ -15297,8 +15295,8 @@ paths:
     post:
       tags:
         - Cart
-      summary: /beacon/v2/{siteId}/cart/remove
-      description: Shopper removes an item or reduces an items quantity in the cart via the cart page or a slideout cart.
+      summary: remove
+      description: <i>/beacon/v2/{siteId}/cart/remove</i><br><br>Shopper removes an item or reduces an items quantity in the cart via the cart page or a slideout cart.
       operationId: cart-remove
       security:
         - {}
@@ -15603,8 +15601,8 @@ paths:
     post:
       tags:
         - Cart
-      summary: /beacon/v2/{siteId}/cart/view
-      description: Shopper views the cart contents. **Usage of this endpoint MUST be omitted.**
+      summary: view
+      description: <i>/beacon/v2/{siteId}/cart/view</i><br><br>Shopper views the cart contents. **Usage of this endpoint MUST be omitted.**
       operationId: cart-view
       security:
         - {}
@@ -15910,8 +15908,8 @@ paths:
     post:
       tags:
         - Order
-      summary: /beacon/v2/{siteId}/order/transaction
-      description: Shopper has completed an order transaction. Tracks order contents.
+      summary: transaction
+      description: <i>/beacon/v2/{siteId}/order/transaction</i><br><br>Shopper has completed an order transaction. Tracks order contents.
       operationId: order-transaction
       security:
         - {}
@@ -16333,8 +16331,8 @@ paths:
     post:
       tags:
         - Messaging Recommendations
-      summary: /beacon/v2/{siteId}/messaging/email/render
-      description: This event tracks the rendering of a messaging recommendation section in an email.
+      summary: email/render
+      description: <i>/beacon/v2/{siteId}/messaging/email/render</i><br><br>This event tracks the rendering of a messaging recommendation section in an email.
       operationId: messaging-email-render
       security:
         - {}
@@ -16447,8 +16445,8 @@ paths:
     post:
       tags:
         - Messaging Recommendations
-      summary: /beacon/v2/{siteId}/messaging/email/clickthrough
-      description: This event tracks when a shopper clicks through a messaging recommendation section in an email and is navigated to the website.
+      summary: email/clickthrough
+      description: <i>/beacon/v2/{siteId}/messaging/email/clickthrough</i><br><br>This event tracks when a shopper clicks through a messaging recommendation section in an email and is navigated to the website.
       operationId: messaging-email-clickthrough
       security:
         - {}
@@ -16561,8 +16559,8 @@ paths:
     post:
       tags:
         - Messaging Recommendations
-      summary: /beacon/v2/{siteId}/messaging/sms/render
-      description: This event tracks the rendering of an SMS recommendation section in an SMS text.
+      summary: sms/render
+      description: <i>/beacon/v2/{siteId}/messaging/sms/render</i><br><br>This event tracks the rendering of an SMS recommendation section in an SMS text.
       operationId: messaging-sms-render
       security:
         - {}
@@ -16675,8 +16673,8 @@ paths:
     post:
       tags:
         - Messaging Recommendations
-      summary: /beacon/v2/{siteId}/messaging/sms/clickthrough
-      description: This event tracks when a shopper clicks through a SMS recommendation section in an SMS text and is navigated to the website.
+      summary: sms/clickthrough
+      description: <i>/beacon/v2/{siteId}/messaging/sms/clickthrough</i><br><br>This event tracks when a shopper clicks through a SMS recommendation section in an SMS text and is navigated to the website.
       operationId: messaging-sms-clickthrough
       security:
         - {}
@@ -16789,8 +16787,8 @@ paths:
     post:
       tags:
         - Error Logs
-      summary: /beacon/v2/{siteId}/log/personalization
-      description: Personalization error log events
+      summary: personalization
+      description: <i>/beacon/v2/{siteId}/log/personalization</i><br><br>Personalization error log events
       operationId: log-personalization
       security:
         - {}
@@ -17193,8 +17191,8 @@ paths:
     post:
       tags:
         - Error Logs
-      summary: /beacon/v2/{siteId}/log/shopifypixel
-      description: Shopify Pixel Extension error log events
+      summary: shopifypixel
+      description: <i>/beacon/v2/{siteId}/log/shopifypixel</i><br><br>Shopify Pixel Extension error log events
       operationId: log-shopifypixel
       security:
         - {}
@@ -17587,8 +17585,8 @@ paths:
     post:
       tags:
         - Error Logs
-      summary: /beacon/v2/{siteId}/log/snap
-      description: Snap error log events
+      summary: snap
+      description: <i>/beacon/v2/{siteId}/log/snap</i><br><br>Snap error log events
       operationId: log-snap
       security:
         - {}
@@ -18216,6 +18214,157 @@ components:
                         description: If an A/B test is active for a triggered campaign, value will be returned as `merchandising.experiments[i].variationId` WHERE the `merchandising.experiments[i].campaignId` matches `merchandising.triggeredCampaigns[i].id` from the Autocomplete API
             results:
               $ref: '#/components/schemas/results'
+    product:
+      type: object
+      description: Product details
+      required:
+        - uid
+        - qty
+        - price
+      properties:
+        uid:
+          description: Unique product identifier of the Searchspring indexed product (also provide `sku`, `childSku`, and `childId` if available)
+          type: string
+        childUid:
+          description: Unique product variant identifier
+          type: string
+        sku:
+          description: Unique product identifier (also provide `childSku` if available)
+          type: string
+        childSku:
+          description: Unique product variant identifier (also provide `sku` if available)
+          type: string
+        qty:
+          description: Quantity of the item
+          type: number
+        price:
+          description: Price of individual item
+          type: number
+    autocomplete.addtocart.schema:
+      title: Shopper interaction with results
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          description: Event details
+          required:
+            - q
+            - pagination
+            - results
+          properties:
+            q:
+              type: string
+              description: Search query passed as the `q` query string parameter to the Autocomplete API
+            correctedQuery:
+              type: string
+              description: If spell correction occurs, value will be `query.correctedQuery` from the Autocomplete API
+            didYouMean:
+              type: string
+              description: If autocomplete API response returns `didYouMean`, value must be `didYouMean.query`
+            rq:
+              type: string
+              description: Refined query passed as the `rq` query string parameter to the Autocomplete API. This should be omitted if search within search results is not implemented.
+            matchType:
+              type: string
+              description: Indicates the type of search matching that was required for this search, returned as `query.matchType` from Autocomplete API
+            bgfilter:
+              type: array
+              description: List of active background filters passed to the Autocomplete API
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    description: Field of active background filter
+                  value:
+                    type: array
+                    description: Value of active background filter
+                    items:
+                      type: string
+            filter:
+              type: array
+              description: List of active filters passed to the Autocomplete API
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    description: Field of active filter
+                  value:
+                    type: array
+                    description: Value of active filter
+                    items:
+                      type: string
+            sort:
+              type: array
+              description: List of active sorts passed to the Autocomplete API
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    description: Field of active sort
+                  dir:
+                    type: string
+                    description: Direction of active sort
+                    enum:
+                      - asc
+                      - desc
+            pagination:
+              type: object
+              description: Pagination data returned from the Autocomplete API
+              required:
+                - totalResults
+                - page
+                - resultsPerPage
+              properties:
+                totalResults:
+                  type: integer
+                  description: Total results returned as `pagination.totalResults` from Autocomplete API
+                page:
+                  type: integer
+                  description: Current page returned as `pagination.currentPage` from Autocomplete API
+                resultsPerPage:
+                  type: integer
+                  description: Results per page returned as `pagination.resultsPerPage` from Autocomplete API
+            merchandising:
+              type: object
+              description: Merchandising data returned from the Autocomplete API
+              properties:
+                redirect:
+                  type: string
+                  description: Redirect URL returned as `merchandising.redirect` from Search API if a Searchspring configured redirect is triggered.
+                personalized:
+                  type: boolean
+                  description: Personalized value returned as `merchandising.personalized` from Autocomplete API
+                  enum:
+                    - true
+                    - false
+                triggeredCampaigns:
+                  type: array
+                  description: List of triggered campaigns returned as `merchandising.triggeredCampaigns` from the Autocomplete API
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Unique ID of the triggered campaign returned as `merchandising.triggeredCampaigns[i].id` from the Autocomplete API
+                      experimentId:
+                        type: string
+                        description: If an A/B test is active for a triggered campaign, value will be returned as `merchandising.experiments[i].experimentId` WHERE the `merchandising.experiments[i].campaignId` matches `merchandising.triggeredCampaigns[i].id` from the Autocomplete API
+                      variationId:
+                        type: string
+                        description: If an A/B test is active for a triggered campaign, value will be returned as `merchandising.experiments[i].variationId` WHERE the `merchandising.experiments[i].campaignId` matches `merchandising.triggeredCampaigns[i].id` from the Autocomplete API
+            results:
+              type: array
+              description: Products added to the cart
+              items:
+                $ref: '#/components/schemas/product'
     search.schema:
       title: Shopper interaction with results
       type: object
@@ -18338,6 +18487,131 @@ components:
                         description: If an A/B test is active for a triggered campaign, value will be returned as `merchandising.experiments[i].variationId` WHERE the `merchandising.experiments[i].campaignId` matches `merchandising.triggeredCampaigns[i].id` from the Search API
             results:
               $ref: '#/components/schemas/results'
+    search.addtocart.schema:
+      title: Shopper interaction with results
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          description: Event details
+          required:
+            - q
+            - pagination
+            - results
+          properties:
+            q:
+              type: string
+              description: Search query passed as the `q` query string parameter to the Search API. **If an empty string is passed, will indicate a blank search was submitted.**
+            correctedQuery:
+              type: string
+              description: If spell correction occurs, value will be `query.correctedQuery` from the Search API
+            didYouMean:
+              type: string
+              description: If search API response returns `didYouMean`, value must be `didYouMean.query`
+            rq:
+              type: string
+              description: Refined query passed as the `rq` query string parameter to the Autocomplete API. This should be omitted if search within search results is not implemented.
+            matchType:
+              type: string
+              description: Indicates the type of search matching that was required for this search, returned as `query.matchType` from Search API
+            bgfilter:
+              type: array
+              description: List of active background filters passed to the Search API
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    description: Field of active background filter
+                  value:
+                    type: array
+                    description: Value of active background filter
+                    items:
+                      type: string
+            filter:
+              type: array
+              description: List of active filters passed to the Search API
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    description: Field of active filter
+                  value:
+                    type: array
+                    description: Value of active filter
+                    items:
+                      type: string
+            sort:
+              type: array
+              description: List of active sorts passed to the Autocomplete API
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    description: Field of active sort
+                  dir:
+                    type: string
+                    description: Direction of active sort
+                    enum:
+                      - asc
+                      - desc
+            pagination:
+              type: object
+              description: Pagination data returned from the Search API
+              required:
+                - totalResults
+                - page
+                - resultsPerPage
+              properties:
+                totalResults:
+                  type: integer
+                  description: Total results returned as `pagination.totalResults` from Search API
+                page:
+                  type: integer
+                  description: Current page returned as `pagination.currentPage` from Search API
+                resultsPerPage:
+                  type: integer
+                  description: Results per page returned as `pagination.resultsPerPage` from Search API
+            merchandising:
+              type: object
+              description: Merchandising data returned from the Search API
+              properties:
+                redirect:
+                  type: string
+                  description: Redirect URL returned as `merchandising.redirect` from Search API if a Searchspring configured redirect is triggered.
+                personalized:
+                  type: boolean
+                  description: Personalized value returned as `merchandising.personalized` from Search API
+                  enum:
+                    - true
+                    - false
+                triggeredCampaigns:
+                  type: array
+                  description: List of triggered campaigns returned as `merchandising.triggeredCampaigns` from the Search API
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Unique ID of the triggered campaign returned as `merchandising.triggeredCampaigns[i].id` from the Search API
+                      experimentId:
+                        type: string
+                        description: If an A/B test is active for a triggered campaign, value will be returned as `merchandising.experiments[i].experimentId` WHERE the `merchandising.experiments[i].campaignId` matches `merchandising.triggeredCampaigns[i].id` from the Search API
+                      variationId:
+                        type: string
+                        description: If an A/B test is active for a triggered campaign, value will be returned as `merchandising.experiments[i].variationId` WHERE the `merchandising.experiments[i].campaignId` matches `merchandising.triggeredCampaigns[i].id` from the Search API
+            results:
+              type: array
+              description: Products added to the cart
+              items:
+                $ref: '#/components/schemas/product'
     category.schema:
       title: Shopper interaction with results
       type: object
@@ -18444,6 +18718,115 @@ components:
                         description: If an A/B test is active for a triggered campaign, value will be returned as `merchandising.experiments[i].variationId` WHERE the `merchandising.experiments[i].campaignId` matches `merchandising.triggeredCampaigns[i].id` from the Search API
             results:
               $ref: '#/components/schemas/results'
+    category.addtocart.schema:
+      title: Shopper interaction with results
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          description: Event details
+          required:
+            - pagination
+            - results
+          properties:
+            rq:
+              type: string
+              description: Refined query passed as the `rq` query string parameter to the Search API. This should be omitted if search within search results is not implemented.
+            bgfilter:
+              type: array
+              description: List of active background filters passed to the Search API
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    description: Field of active background filter
+                  value:
+                    type: array
+                    description: Value of active background filter
+                    items:
+                      type: string
+            filter:
+              type: array
+              description: List of active filters passed to the Search API
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    description: Field of active filter
+                  value:
+                    type: array
+                    description: Value of active filter
+                    items:
+                      type: string
+            sort:
+              type: array
+              description: List of active sorts passed to the Autocomplete API
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    description: Field of active sort
+                  dir:
+                    type: string
+                    description: Direction of active sort
+                    enum:
+                      - asc
+                      - desc
+            pagination:
+              type: object
+              description: Pagination data returned from the Search API
+              required:
+                - totalResults
+                - page
+                - resultsPerPage
+              properties:
+                totalResults:
+                  type: integer
+                  description: Total results returned as `pagination.totalResults` from Search API
+                page:
+                  type: integer
+                  description: Current page returned as `pagination.currentPage` from Search API
+                resultsPerPage:
+                  type: integer
+                  description: Results per page returned as `pagination.resultsPerPage` from Search API
+            merchandising:
+              type: object
+              description: Merchandising data returned from the Search API
+              properties:
+                personalized:
+                  type: boolean
+                  description: Personalized value returned as `merchandising.personalized` from Search API
+                  enum:
+                    - true
+                    - false
+                triggeredCampaigns:
+                  type: array
+                  description: List of triggered campaigns returned as `merchandising.triggeredCampaigns` from the Search API
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Unique ID of the triggered campaign returned as `merchandising.triggeredCampaigns[i].id` from the Search API
+                      experimentId:
+                        type: string
+                        description: If an A/B test is active for a triggered campaign, value will be returned as `merchandising.experiments[i].experimentId` WHERE the `merchandising.experiments[i].campaignId` matches `merchandising.triggeredCampaigns[i].id` from the Search API
+                      variationId:
+                        type: string
+                        description: If an A/B test is active for a triggered campaign, value will be returned as `merchandising.experiments[i].variationId` WHERE the `merchandising.experiments[i].campaignId` matches `merchandising.triggeredCampaigns[i].id` from the Search API
+            results:
+              type: array
+              description: Products added to the cart
+              items:
+                $ref: '#/components/schemas/product'
     recommendations.schema:
       title: Shopper interaction with personalized recommendation profiles and their results
       type: object
@@ -18465,32 +18848,30 @@ components:
               description: Tag of the personalized recommendation profile the shopper interacted with
             results:
               $ref: '#/components/schemas/results'
-    product:
+    recommendations.addtocart.schema:
+      title: Shopper interaction with personalized recommendation profiles and their results
       type: object
-      description: Product details
       required:
-        - uid
-        - qty
-        - price
+        - context
+        - data
       properties:
-        uid:
-          description: Unique product identifier of the Searchspring indexed product (also provide `sku`, `childSku`, and `childId` if available)
-          type: string
-        childUid:
-          description: Unique product variant identifier
-          type: string
-        sku:
-          description: Unique product identifier (also provide `childSku` if available)
-          type: string
-        childSku:
-          description: Unique product variant identifier (also provide `sku` if available)
-          type: string
-        qty:
-          description: Quantity of the item
-          type: number
-        price:
-          description: Price of individual item
-          type: number
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          description: Event details
+          required:
+            - tag
+            - results
+          properties:
+            tag:
+              type: string
+              description: Tag of the personalized recommendation profile the shopper interacted with
+            results:
+              type: array
+              description: Products added to the cart
+              items:
+                $ref: '#/components/schemas/product'
     cart.schema:
       title: Shopper update the shopping cart
       type: object

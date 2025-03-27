@@ -12,75 +12,79 @@
  * Do not edit the class manually.
  */
 
-
-import * as runtime from '../runtime';
-import type {
-  Model400Response,
-  Model404Response,
-  ProductPageviewSchema,
-} from '../models/index';
+import { mapValues } from '../runtime';
+import type { Context } from './Context';
 import {
-    Model400ResponseFromJSON,
-    Model400ResponseToJSON,
-    Model404ResponseFromJSON,
-    Model404ResponseToJSON,
-    ProductPageviewSchemaFromJSON,
-    ProductPageviewSchemaToJSON,
-} from '../models/index';
-
-export interface ProductPageviewRequest {
-    siteId: string;
-    productPageviewSchema: ProductPageviewSchema;
-}
+    ContextFromJSON,
+    ContextFromJSONTyped,
+    ContextToJSON,
+    ContextToJSONTyped,
+} from './Context';
+import type { AutocompleteAddtocartSchemaData } from './AutocompleteAddtocartSchemaData';
+import {
+    AutocompleteAddtocartSchemaDataFromJSON,
+    AutocompleteAddtocartSchemaDataFromJSONTyped,
+    AutocompleteAddtocartSchemaDataToJSON,
+    AutocompleteAddtocartSchemaDataToJSONTyped,
+} from './AutocompleteAddtocartSchemaData';
 
 /**
  * 
+ * @export
+ * @interface AutocompleteAddtocartSchema
  */
-export class ProductApi extends runtime.BaseAPI {
-
+export interface AutocompleteAddtocartSchema {
     /**
-     * <i>/beacon/v2/{siteId}/product/pageview</i><br><br>Shopper has navigated to a product detail page (PDP).
-     * pageview
+     * 
+     * @type {Context}
+     * @memberof AutocompleteAddtocartSchema
      */
-    async productPageviewRaw(requestParameters: ProductPageviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
-        if (requestParameters['siteId'] == null) {
-            throw new runtime.RequiredError(
-                'siteId',
-                'Required parameter "siteId" was null or undefined when calling productPageview().'
-            );
-        }
-
-        if (requestParameters['productPageviewSchema'] == null) {
-            throw new runtime.RequiredError(
-                'productPageviewSchema',
-                'Required parameter "productPageviewSchema" was null or undefined when calling productPageview().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        headerParameters['Content-Type'] = 'text/plain';
-
-        const response = await this.request({
-            path: `/{siteId}/product/pageview`.replace(`{${"siteId"}}`, encodeURIComponent(String(requestParameters['siteId']))),
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-            body: ProductPageviewSchemaToJSON(requestParameters['productPageviewSchema']),
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
+    context: Context;
     /**
-     * <i>/beacon/v2/{siteId}/product/pageview</i><br><br>Shopper has navigated to a product detail page (PDP).
-     * pageview
+     * 
+     * @type {AutocompleteAddtocartSchemaData}
+     * @memberof AutocompleteAddtocartSchema
      */
-    async productPageview(requestParameters: ProductPageviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
-        const response = await this.productPageviewRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
+    data: AutocompleteAddtocartSchemaData;
 }
+
+/**
+ * Check if a given object implements the AutocompleteAddtocartSchema interface.
+ */
+export function instanceOfAutocompleteAddtocartSchema(value: object): value is AutocompleteAddtocartSchema {
+    if (!('context' in value) || value['context'] === undefined) return false;
+    if (!('data' in value) || value['data'] === undefined) return false;
+    return true;
+}
+
+export function AutocompleteAddtocartSchemaFromJSON(json: any): AutocompleteAddtocartSchema {
+    return AutocompleteAddtocartSchemaFromJSONTyped(json, false);
+}
+
+export function AutocompleteAddtocartSchemaFromJSONTyped(json: any, ignoreDiscriminator: boolean): AutocompleteAddtocartSchema {
+    if (json == null) {
+        return json;
+    }
+    return {
+        
+        'context': ContextFromJSON(json['context']),
+        'data': AutocompleteAddtocartSchemaDataFromJSON(json['data']),
+    };
+}
+
+  export function AutocompleteAddtocartSchemaToJSON(json: any): AutocompleteAddtocartSchema {
+      return AutocompleteAddtocartSchemaToJSONTyped(json, false);
+  }
+
+  export function AutocompleteAddtocartSchemaToJSONTyped(value?: AutocompleteAddtocartSchema | null, ignoreDiscriminator: boolean = false): any {
+    if (value == null) {
+        return value;
+    }
+
+    return {
+        
+        'context': ContextToJSON(value['context']),
+        'data': AutocompleteAddtocartSchemaDataToJSON(value['data']),
+    };
+}
+

@@ -360,6 +360,7 @@ describe('Beacon', () => {
 				{ uid: 'prodUid4', childUid: 'prodChildUid4', sku: 'prodSku4', childSku: 'prodChildSku4' },
 			],
 		};
+
 		const otherFetchParams = {
 			headers: {
 				'Content-Type': 'text/plain',
@@ -406,13 +407,28 @@ describe('Beacon', () => {
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
 			});
 			it('can process addToCart event', async () => {
+				beacon.storage.cart.clear();
+
+				const data = {
+					...baseSearchSchema,
+					results: [
+						{ uid: 'prodUid1', childUid: 'prodChildUid1', sku: 'prodSku1', childSku: 'prodChildSku1', qty: 1, price: 10.99 },
+						{ uid: 'prodUid2', childUid: 'prodChildUid2', sku: 'prodSku2', childSku: 'prodChildSku2', qty: 1, price: 10.99 },
+					]
+				};
+
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteAddtocart');
+
 				const payload = beacon.events.autocomplete.addToCart({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.autocompleteSchema);
+				const body = JSON.stringify(payload.autocompleteAddtocartSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+
+				// validate cart storage data
+				const cartData = beacon.storage.cart.get();
+				expect(cartData).toEqual(data.results);
 			});
 			it('can process clickThrough event', async () => {
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteClickthrough');
@@ -457,13 +473,28 @@ describe('Beacon', () => {
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
 			});
 			it('can process addToCart event', async () => {
+				beacon.storage.cart.clear();
+
+				const data = {
+					...baseSearchSchema,
+					results: [
+						{ uid: 'prodUid1', childUid: 'prodChildUid1', sku: 'prodSku1', childSku: 'prodChildSku1', qty: 1, price: 10.99 },
+						{ uid: 'prodUid2', childUid: 'prodChildUid2', sku: 'prodSku2', childSku: 'prodChildSku2', qty: 1, price: 10.99 },
+					]
+				};
+
 				const spy = jest.spyOn(beacon['apis'].search, 'searchAddtocart');
+
 				const payload = beacon.events.search.addToCart({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.searchSchema);
+				const body = JSON.stringify(payload.searchAddtocartSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+
+				// validate cart storage data
+				const cartData = beacon.storage.cart.get();
+				expect(cartData).toEqual(data.results);
 			});
 			it('can process clickThrough event', async () => {
 				const spy = jest.spyOn(beacon['apis'].search, 'searchClickthrough');
@@ -509,13 +540,29 @@ describe('Beacon', () => {
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
 			});
 			it('can process addToCart event', async () => {
+				beacon.storage.cart.clear();
+
+				const data = {
+					...baseSearchSchema,
+					q: undefined,
+					results: [
+						{ uid: 'prodUid1', childUid: 'prodChildUid1', sku: 'prodSku1', childSku: 'prodChildSku1', qty: 1, price: 10.99 },
+						{ uid: 'prodUid2', childUid: 'prodChildUid2', sku: 'prodSku2', childSku: 'prodChildSku2', qty: 1, price: 10.99 },
+					]
+				};
+
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryAddtocart');
+
 				const payload = beacon.events.category.addToCart({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.categorySchema);
+				const body = JSON.stringify(payload.categoryAddtocartSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+
+				// validate cart storage data
+				const cartData = beacon.storage.cart.get();
+				expect(cartData).toEqual(data.results);
 			});
 			it('can process clickThrough event', async () => {
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryClickthrough');
@@ -551,13 +598,28 @@ describe('Beacon', () => {
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
 			});
 			it('can process addToCart event', async () => {
+				beacon.storage.cart.clear();
+
+				const data = {
+					tag: 'test-tag',
+					results: [
+						{ uid: 'prodUid1', childUid: 'prodChildUid1', sku: 'prodSku1', childSku: 'prodChildSku1', qty: 1, price: 10.99 },
+						{ uid: 'prodUid2', childUid: 'prodChildUid2', sku: 'prodSku2', childSku: 'prodChildSku2', qty: 1, price: 10.99 },
+					]
+				};
+
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsAddtocart');
+
 				const payload = beacon.events.recommendations.addToCart({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.recommendationsSchema);
+				const body = JSON.stringify(payload.recommendationsAddtocartSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+
+				// validate cart storage data
+				const cartData = beacon.storage.cart.get();
+				expect(cartData).toEqual(data.results);
 			});
 			it('can process clickThrough event', async () => {
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsClickthrough');
@@ -594,9 +656,15 @@ describe('Beacon', () => {
 						};
 					}),
 				],
-				// cart: [],
 			};
 			it('can process add event', async () => {
+				const cart = [
+					{ uid: 'prodUidA', childUid: 'prodChildUidA', sku: 'prodSkuA', childSku: 'prodChildSkuA', qty: 1, price: 10.99 },
+					{ uid: 'prodUidB', childUid: 'prodChildUidB', sku: 'prodSkuB', childSku: 'prodChildSkuB', qty: 1, price: 10.99 },
+				];
+
+				beacon.storage.cart.set(cart);
+
 				const spy = jest.spyOn(beacon['apis'].cart, 'cartAdd');
 				const payload = beacon.events.cart.add({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
@@ -609,17 +677,102 @@ describe('Beacon', () => {
 						results: payload.cartSchema.data.results,
 					},
 				});
-				expect(mockFetchApi).toHaveBeenNthCalledWith(2, expect.any(String), { body, ...otherFetchParams });
+
+				// actual event is the third request due to storage changes sending preflights
+				expect(mockFetchApi).toHaveBeenNthCalledWith(3, expect.any(String), { body, ...otherFetchParams });
+
+				// validate cart storage data
+				const cartData = beacon.storage.cart.get();
+				expect(cartData).toEqual([...data.results, ...cart]);
 			});
+
+			it('can process add event with supplied cart', async () => {
+				const cart = [
+					{ uid: 'prodUidA', childUid: 'prodChildUidA', sku: 'prodSkuA', childSku: 'prodChildSkuA', qty: 1, price: 10.99 },
+					{ uid: 'prodUidB', childUid: 'prodChildUidB', sku: 'prodSkuB', childSku: 'prodChildSkuB', qty: 1, price: 10.99 },
+					...data.results
+				];
+
+				const cartData = {
+					...data,
+					cart
+				}
+
+				const spy = jest.spyOn(beacon['apis'].cart, 'cartAdd');
+				const payload = beacon.events.cart.add({ data: cartData });
+				await new Promise((resolve) => setTimeout(resolve, 0));
+
+				expect(spy).toHaveBeenCalled();
+				const body = JSON.stringify({
+					...payload.cartSchema,
+					data: {
+						results: payload.cartSchema.data.results,
+						cart: payload.cartSchema.data.cart,
+					},
+				});
+
+				// actual event is the second request due to storage change sending preflights
+				expect(mockFetchApi).toHaveBeenNthCalledWith(2, expect.any(String), { body, ...otherFetchParams });
+
+				// validate cart storage data
+				const storedCartData = beacon.storage.cart.get();
+				expect(storedCartData).toEqual(cart);
+			});
+			
 			it('can process remove event', async () => {
+				const cart = [
+					{ uid: 'prodUidA', childUid: 'prodChildUidA', sku: 'prodSkuA', childSku: 'prodChildSkuA', qty: 1, price: 10.99 },
+					{ uid: 'prodUidB', childUid: 'prodChildUidB', sku: 'prodSkuB', childSku: 'prodChildSkuB', qty: 1, price: 10.99 },
+				];
+
+				const removeData = {
+					...data,
+					results: [
+						{ uid: 'prodUidA', childUid: 'prodChildUidA', sku: 'prodSkuA', childSku: 'prodChildSkuA', qty: 1, price: 10.99 },
+					],
+				}
+
+				beacon.storage.cart.set(cart);
+
 				const spy = jest.spyOn(beacon['apis'].cart, 'cartRemove');
-				const payload = beacon.events.cart.remove({ data });
+				const payload = beacon.events.cart.remove({ data: removeData });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
 				const body = JSON.stringify(payload.cartSchema);
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+
+				// validate cart storage data
+				const storedCartData = beacon.storage.cart.get();
+				expect(storedCartData).toEqual([cart[1]]);
 			});
+			
+			it('can process remove event with supplied cart', async () => {
+				const cart = [
+					{ uid: 'prodUidB', childUid: 'prodChildUidB', sku: 'prodSkuB', childSku: 'prodChildSkuB', qty: 1, price: 10.99 },
+				];
+
+				const removeData = {
+					...data,
+					results: [
+						{ uid: 'prodUidA', childUid: 'prodChildUidA', sku: 'prodSkuA', childSku: 'prodChildSkuA', qty: 1, price: 10.99 },
+					],
+					cart
+				}
+
+				const spy = jest.spyOn(beacon['apis'].cart, 'cartRemove');
+				const payload = beacon.events.cart.remove({ data: removeData });
+				await new Promise((resolve) => setTimeout(resolve, 0));
+
+				expect(spy).toHaveBeenCalled();
+				const body = JSON.stringify(payload.cartSchema);
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+
+				// validate cart storage data
+				const storedCartData = beacon.storage.cart.get();
+				expect(storedCartData).toEqual(cart);
+			});
+
 			it('can process view event', async () => {
 				const spy = jest.spyOn(beacon['apis'].cart, 'cartView');
 				const payload = beacon.events.cart.view({ data });

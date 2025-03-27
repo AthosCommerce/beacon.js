@@ -17,6 +17,7 @@ import * as runtime from '../runtime';
 import type {
   Model400Response,
   Model404Response,
+  SearchAddtocartSchema,
   SearchRedirectSchema,
   SearchSchema,
 } from '../models/index';
@@ -25,6 +26,8 @@ import {
     Model400ResponseToJSON,
     Model404ResponseFromJSON,
     Model404ResponseToJSON,
+    SearchAddtocartSchemaFromJSON,
+    SearchAddtocartSchemaToJSON,
     SearchRedirectSchemaFromJSON,
     SearchRedirectSchemaToJSON,
     SearchSchemaFromJSON,
@@ -33,7 +36,7 @@ import {
 
 export interface SearchAddtocartRequest {
     siteId: string;
-    searchSchema: SearchSchema;
+    searchAddtocartSchema: SearchAddtocartSchema;
 }
 
 export interface SearchClickthroughRequest {
@@ -62,8 +65,8 @@ export interface SearchRenderRequest {
 export class SearchApi extends runtime.BaseAPI {
 
     /**
-     * This event should be triggered when a shopper lands on a search results page where Searchspring search results are rendered, and adds a result to the cart via a `Quick Add to Cart` button. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
-     * /beacon/v2/{siteId}/search/addtocart
+     * <i>/beacon/v2/{siteId}/search/addtocart</i><br><br>This event should be triggered when a shopper lands on a search results page where Searchspring search results are rendered, and adds a result to the cart via a `Quick Add to Cart` button. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+     * addtocart
      */
     async searchAddtocartRaw(requestParameters: SearchAddtocartRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -73,10 +76,10 @@ export class SearchApi extends runtime.BaseAPI {
             );
         }
 
-        if (requestParameters['searchSchema'] == null) {
+        if (requestParameters['searchAddtocartSchema'] == null) {
             throw new runtime.RequiredError(
-                'searchSchema',
-                'Required parameter "searchSchema" was null or undefined when calling searchAddtocart().'
+                'searchAddtocartSchema',
+                'Required parameter "searchAddtocartSchema" was null or undefined when calling searchAddtocart().'
             );
         }
 
@@ -91,15 +94,15 @@ export class SearchApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: SearchSchemaToJSON(requestParameters['searchSchema']),
+            body: SearchAddtocartSchemaToJSON(requestParameters['searchAddtocartSchema']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse<any>(response);
     }
 
     /**
-     * This event should be triggered when a shopper lands on a search results page where Searchspring search results are rendered, and adds a result to the cart via a `Quick Add to Cart` button. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
-     * /beacon/v2/{siteId}/search/addtocart
+     * <i>/beacon/v2/{siteId}/search/addtocart</i><br><br>This event should be triggered when a shopper lands on a search results page where Searchspring search results are rendered, and adds a result to the cart via a `Quick Add to Cart` button. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+     * addtocart
      */
     async searchAddtocart(requestParameters: SearchAddtocartRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.searchAddtocartRaw(requestParameters, initOverrides);
@@ -107,8 +110,8 @@ export class SearchApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event should be triggered when a shopper lands on a search results page, clicks on a Searchspring search result, and will be taken to the product detail page (PDP).
-     * /beacon/v2/{siteId}/search/clickthrough
+     * <i>/beacon/v2/{siteId}/search/clickthrough</i><br><br>This event should be triggered when a shopper lands on a search results page, clicks on a Searchspring search result, and will be taken to the product detail page (PDP).
+     * clickthrough
      */
     async searchClickthroughRaw(requestParameters: SearchClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -143,8 +146,8 @@ export class SearchApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event should be triggered when a shopper lands on a search results page, clicks on a Searchspring search result, and will be taken to the product detail page (PDP).
-     * /beacon/v2/{siteId}/search/clickthrough
+     * <i>/beacon/v2/{siteId}/search/clickthrough</i><br><br>This event should be triggered when a shopper lands on a search results page, clicks on a Searchspring search result, and will be taken to the product detail page (PDP).
+     * clickthrough
      */
     async searchClickthrough(requestParameters: SearchClickthroughRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.searchClickthroughRaw(requestParameters, initOverrides);
@@ -152,8 +155,8 @@ export class SearchApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event should be triggered when a shopper lands on a search results page and Searchspring search results receive an impression.
-     * /beacon/v2/{siteId}/search/impression
+     * <i>/beacon/v2/{siteId}/search/impression</i><br><br>This event should be triggered when a shopper lands on a search results page and Searchspring search results receive an impression.
+     * impression
      */
     async searchImpressionRaw(requestParameters: SearchImpressionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -188,8 +191,8 @@ export class SearchApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event should be triggered when a shopper lands on a search results page and Searchspring search results receive an impression.
-     * /beacon/v2/{siteId}/search/impression
+     * <i>/beacon/v2/{siteId}/search/impression</i><br><br>This event should be triggered when a shopper lands on a search results page and Searchspring search results receive an impression.
+     * impression
      */
     async searchImpression(requestParameters: SearchImpressionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.searchImpressionRaw(requestParameters, initOverrides);
@@ -197,8 +200,8 @@ export class SearchApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event should be triggered after a shopper lands on a search results page where Searchspring search results are rendered, but a redirect URL is returned in the Search API response and the shopper is redirected to the returned redirect URL.
-     * /beacon/v2/{siteId}/search/redirect
+     * <i>/beacon/v2/{siteId}/search/redirect</i><br><br>This event should be triggered after a shopper lands on a search results page where Searchspring search results are rendered, but a redirect URL is returned in the Search API response and the shopper is redirected to the returned redirect URL.
+     * redirect
      */
     async searchRedirectRaw(requestParameters: SearchRedirectRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -233,8 +236,8 @@ export class SearchApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event should be triggered after a shopper lands on a search results page where Searchspring search results are rendered, but a redirect URL is returned in the Search API response and the shopper is redirected to the returned redirect URL.
-     * /beacon/v2/{siteId}/search/redirect
+     * <i>/beacon/v2/{siteId}/search/redirect</i><br><br>This event should be triggered after a shopper lands on a search results page where Searchspring search results are rendered, but a redirect URL is returned in the Search API response and the shopper is redirected to the returned redirect URL.
+     * redirect
      */
     async searchRedirect(requestParameters: SearchRedirectRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.searchRedirectRaw(requestParameters, initOverrides);
@@ -242,8 +245,8 @@ export class SearchApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event should be triggered when a shopper lands on a search results page and Searchspring search results are rendered.
-     * /beacon/v2/{siteId}/search/render
+     * <i>/beacon/v2/{siteId}/search/render</i><br><br>This event should be triggered when a shopper lands on a search results page and Searchspring search results are rendered.
+     * render
      */
     async searchRenderRaw(requestParameters: SearchRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -278,8 +281,8 @@ export class SearchApi extends runtime.BaseAPI {
     }
 
     /**
-     * This event should be triggered when a shopper lands on a search results page and Searchspring search results are rendered.
-     * /beacon/v2/{siteId}/search/render
+     * <i>/beacon/v2/{siteId}/search/render</i><br><br>This event should be triggered when a shopper lands on a search results page and Searchspring search results are rendered.
+     * render
      */
     async searchRender(requestParameters: SearchRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.searchRenderRaw(requestParameters, initOverrides);

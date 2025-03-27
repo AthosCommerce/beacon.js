@@ -39,8 +39,8 @@ export interface LoginRequest {
 export class ShopperApi extends runtime.BaseAPI {
 
     /**
-     * Shopper successfully logs into their account.
-     * /beacon/v2/{siteId}/shopper/login
+     * <i>/beacon/v2/{siteId}/shopper/login</i><br><br>Shopper successfully logs into their account.
+     * login
      */
     async loginRaw(requestParameters: LoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<object>> {
         if (requestParameters['siteId'] == null) {
@@ -75,8 +75,8 @@ export class ShopperApi extends runtime.BaseAPI {
     }
 
     /**
-     * Shopper successfully logs into their account.
-     * /beacon/v2/{siteId}/shopper/login
+     * <i>/beacon/v2/{siteId}/shopper/login</i><br><br>Shopper successfully logs into their account.
+     * login
      */
     async login(requestParameters: LoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<object> {
         const response = await this.loginRaw(requestParameters, initOverrides);
