@@ -127,7 +127,7 @@ export type Payload<T> = {
 
 export const REQUEST_GROUPING_TIMEOUT = 200;
 const USER_ID_KEY = 'ssUserId';
-const SESSION_ID_KEY = 'ssSessionIdNamespace';
+const SESSION_ID_KEY = 'ssSessionId';
 const SHOPPER_ID_KEY = 'ssShopperId';
 export const CART_KEY = 'ssCartProducts';
 const VIEWED_KEY = 'ssViewedProducts';
