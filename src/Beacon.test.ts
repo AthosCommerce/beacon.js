@@ -102,10 +102,8 @@ describe('Beacon', () => {
 
 				// localStorage contains cart data
 				expect(localStorageMock.setItem).toHaveBeenCalled();
-				const rawItem = localStorageMock.getItem(CART_KEY)!;
-				const data = JSON.parse(rawItem);
-				// should be key'd by siteId
-				expect(data[mockGlobals.siteId]).toBe(JSON.stringify(mockProducts));
+				const data = localStorageMock.getItem(CART_KEY)!;
+				expect(data).toBe(JSON.stringify(mockProducts));
 
 				// can add to exisiting cart data and should be at the front
 				const product = { uid: 'productUid5', childUid: 'productChildUid5', sku: 'productSku5', childSku: 'productChildSku5', qty: 1, price: 9.99 };
@@ -152,54 +150,7 @@ describe('Beacon', () => {
 				expect(clearedCartData).toEqual([]);
 				expect(global.document.cookie).toContain(`${CART_KEY}=;`);
 				const rawClearedItem = localStorageMock.getItem(CART_KEY)!;
-				const clearedData = JSON.parse(rawClearedItem);
-				expect(clearedData[mockGlobals.siteId]).toBe('[]');
-			});
-		});
-		describe.skip('Custom APIs', () => {
-			const cookieKey = 'test-cookie';
-			const cookieReturnValue = 'test-cookie-value';
-
-			const localStorageKey = 'test-local-storage';
-			const localStorageValue = 'test-local-storage-value';
-			const localStorageReturnValue = JSON.stringify({ [mockGlobals.siteId]: localStorageValue });
-
-			const apis = {
-				cookie: {
-					get: jest.fn().mockResolvedValue(cookieReturnValue),
-					set: jest.fn().mockResolvedValue(undefined),
-				},
-				localStorage: {
-					clear: jest.fn().mockResolvedValue(undefined),
-					getItem: jest.fn().mockResolvedValue(localStorageReturnValue),
-					setItem: jest.fn().mockResolvedValue(undefined),
-					removeItem: jest.fn().mockResolvedValue(undefined),
-				},
-			};
-
-			it('can getCookie', () => {
-				beacon = new Beacon(mockGlobals, { ...mockConfig, apis });
-				const result = beacon['getCookie'](cookieKey);
-				expect(result).toEqual(cookieReturnValue);
-				expect(apis.cookie.get).toHaveBeenCalledWith(cookieKey);
-			});
-			it('can setCookie', () => {
-				beacon = new Beacon(mockGlobals, { ...mockConfig, apis });
-				const result = beacon['setCookie'](cookieKey, cookieReturnValue, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
-				expect(result).toBeUndefined();
-				expect(apis.cookie.set).toHaveBeenCalledWith(`${cookieKey}=${cookieReturnValue};SameSite=${COOKIE_SAMESITE};path=/;domain=${COOKIE_DOMAIN};`);
-			});
-			it('can getLocalStorage', () => {
-				beacon = new Beacon(mockGlobals, { ...mockConfig, apis });
-				const result = beacon['getLocalStorageItem'](localStorageKey);
-				expect(result).toEqual(localStorageValue);
-				expect(apis.localStorage.getItem).toHaveBeenCalledWith(localStorageKey);
-			});
-			it('can setLocalStorage', () => {
-				beacon = new Beacon(mockGlobals, { ...mockConfig, apis });
-				const result = beacon['setLocalStorageItem'](localStorageKey, localStorageValue);
-				expect(result).toBeUndefined();
-				expect(apis.localStorage.setItem).toHaveBeenCalledWith(localStorageKey, JSON.stringify({ [mockGlobals.siteId]: localStorageValue }));
+				expect(rawClearedItem).toBe('[]');
 			});
 		});
 		describe('Methods', () => {
