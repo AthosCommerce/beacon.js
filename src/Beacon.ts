@@ -85,16 +85,6 @@ export type BeaconConfig = {
 	mode?: 'production' | 'development';
 	initiator?: string;
 	apis?: {
-		cookie?: {
-			get: (name?: string) => Promise<string>;
-			set: (cookieString: string) => Promise<string>;
-		};
-		localStorage?: {
-			clear: () => Promise<void>;
-			getItem: (key: string) => Promise<string | null>;
-			setItem: (key: string, value: string) => Promise<void>;
-			removeItem: (key: string) => Promise<void>;
-		};
 		requesters?: {
 			personalization?: {
 				origin?: string;
@@ -242,48 +232,21 @@ export class Beacon {
 			cookie += `domain=${domain};`;
 		}
 
-		const setCookieFn = this.config.apis?.cookie?.set;
-		if (setCookieFn) {
-			try {
-				setCookieFn(cookie);
-				return;
-			} catch (e) {
-				console.error('Failed to set cookie using custom API:', e);
-			}
-		} else if (typeof window !== 'undefined') {
+		if (typeof window !== 'undefined') {
 			window.document.cookie = cookie;
 		}
 	}
 
 	private getLocalStorageItem(name: string): string {
-		let storedValue = '';
 		if (typeof window !== 'undefined') {
-			storedValue = window.localStorage?.getItem(name) || '';
+			return window.localStorage?.getItem(name) || '';
 		}
-
-		try {
-			const data = JSON.parse(storedValue);
-			return data[this.globals.siteId] || '';
-		} catch (e) {
-			return '';
-		}
+		return '';
 	}
 
 	private setLocalStorageItem(name: string, value: string): void {
-		const storedValue = JSON.stringify({
-			[this.globals.siteId]: value,
-		});
-		const setLocalStorageFn = this.config.apis?.localStorage?.setItem;
-		if (setLocalStorageFn) {
-			try {
-				setLocalStorageFn(name, storedValue);
-				return;
-			} catch (e) {
-				console.error('Failed to set localStorage item using custom API:', e);
-				return;
-			}
-		} else if (typeof window !== 'undefined') {
-			window.localStorage.setItem(name, storedValue);
+		if (typeof window !== 'undefined') {
+			window.localStorage.setItem(name, value);
 		}
 	}
 
@@ -392,7 +355,7 @@ export class Beacon {
 					return storedSkus
 						.split(',')
 						.filter((sku) => sku)
-						.map((sku) => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
+						.map((sku) => ({ uid: sku, sku: sku }));
 				}
 				return [];
 			},
