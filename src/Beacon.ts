@@ -1,5 +1,6 @@
-import packageJSON from '../package.json';
-export const { version } = packageJSON;
+// import packageJSON from '../package.json';
+// export const { version } = packageJSON;
+const version = 'test';
 
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -13,7 +14,7 @@ import {
 	AutocompleteSchemaData,
 	CartAddRequest,
 	CartRemoveRequest,
-	CartViewRequest,
+	CartViewTranslationRequest,
 	CategoryAddtocartRequest,
 	CategoryClickthroughRequest,
 	CategoryImpressionRequest,
@@ -65,6 +66,7 @@ import {
 	CategoryAddtocartSchemaData,
 	RecommendationsAddtocartSchemaData,
 	CartviewSchemaData,
+	TranslationsApi,
 } from './client';
 
 declare global {
@@ -73,6 +75,7 @@ declare global {
 	}
 }
 type LocalStorageItem = string | number | boolean | object | null;
+type PageLoadData = Record<string, { value: string; timestamp: string }>;
 export type PreflightRequestModel = {
 	userId: string;
 	siteId: string;
@@ -113,6 +116,7 @@ interface ApiMethodMap {
 	cart: CartApi;
 	order: OrderApi;
 	error: ErrorLogsApi;
+	translations: TranslationsApi;
 }
 export interface PayloadRequest {
 	apiType: keyof ApiMethodMap;
@@ -127,6 +131,7 @@ export type Payload<T> = {
 
 export const REQUEST_GROUPING_TIMEOUT = 200;
 const USER_ID_KEY = 'ssUserId';
+const PAGE_LOAD_ID_KEY = 'ssPageLoadId';
 const SESSION_ID_KEY = 'ssSessionId';
 const SHOPPER_ID_KEY = 'ssShopperId';
 export const CART_KEY = 'ssCartProducts';
@@ -136,6 +141,7 @@ const ATTRIBUTION_QUERY_PARAM = 'ss_attribution';
 const ATTRIBUTION_KEY = 'ssAttribution';
 const MAX_EXPIRATION = 47304000000; // 18 months
 const THIRTY_MINUTES = 1800000; // 30 minutes
+const TEN_SECONDS = 10000; // 10 seconds
 const MAX_VIEWED_COUNT = 20;
 const EXPIRED_COOKIE = -1;
 export const COOKIE_DOMAIN =
@@ -184,10 +190,11 @@ export class Beacon {
 			cart: new CartApi(apiConfig),
 			order: new OrderApi(apiConfig),
 			error: new ErrorLogsApi(apiConfig),
+			translations: new TranslationsApi(apiConfig),
 		};
 
 		this.globals = globals;
-		this.pageLoadId = this.generateId();
+		this.pageLoadId = this.getPageLoadId();
 
 		if (this.globals.currency) {
 			this.setCurrency(this.globals.currency);
@@ -237,7 +244,7 @@ export class Beacon {
 		}
 	}
 
-	private getLocalStorageItem(name: string): LocalStorageItem {
+	private getLocalStorageItem<T = LocalStorageItem>(name: string): T | undefined {
 		if (typeof window !== 'undefined') {
 			const rawData = window.localStorage?.getItem(name) || '';
 			try {
@@ -252,7 +259,6 @@ export class Beacon {
 				// noop - failed to parse stored value
 			}
 		}
-		return '';
 	}
 
 	private setLocalStorageItem(name: string, value: LocalStorageItem): void {
@@ -771,8 +777,8 @@ export class Beacon {
 
 				return payload;
 			},
-			view: (event: Payload<CartviewSchemaData>): CartViewRequest => {
-				const payload: CartViewRequest = {
+			view: (event: Payload<CartviewSchemaData>): CartViewTranslationRequest => {
+				const payload: CartViewTranslationRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					cartviewSchema: {
 						context: this.getContext(),
@@ -780,7 +786,7 @@ export class Beacon {
 					},
 				};
 
-				const request = this.createRequest('cart', 'cartView', payload);
+				const request = this.createRequest('translations', 'cartViewTranslation', payload);
 				this.sendRequests([request]);
 				this.storage.cart.set(event.data.results);
 				return payload;
@@ -918,6 +924,40 @@ export class Beacon {
 			this.setCookie(key, data.value, COOKIE_SAMESITE, expiration, COOKIE_DOMAIN); // attempt to store in cookie
 			return data.value;
 		}
+	}
+
+	public getPageLoadId(): string {
+		if(this.pageLoadId) {
+			return this.pageLoadId;
+		}
+
+		let pageLoadId = this.generateId();
+		let pageLoadData: PageLoadData = {};
+		const pageLoadLocalData = this.getLocalStorageItem<PageLoadData>(PAGE_LOAD_ID_KEY);
+		if(pageLoadLocalData) {
+			pageLoadData = pageLoadLocalData;
+		} else {
+			const pageLoadCookieData = this.getCookie(PAGE_LOAD_ID_KEY);
+			if(pageLoadCookieData) {
+				try {
+					pageLoadData = JSON.parse(pageLoadCookieData);
+				} catch {
+					this.setCookie(PAGE_LOAD_ID_KEY, '', COOKIE_SAMESITE, THIRTY_MINUTES, COOKIE_DOMAIN);
+				}
+			}
+		}
+		const currentHref = this.config.href || (typeof window !== 'undefined' && window.location.href) || '';
+		if(pageLoadData && pageLoadData[currentHref]) {
+			const { value, timestamp } = pageLoadData[currentHref];
+			if(value && timestamp && new Date(timestamp).getTime() > Date.now() - TEN_SECONDS) {
+				pageLoadId = value;
+			}
+		}
+		const value = { ...pageLoadData, [currentHref]: { value: pageLoadId, timestamp: this.getTimestamp()}};
+		this.setLocalStorageItem(PAGE_LOAD_ID_KEY, value);
+		this.setCookie(PAGE_LOAD_ID_KEY, JSON.stringify(value), COOKIE_SAMESITE, THIRTY_MINUTES, COOKIE_DOMAIN);
+		this.pageLoadId = pageLoadId;
+		return pageLoadId;
 	}
 
 	public getUserId(): string {

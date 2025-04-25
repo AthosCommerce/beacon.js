@@ -10,3 +10,4 @@ export * from './ProductApi';
 export * from './RecommendationsApi';
 export * from './SearchApi';
 export * from './ShopperApi';
+export * from './TranslationsApi';

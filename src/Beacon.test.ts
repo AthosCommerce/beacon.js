@@ -738,7 +738,7 @@ describe('Beacon', () => {
 			});
 
 			it('can process view event', async () => {
-				const spy = jest.spyOn(beacon['apis'].cart, 'cartView');
+				const spy = jest.spyOn(beacon['apis'].translations, 'cartViewTranslation');
 				const payload = beacon.events.cart.view({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
