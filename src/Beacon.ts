@@ -72,7 +72,7 @@ declare global {
 	}
 }
 type LocalStorageItem = string | number | boolean | object | null;
-type PageLoadData = Record<string, { value: string; timestamp: string }>;
+type PageLoadData = { href: string; value: string; timestamp: string };
 export type PreflightRequestModel = {
 	userId: string;
 	siteId: string;
@@ -127,7 +127,7 @@ export type Payload<T> = {
 
 export const REQUEST_GROUPING_TIMEOUT = 200;
 const USER_ID_KEY = 'ssUserId';
-const PAGE_LOAD_ID_KEY = 'ssPageLoadId';
+export const PAGE_LOAD_ID_KEY = 'ssPageLoadId';
 const SESSION_ID_KEY = 'ssSessionId';
 const SHOPPER_ID_KEY = 'ssShopperId';
 export const CART_KEY = 'ssCartProducts';
@@ -137,7 +137,7 @@ const ATTRIBUTION_QUERY_PARAM = 'ss_attribution';
 const ATTRIBUTION_KEY = 'ssAttribution';
 const MAX_EXPIRATION = 47304000000; // 18 months
 const THIRTY_MINUTES = 1800000; // 30 minutes
-const TEN_SECONDS = 10000; // 10 seconds
+export const PAGE_LOAD_ID_EXPIRATION = 10000; // 10 seconds
 const MAX_VIEWED_COUNT = 20;
 const EXPIRED_COOKIE = -1;
 export const COOKIE_DOMAIN =
@@ -913,30 +913,17 @@ export class Beacon {
 		}
 
 		let pageLoadId = this.generateId();
-		let pageLoadData: PageLoadData = {};
-		const pageLoadLocalData = this.getLocalStorageItem<PageLoadData>(PAGE_LOAD_ID_KEY);
-		if(pageLoadLocalData) {
-			pageLoadData = pageLoadLocalData;
-		} else {
-			const pageLoadCookieData = this.getCookie(PAGE_LOAD_ID_KEY);
-			if(pageLoadCookieData) {
-				try {
-					pageLoadData = JSON.parse(pageLoadCookieData);
-				} catch {
-					this.setCookie(PAGE_LOAD_ID_KEY, '', COOKIE_SAMESITE, THIRTY_MINUTES, COOKIE_DOMAIN);
-				}
-			}
-		}
+		const pageLoadData = this.getLocalStorageItem<PageLoadData>(PAGE_LOAD_ID_KEY);
 		const currentHref = this.config.href || (typeof window !== 'undefined' && window.location.href) || '';
-		if(pageLoadData && pageLoadData[currentHref]) {
-			const { value, timestamp } = pageLoadData[currentHref];
-			if(value && timestamp && new Date(timestamp).getTime() > Date.now() - TEN_SECONDS) {
+		if(pageLoadData) {
+			const { href, value, timestamp } = pageLoadData;
+			if(href === currentHref && value && timestamp && new Date(timestamp).getTime() > Date.now() - PAGE_LOAD_ID_EXPIRATION) {
 				pageLoadId = value;
 			}
+			this.setLocalStorageItem(PAGE_LOAD_ID_KEY, '');
+		} else {
+			this.setLocalStorageItem(PAGE_LOAD_ID_KEY, { href: currentHref, value: pageLoadId, timestamp: this.getTimestamp()});
 		}
-		const value = { ...pageLoadData, [currentHref]: { value: pageLoadId, timestamp: this.getTimestamp()}};
-		this.setLocalStorageItem(PAGE_LOAD_ID_KEY, value);
-		this.setCookie(PAGE_LOAD_ID_KEY, JSON.stringify(value), COOKIE_SAMESITE, THIRTY_MINUTES, COOKIE_DOMAIN);
 		this.pageLoadId = pageLoadId;
 		return pageLoadId;
 	}

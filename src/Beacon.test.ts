@@ -4,6 +4,8 @@ import {
 	appendResults,
 	Beacon,
 	CART_KEY,
+	PAGE_LOAD_ID_EXPIRATION,
+	PAGE_LOAD_ID_KEY,
 	PayloadRequest,
 	REQUEST_GROUPING_TIMEOUT,
 } from './Beacon';
@@ -101,7 +103,7 @@ describe('Beacon', () => {
 				// localStorage contains cart data
 				expect(localStorageMock.setItem).toHaveBeenCalled();
 				const data = localStorageMock.getItem(CART_KEY)!;
-				expect(data).toBe(JSON.stringify({ value: mockProducts}));
+				expect(data).toBe(JSON.stringify({ value: mockProducts }));
 
 				// can add to exisiting cart data and should be at the front
 				const product = { uid: 'productUid5', childUid: 'productChildUid5', sku: 'productSku5', childSku: 'productChildSku5', qty: 1, price: 9.99 };
@@ -180,6 +182,70 @@ describe('Beacon', () => {
 				expect(id3).toStrictEqual(expect.any(String));
 				expect(id3).not.toBe(id2);
 			});
+
+			it('can getPageLoadId', async () => {
+				localStorageMock.clear(); // clear storage again due to reinstantiating beacon
+				const href = 'test-href';
+				beacon = new Beacon(mockGlobals, {
+					...mockConfig,
+					href,
+				});
+				const pageLoadId1 = beacon.getPageLoadId();
+				expect(pageLoadId1).toStrictEqual(expect.any(String));
+
+				await new Promise((resolve) => setTimeout(resolve, 100));
+
+				// should return the same id
+				const pageLoadId2 = beacon.getPageLoadId();
+				expect(pageLoadId2).toStrictEqual(pageLoadId1);
+
+				// should save generated id to storage
+				const stored = localStorageMock.getItem(PAGE_LOAD_ID_KEY)!;
+				expect(JSON.parse(stored)).toStrictEqual({
+					value: {
+						href,
+						value: pageLoadId1,
+						timestamp: expect.any(String),
+					}
+				});
+			});
+
+			it('can getPageLoadId from storage', async () => {
+				const stored = { href: 'test-href', value: 'test-value', timestamp: beacon.getTimestamp() };
+				localStorageMock.setItem(PAGE_LOAD_ID_KEY, JSON.stringify({ value: stored }));
+
+				// reconstruct beacon due to pageLoadId being created in constructor
+				beacon = new Beacon(mockGlobals, {
+					...mockConfig,
+					href: stored.href,
+				});
+				expect(beacon['config'].href).toStrictEqual(stored.href);
+				expect(beacon['pageLoadId']).toStrictEqual(stored.value);
+
+				// should be cleared from storage
+				const raw = localStorageMock.getItem(PAGE_LOAD_ID_KEY)!;
+				expect(raw).toStrictEqual(JSON.stringify({ value: '' }));
+			});
+
+			it('does not get expired pageLoadId from storage', async () => {
+				const stored = { href: 'test-href', value: 'test-value', timestamp: beacon.getTimestamp() };
+				localStorageMock.setItem(PAGE_LOAD_ID_KEY, JSON.stringify({ value: stored }));
+
+				await new Promise((resolve) => setTimeout(resolve, PAGE_LOAD_ID_EXPIRATION + 100));
+
+				// reconstruct beacon due to pageLoadId being created in constructor
+				beacon = new Beacon(mockGlobals, {
+					...mockConfig,
+					href: stored.href,
+				});
+				expect(beacon['config'].href).toStrictEqual(stored.href);
+				expect(beacon['pageLoadId']).not.toBe(stored.value);
+				expect(beacon['pageLoadId']).toStrictEqual(expect.any(String));
+
+				// should be cleared from storage
+				const stored2 = localStorageMock.getItem(PAGE_LOAD_ID_KEY)!;
+				expect(JSON.parse(stored2)).toStrictEqual({ value: '' });
+			}, PAGE_LOAD_ID_EXPIRATION + 1000);
 		});
 	});
 
@@ -679,7 +745,7 @@ describe('Beacon', () => {
 				const storedCartData = beacon.storage.cart.get();
 				expect(storedCartData).toEqual(cart);
 			});
-			
+
 			it('can process remove event', async () => {
 				const cart = [
 					{ uid: 'prodUidA', childUid: 'prodChildUidA', sku: 'prodSkuA', childSku: 'prodChildSkuA', qty: 1, price: 10.99 },
@@ -707,7 +773,7 @@ describe('Beacon', () => {
 				const storedCartData = beacon.storage.cart.get();
 				expect(storedCartData).toEqual([cart[1]]);
 			});
-			
+
 			it('can process remove event with supplied cart', async () => {
 				const cart = [
 					{ uid: 'prodUidB', childUid: 'prodChildUidB', sku: 'prodSkuB', childSku: 'prodChildSkuB', qty: 1, price: 10.99 },
