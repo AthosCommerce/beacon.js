@@ -101,6 +101,7 @@ export type BeaconConfig = {
 type BeaconGlobals = {
 	siteId: string;
 	currency?: ContextCurrency;
+	cart?: Product[];
 };
 
 interface ApiMethodMap {
@@ -194,6 +195,89 @@ export class Beacon {
 		if (this.globals.currency) {
 			this.setCurrency(this.globals.currency);
 		}
+		if (this.globals.cart && Array.isArray(this.globals.cart)) {
+			const currentCart: Product[] = this.globals.cart.filter((item) => typeof item === 'object' && (item.uid || item.sku)).map((item): Product => {
+				return {
+					uid: item.uid || item.sku || '',
+					childUid: item.childUid,
+					sku: item.sku,
+					childSku: item.childSku,
+					price: item.price || -1,
+					qty: item.qty || 1,
+				}
+			});
+
+			const storedCart = this.storage.cart.get();
+			if(!storedCart?.length && currentCart.length) {
+				console.log("Got heree")
+				// no stored cart, add all items
+				this.events.cart.add({
+					data: {
+						results: currentCart,
+						cart: currentCart,
+					}
+				});
+			} else if (currentCart.length) {
+				currentCart.forEach((item) => {
+					const existingItem = storedCart.find((existingItem) => {
+						return existingItem.uid === item.uid &&
+							existingItem.sku === item.sku &&
+							existingItem.childUid === item.childUid &&
+							existingItem.childSku === item.childSku;
+					});
+					if (existingItem) {
+						// item already exists in cart, check if qty has changed
+						if (item.qty !== -1 && item.qty > existingItem.qty) {
+							const results = [{
+								...item,
+								qty: item.qty - existingItem.qty,
+							}];
+							this.events.cart.add({
+								data: {
+									results,
+									cart: currentCart,
+								}
+							});
+						} else if (item.qty !== -1 && item.qty < existingItem.qty) {
+							const results = [{
+								...existingItem,
+								qty: existingItem.qty - item.qty,
+							}];
+							this.events.cart.remove({
+								data: {
+									results,
+									cart: currentCart,
+								}
+							});
+						}
+						// remove from existing cart
+						const index = storedCart.indexOf(existingItem);
+						if (index !== -1) {
+							storedCart.splice(index, 1);
+						}
+					} else {
+						// item does not exist in cart, add it
+						this.events.cart.add({
+							data: {
+								results: [item],
+								cart: currentCart,
+							}
+						});
+					}
+				});
+
+			}
+			// any remaining items in existing cart should be removed
+			// OR current cart is empty but storage has items, remove items from storage
+			if (storedCart.length) {
+				this.events.cart.remove({
+					data: {
+						results: storedCart,
+						cart: currentCart,
+					}
+				});
+			}
+		}
 	}
 
 	private getCookie(name: string): string {
@@ -269,7 +353,7 @@ export class Beacon {
 				const storedProducts = this.getLocalStorageItem(CART_KEY) as Product[];
 				if (storedProducts) {
 					try {
-						if(Array.isArray(storedProducts)) {
+						if (Array.isArray(storedProducts)) {
 							return storedProducts as Product[];
 						}
 					} catch {
@@ -313,10 +397,10 @@ export class Beacon {
 						.reverse()
 						.forEach((product) => {
 							// ensure objects have properties
-							const isSkuAlreadyInCart = cartProducts.find((cartProduct) => 
-								cartProduct.childUid === product.childUid && 
-								cartProduct.childSku === product.childSku && 
-								cartProduct.uid === product.uid && 
+							const isSkuAlreadyInCart = cartProducts.find((cartProduct) =>
+								cartProduct.childUid === product.childUid &&
+								cartProduct.childSku === product.childSku &&
+								cartProduct.uid === product.uid &&
 								cartProduct.sku === product.sku
 							);
 							if (!isSkuAlreadyInCart) {
@@ -336,10 +420,10 @@ export class Beacon {
 					const cartProducts = [...existingCartProducts];
 
 					products.forEach((product) => {
-						const isSkuAlreadyInCart = cartProducts.find((cartProduct) => 
-							cartProduct.childUid === product.childUid && 
-							cartProduct.childSku === product.childSku && 
-							cartProduct.uid === product.uid && 
+						const isSkuAlreadyInCart = cartProducts.find((cartProduct) =>
+							cartProduct.childUid === product.childUid &&
+							cartProduct.childSku === product.childSku &&
+							cartProduct.uid === product.uid &&
 							cartProduct.sku === product.sku
 						);
 						if (isSkuAlreadyInCart) {
@@ -364,7 +448,7 @@ export class Beacon {
 				const storedItems = this.getLocalStorageItem(VIEWED_KEY) as ProductPageviewSchemaDataResult[];
 				if (storedItems) {
 					try {
-						if(Array.isArray(storedItems)) {
+						if (Array.isArray(storedItems)) {
 							return storedItems as ProductPageviewSchemaDataResult[];
 						}
 					} catch {
@@ -471,7 +555,7 @@ export class Beacon {
 				return payload;
 			},
 			addToCart: (event: Payload<AutocompleteAddtocartSchemaData>): AutocompleteAddtocartRequest => {
-				if(event.data.results) {
+				if (event.data.results) {
 					this.storage.cart.add(event.data.results);
 				}
 
@@ -542,7 +626,7 @@ export class Beacon {
 				return payload;
 			},
 			addToCart: (event: Payload<SearchAddtocartSchemaData>): SearchAddtocartRequest => {
-				if(event.data.results) {
+				if (event.data.results) {
 					this.storage.cart.add(event.data.results)
 				}
 
@@ -613,7 +697,7 @@ export class Beacon {
 				return payload;
 			},
 			addToCart: (event: Payload<CategoryAddtocartSchemaData>): CategoryAddtocartRequest => {
-				if(event.data.results) {
+				if (event.data.results) {
 					this.storage.cart.add(event.data.results)
 				}
 
@@ -671,7 +755,7 @@ export class Beacon {
 				return payload;
 			},
 			addToCart: (event: Payload<RecommendationsAddtocartSchemaData>): RecommendationsAddtocartRequest => {
-				if(event.data.results) {
+				if (event.data.results) {
 					this.storage.cart.add(event.data.results)
 				}
 
@@ -726,7 +810,7 @@ export class Beacon {
 				}
 
 				if (!data.cart) {
-					if(data.results) {
+					if (data.results) {
 						this.storage.cart.add(data.results)
 					}
 					data.cart = this.storage.cart.get();
@@ -751,7 +835,7 @@ export class Beacon {
 					...event.data,
 				}
 				if (!data.cart) {
-					if(data.results) {
+					if (data.results) {
 						this.storage.cart.remove(data.results)
 					}
 					data.cart = this.storage.cart.get();
@@ -908,20 +992,20 @@ export class Beacon {
 	}
 
 	public getPageLoadId(): string {
-		if(this.pageLoadId) {
+		if (this.pageLoadId) {
 			return this.pageLoadId;
 		}
 
 		let pageLoadId = this.generateId();
 		const pageLoadData = this.getLocalStorageItem<PageLoadData>(PAGE_LOAD_ID_KEY);
 		const currentHref = this.config.href || (typeof window !== 'undefined' && window.location.href) || '';
-		if(pageLoadData) {
+		if (pageLoadData) {
 			const { href, value, timestamp } = pageLoadData;
-			if(href === currentHref && value && timestamp && new Date(timestamp).getTime() > Date.now() - PAGE_LOAD_ID_EXPIRATION) {
+			if (href === currentHref && value && timestamp && new Date(timestamp).getTime() > Date.now() - PAGE_LOAD_ID_EXPIRATION) {
 				pageLoadId = value;
 			}
 		}
-		this.setLocalStorageItem(PAGE_LOAD_ID_KEY, { href: currentHref, value: pageLoadId, timestamp: this.getTimestamp()});
+		this.setLocalStorageItem(PAGE_LOAD_ID_KEY, { href: currentHref, value: pageLoadId, timestamp: this.getTimestamp() });
 		this.pageLoadId = pageLoadId;
 		return pageLoadId;
 	}
@@ -983,7 +1067,7 @@ export class Beacon {
 		const storedAttribution = this.getCookie(ATTRIBUTION_KEY) || this.getLocalStorageItem(ATTRIBUTION_KEY) as ContextAttributionInner[];
 		if (storedAttribution) {
 			try {
-				if(typeof storedAttribution === 'string') {
+				if (typeof storedAttribution === 'string') {
 					// from cookie
 					attribution = JSON.parse(storedAttribution) as ContextAttributionInner[];
 				} else if (Array.isArray(storedAttribution)) {
