@@ -84,15 +84,15 @@ export type PreflightRequestModel = {
 export type BeaconConfig = {
 	mode?: 'production' | 'development';
 	initiator?: string;
-	apis?: {
-		requesters?: {
-			personalization?: {
-				origin?: string;
-			};
-			beacon?: {
-				origin?: string;
-			};
+	requesters?: {
+		personalization?: {
+			origin?: string;
 		};
+		beacon?: {
+			origin?: string;
+		};
+	};
+	apis?: {
 		fetch?: FetchAPI;
 	};
 	href?: string;
@@ -101,6 +101,7 @@ export type BeaconConfig = {
 type BeaconGlobals = {
 	siteId: string;
 	currency?: ContextCurrency;
+	cart?: Product[];
 };
 
 interface ApiMethodMap {
@@ -175,7 +176,7 @@ export class Beacon {
 		this.initiator = this.config.initiator || `beaconjs/${version}`;
 
 		const fetchApi = this.config.apis?.fetch;
-		const apiConfig = new Configuration({ fetchApi, basePath: this.config.apis?.requesters?.beacon?.origin });
+		const apiConfig = new Configuration({ fetchApi, basePath: this.config.requesters?.beacon?.origin });
 		this.apis = {
 			shopper: new ShopperApi(apiConfig),
 			autocomplete: new AutocompleteApi(apiConfig),
@@ -269,7 +270,7 @@ export class Beacon {
 				const storedProducts = this.getLocalStorageItem(CART_KEY) as Product[];
 				if (storedProducts) {
 					try {
-						if(Array.isArray(storedProducts)) {
+						if (Array.isArray(storedProducts)) {
 							return storedProducts as Product[];
 						}
 					} catch {
@@ -313,10 +314,10 @@ export class Beacon {
 						.reverse()
 						.forEach((product) => {
 							// ensure objects have properties
-							const isSkuAlreadyInCart = cartProducts.find((cartProduct) => 
-								cartProduct.childUid === product.childUid && 
-								cartProduct.childSku === product.childSku && 
-								cartProduct.uid === product.uid && 
+							const isSkuAlreadyInCart = cartProducts.find((cartProduct) =>
+								cartProduct.childUid === product.childUid &&
+								cartProduct.childSku === product.childSku &&
+								cartProduct.uid === product.uid &&
 								cartProduct.sku === product.sku
 							);
 							if (!isSkuAlreadyInCart) {
@@ -336,10 +337,10 @@ export class Beacon {
 					const cartProducts = [...existingCartProducts];
 
 					products.forEach((product) => {
-						const isSkuAlreadyInCart = cartProducts.find((cartProduct) => 
-							cartProduct.childUid === product.childUid && 
-							cartProduct.childSku === product.childSku && 
-							cartProduct.uid === product.uid && 
+						const isSkuAlreadyInCart = cartProducts.find((cartProduct) =>
+							cartProduct.childUid === product.childUid &&
+							cartProduct.childSku === product.childSku &&
+							cartProduct.uid === product.uid &&
 							cartProduct.sku === product.sku
 						);
 						if (isSkuAlreadyInCart) {
@@ -364,7 +365,7 @@ export class Beacon {
 				const storedItems = this.getLocalStorageItem(VIEWED_KEY) as ProductPageviewSchemaDataResult[];
 				if (storedItems) {
 					try {
-						if(Array.isArray(storedItems)) {
+						if (Array.isArray(storedItems)) {
 							return storedItems as ProductPageviewSchemaDataResult[];
 						}
 					} catch {
@@ -471,7 +472,7 @@ export class Beacon {
 				return payload;
 			},
 			addToCart: (event: Payload<AutocompleteAddtocartSchemaData>): AutocompleteAddtocartRequest => {
-				if(event.data.results) {
+				if (event.data.results) {
 					this.storage.cart.add(event.data.results);
 				}
 
@@ -542,7 +543,7 @@ export class Beacon {
 				return payload;
 			},
 			addToCart: (event: Payload<SearchAddtocartSchemaData>): SearchAddtocartRequest => {
-				if(event.data.results) {
+				if (event.data.results) {
 					this.storage.cart.add(event.data.results)
 				}
 
@@ -613,7 +614,7 @@ export class Beacon {
 				return payload;
 			},
 			addToCart: (event: Payload<CategoryAddtocartSchemaData>): CategoryAddtocartRequest => {
-				if(event.data.results) {
+				if (event.data.results) {
 					this.storage.cart.add(event.data.results)
 				}
 
@@ -671,7 +672,7 @@ export class Beacon {
 				return payload;
 			},
 			addToCart: (event: Payload<RecommendationsAddtocartSchemaData>): RecommendationsAddtocartRequest => {
-				if(event.data.results) {
+				if (event.data.results) {
 					this.storage.cart.add(event.data.results)
 				}
 
@@ -726,7 +727,7 @@ export class Beacon {
 				}
 
 				if (!data.cart) {
-					if(data.results) {
+					if (data.results) {
 						this.storage.cart.add(data.results)
 					}
 					data.cart = this.storage.cart.get();
@@ -751,7 +752,7 @@ export class Beacon {
 					...event.data,
 				}
 				if (!data.cart) {
-					if(data.results) {
+					if (data.results) {
 						this.storage.cart.remove(data.results)
 					}
 					data.cart = this.storage.cart.get();
@@ -908,20 +909,20 @@ export class Beacon {
 	}
 
 	public getPageLoadId(): string {
-		if(this.pageLoadId) {
+		if (this.pageLoadId) {
 			return this.pageLoadId;
 		}
 
 		let pageLoadId = this.generateId();
 		const pageLoadData = this.getLocalStorageItem<PageLoadData>(PAGE_LOAD_ID_KEY);
 		const currentHref = this.config.href || (typeof window !== 'undefined' && window.location.href) || '';
-		if(pageLoadData) {
+		if (pageLoadData) {
 			const { href, value, timestamp } = pageLoadData;
-			if(href === currentHref && value && timestamp && new Date(timestamp).getTime() > Date.now() - PAGE_LOAD_ID_EXPIRATION) {
+			if (href === currentHref && value && timestamp && new Date(timestamp).getTime() > Date.now() - PAGE_LOAD_ID_EXPIRATION) {
 				pageLoadId = value;
 			}
 		}
-		this.setLocalStorageItem(PAGE_LOAD_ID_KEY, { href: currentHref, value: pageLoadId, timestamp: this.getTimestamp()});
+		this.setLocalStorageItem(PAGE_LOAD_ID_KEY, { href: currentHref, value: pageLoadId, timestamp: this.getTimestamp() });
 		this.pageLoadId = pageLoadId;
 		return pageLoadId;
 	}
@@ -983,7 +984,7 @@ export class Beacon {
 		const storedAttribution = this.getCookie(ATTRIBUTION_KEY) || this.getLocalStorageItem(ATTRIBUTION_KEY) as ContextAttributionInner[];
 		if (storedAttribution) {
 			try {
-				if(typeof storedAttribution === 'string') {
+				if (typeof storedAttribution === 'string') {
 					// from cookie
 					attribution = JSON.parse(storedAttribution) as ContextAttributionInner[];
 				} else if (Array.isArray(storedAttribution)) {
@@ -1132,7 +1133,7 @@ export class Beacon {
 		const cart = overrides?.cart || this.storage.cart.get();
 		const lastViewed = overrides?.lastViewed || this.storage.viewed.get();
 
-		if (userId && typeof userId == 'string' && siteId && (shopper || cart.length || lastViewed.length)) {
+		if (userId && typeof userId == 'string' && siteId) {
 			const preflightParams: PreflightRequestModel = {
 				userId,
 				siteId,
@@ -1148,7 +1149,7 @@ export class Beacon {
 				preflightParams.lastViewed = lastViewed.map((item) => this.getProductId(item));
 			}
 
-			const origin = this.config.apis?.requesters?.personalization?.origin || `https://${siteId}.a.searchspring.io`;
+			const origin = this.config.requesters?.personalization?.origin || `https://${siteId}.a.searchspring.io`;
 			const endpoint = `${origin}/api/personalization/preflightCache`;
 
 			if (this.config.apis?.fetch || typeof fetch !== 'undefined') {
