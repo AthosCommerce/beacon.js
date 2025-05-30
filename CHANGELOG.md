@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.27](https://github.com/searchspring/beacon.js/compare/v0.0.26...v0.0.27) (2025-05-30)
+
+
+### Bug Fixes
+
+* recommendations addToCart events should be batched ([5c2e70c](https://github.com/searchspring/beacon.js/commit/5c2e70c3224905c28a3775a2a7374a64d450d0eb))
+
 ### [0.0.26](https://github.com/searchspring/beacon.js/compare/v0.0.25...v0.0.26) (2025-05-29)
 
 
