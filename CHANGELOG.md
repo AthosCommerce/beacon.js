@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.28](https://github.com/searchspring/beacon.js/compare/v0.0.27...v0.0.28) (2025-06-04)
+
+
+### Bug Fixes
+
+* clone initial batch entry ([6529a78](https://github.com/searchspring/beacon.js/commit/6529a78dc052d583f7bb856d892e2b967dbd1cd1))
+
 ### [0.0.27](https://github.com/searchspring/beacon.js/compare/v0.0.26...v0.0.27) (2025-05-30)
 
 
