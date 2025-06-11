@@ -127,7 +127,7 @@ export type Payload<T> = {
 	data: T;
 };
 
-export const REQUEST_GROUPING_TIMEOUT = 200;
+export const REQUEST_GROUPING_TIMEOUT = 300;
 const USER_ID_KEY = 'ssUserId';
 export const PAGE_LOAD_ID_KEY = 'ssPageLoadId';
 const SESSION_ID_KEY = 'ssSessionId';
