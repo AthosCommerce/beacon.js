@@ -264,10 +264,9 @@ export class Beacon {
 				window.localStorage.setItem(name, JSON.stringify({ value }));
 			} catch(e) {
 				if(e.name === 'QuotaExceededError') {
-					// send error to server
 					this.events.error.snap({
 						data: {
-							message: 'Local storage quota exceeded',
+							message: 'QuotaExceededError',
 							details: {
 								key: name,
 								value: value,
