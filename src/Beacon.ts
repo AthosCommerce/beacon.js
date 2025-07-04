@@ -262,7 +262,7 @@ export class Beacon {
 		if (typeof window !== 'undefined') {
 			try {
 				window.localStorage.setItem(name, JSON.stringify({ value }));
-			} catch(e) {
+			} catch(e: any) {
 				if(e.name === 'QuotaExceededError') {
 					this.events.error.snap({
 						data: {
