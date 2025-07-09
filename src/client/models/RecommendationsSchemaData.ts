@@ -20,6 +20,13 @@ import {
     ItemToJSON,
     ItemToJSONTyped,
 } from './Item';
+import type { BannersInner } from './BannersInner';
+import {
+    BannersInnerFromJSON,
+    BannersInnerFromJSONTyped,
+    BannersInnerToJSON,
+    BannersInnerToJSONTyped,
+} from './BannersInner';
 
 /**
  * Event details
@@ -39,6 +46,12 @@ export interface RecommendationsSchemaData {
      * @memberof RecommendationsSchemaData
      */
     results: Array<Item>;
+    /**
+     * List of banners UID's returned in `merchandising.content`. Omitting this field indicates zero banners were returned in the API response.
+     * @type {Array<BannersInner>}
+     * @memberof RecommendationsSchemaData
+     */
+    banners: Array<BannersInner>;
 }
 
 /**
@@ -47,6 +60,7 @@ export interface RecommendationsSchemaData {
 export function instanceOfRecommendationsSchemaData(value: object): value is RecommendationsSchemaData {
     if (!('tag' in value) || value['tag'] === undefined) return false;
     if (!('results' in value) || value['results'] === undefined) return false;
+    if (!('banners' in value) || value['banners'] === undefined) return false;
     return true;
 }
 
@@ -62,6 +76,7 @@ export function RecommendationsSchemaDataFromJSONTyped(json: any, ignoreDiscrimi
         
         'tag': json['tag'],
         'results': ((json['results'] as Array<any>).map(ItemFromJSON)),
+        'banners': ((json['banners'] as Array<any>).map(BannersInnerFromJSON)),
     };
 }
 
@@ -78,6 +93,7 @@ export function RecommendationsSchemaDataFromJSONTyped(json: any, ignoreDiscrimi
         
         'tag': value['tag'],
         'results': ((value['results'] as Array<any>).map(ItemToJSON)),
+        'banners': ((value['banners'] as Array<any>).map(BannersInnerToJSON)),
     };
 }
 

@@ -23,6 +23,7 @@ models/AutocompleteRedirectSchema.ts
 models/AutocompleteRedirectSchemaData.ts
 models/AutocompleteSchema.ts
 models/AutocompleteSchemaData.ts
+models/BannersInner.ts
 models/CartSchema.ts
 models/CartSchemaData.ts
 models/CategoryAddtocartSchema.ts

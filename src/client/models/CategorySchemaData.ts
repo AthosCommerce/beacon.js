@@ -20,6 +20,13 @@ import {
     ItemToJSON,
     ItemToJSONTyped,
 } from './Item';
+import type { BannersInner } from './BannersInner';
+import {
+    BannersInnerFromJSON,
+    BannersInnerFromJSONTyped,
+    BannersInnerToJSON,
+    BannersInnerToJSONTyped,
+} from './BannersInner';
 import type { AutocompleteAddtocartSchemaDataBgfilterInner } from './AutocompleteAddtocartSchemaDataBgfilterInner';
 import {
     AutocompleteAddtocartSchemaDataBgfilterInnerFromJSON,
@@ -110,6 +117,12 @@ export interface CategorySchemaData {
      * @memberof CategorySchemaData
      */
     results: Array<Item>;
+    /**
+     * List of banners UID's returned in `merchandising.content`. Omitting this field indicates zero banners were returned in the API response.
+     * @type {Array<BannersInner>}
+     * @memberof CategorySchemaData
+     */
+    banners: Array<BannersInner>;
 }
 
 
@@ -130,6 +143,7 @@ export function instanceOfCategorySchemaData(value: object): value is CategorySc
     if (!('matchType' in value) || value['matchType'] === undefined) return false;
     if (!('pagination' in value) || value['pagination'] === undefined) return false;
     if (!('results' in value) || value['results'] === undefined) return false;
+    if (!('banners' in value) || value['banners'] === undefined) return false;
     return true;
 }
 
@@ -151,6 +165,7 @@ export function CategorySchemaDataFromJSONTyped(json: any, ignoreDiscriminator: 
         'pagination': CategoryAddtocartSchemaDataPaginationFromJSON(json['pagination']),
         'merchandising': json['merchandising'] == null ? undefined : CategoryAddtocartSchemaDataMerchandisingFromJSON(json['merchandising']),
         'results': ((json['results'] as Array<any>).map(ItemFromJSON)),
+        'banners': ((json['banners'] as Array<any>).map(BannersInnerFromJSON)),
     };
 }
 
@@ -173,6 +188,7 @@ export function CategorySchemaDataFromJSONTyped(json: any, ignoreDiscriminator: 
         'pagination': CategoryAddtocartSchemaDataPaginationToJSON(value['pagination']),
         'merchandising': CategoryAddtocartSchemaDataMerchandisingToJSON(value['merchandising']),
         'results': ((value['results'] as Array<any>).map(ItemToJSON)),
+        'banners': ((value['banners'] as Array<any>).map(BannersInnerToJSON)),
     };
 }
 

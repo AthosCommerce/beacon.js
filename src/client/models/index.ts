@@ -12,6 +12,7 @@ export * from './AutocompleteRedirectSchema';
 export * from './AutocompleteRedirectSchemaData';
 export * from './AutocompleteSchema';
 export * from './AutocompleteSchemaData';
+export * from './BannersInner';
 export * from './CartSchema';
 export * from './CartSchemaData';
 export * from './CategoryAddtocartSchema';
