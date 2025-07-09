@@ -20,6 +20,12 @@ import { mapValues } from '../runtime';
  */
 export interface Item {
     /**
+     * Defines the type of item tracked.
+     * @type {string}
+     * @memberof Item
+     */
+    type: ItemTypeEnum;
+    /**
      * Index of the result returned in the Searchspring results. The first result is 1, the second is 2, etc.
      * @type {number}
      * @memberof Item
@@ -51,10 +57,22 @@ export interface Item {
     childSku?: string;
 }
 
+
+/**
+ * @export
+ */
+export const ItemTypeEnum = {
+    Product: 'product',
+    Banner: 'banner'
+} as const;
+export type ItemTypeEnum = typeof ItemTypeEnum[keyof typeof ItemTypeEnum];
+
+
 /**
  * Check if a given object implements the Item interface.
  */
 export function instanceOfItem(value: object): value is Item {
+    if (!('type' in value) || value['type'] === undefined) return false;
     if (!('position' in value) || value['position'] === undefined) return false;
     if (!('uid' in value) || value['uid'] === undefined) return false;
     return true;
@@ -70,6 +88,7 @@ export function ItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): Item
     }
     return {
         
+        'type': json['type'],
         'position': json['position'],
         'uid': json['uid'],
         'childUid': json['childUid'] == null ? undefined : json['childUid'],
@@ -89,6 +108,7 @@ export function ItemFromJSONTyped(json: any, ignoreDiscriminator: boolean): Item
 
     return {
         
+        'type': value['type'],
         'position': value['position'],
         'uid': value['uid'],
         'childUid': value['childUid'],

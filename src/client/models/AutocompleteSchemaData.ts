@@ -20,6 +20,13 @@ import {
     ItemToJSON,
     ItemToJSONTyped,
 } from './Item';
+import type { BannersInner } from './BannersInner';
+import {
+    BannersInnerFromJSON,
+    BannersInnerFromJSONTyped,
+    BannersInnerToJSON,
+    BannersInnerToJSONTyped,
+} from './BannersInner';
 import type { AutocompleteAddtocartSchemaDataBgfilterInner } from './AutocompleteAddtocartSchemaDataBgfilterInner';
 import {
     AutocompleteAddtocartSchemaDataBgfilterInnerFromJSON,
@@ -128,6 +135,12 @@ export interface AutocompleteSchemaData {
      * @memberof AutocompleteSchemaData
      */
     results: Array<Item>;
+    /**
+     * List of banners UID's returned in `merchandising.content`. Omitting this field indicates zero banners were returned in the API response.
+     * @type {Array<BannersInner>}
+     * @memberof AutocompleteSchemaData
+     */
+    banners: Array<BannersInner>;
 }
 
 
@@ -149,6 +162,7 @@ export function instanceOfAutocompleteSchemaData(value: object): value is Autoco
     if (!('matchType' in value) || value['matchType'] === undefined) return false;
     if (!('pagination' in value) || value['pagination'] === undefined) return false;
     if (!('results' in value) || value['results'] === undefined) return false;
+    if (!('banners' in value) || value['banners'] === undefined) return false;
     return true;
 }
 
@@ -173,6 +187,7 @@ export function AutocompleteSchemaDataFromJSONTyped(json: any, ignoreDiscriminat
         'pagination': AutocompleteAddtocartSchemaDataPaginationFromJSON(json['pagination']),
         'merchandising': json['merchandising'] == null ? undefined : AutocompleteAddtocartSchemaDataMerchandisingFromJSON(json['merchandising']),
         'results': ((json['results'] as Array<any>).map(ItemFromJSON)),
+        'banners': ((json['banners'] as Array<any>).map(BannersInnerFromJSON)),
     };
 }
 
@@ -198,6 +213,7 @@ export function AutocompleteSchemaDataFromJSONTyped(json: any, ignoreDiscriminat
         'pagination': AutocompleteAddtocartSchemaDataPaginationToJSON(value['pagination']),
         'merchandising': AutocompleteAddtocartSchemaDataMerchandisingToJSON(value['merchandising']),
         'results': ((value['results'] as Array<any>).map(ItemToJSON)),
+        'banners': ((value['banners'] as Array<any>).map(BannersInnerToJSON)),
     };
 }
 
