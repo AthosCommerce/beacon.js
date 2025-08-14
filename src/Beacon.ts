@@ -1187,8 +1187,8 @@ export class Beacon {
 		}
 	}
 
-	protected getProductId(product: Product | Item | ProductPageviewSchemaDataResult): string {
-		return `${product.childUid || product.childSku || product.uid || product.sku || ''}`.trim();
+	protected getProductId(product: Product | Item): string {
+		return `${product.childSku || product.childUid || product.sku || product.uid || ''}`.trim();
 	}
 }
 
