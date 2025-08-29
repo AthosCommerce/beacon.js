@@ -63,6 +63,12 @@ import {
  */
 export interface CategoryAddtocartSchemaData {
     /**
+     * Unique ID of the Search API response, returned as `responseId` from the Search API. Used to join events together
+     * @type {string}
+     * @memberof CategoryAddtocartSchemaData
+     */
+    responseId?: string;
+    /**
      * Refined query passed as the `rq` query string parameter to the Search API. This should be omitted if search within search results is not implemented.
      * @type {string}
      * @memberof CategoryAddtocartSchemaData
@@ -73,7 +79,7 @@ export interface CategoryAddtocartSchemaData {
      * @type {string}
      * @memberof CategoryAddtocartSchemaData
      */
-    matchType: CategoryAddtocartSchemaDataMatchTypeEnum;
+    matchType?: CategoryAddtocartSchemaDataMatchTypeEnum;
     /**
      * List of active background filters passed to the Search API
      * @type {Array<AutocompleteAddtocartSchemaDataBgfilterInner>}
@@ -97,7 +103,7 @@ export interface CategoryAddtocartSchemaData {
      * @type {CategoryAddtocartSchemaDataPagination}
      * @memberof CategoryAddtocartSchemaData
      */
-    pagination: CategoryAddtocartSchemaDataPagination;
+    pagination?: CategoryAddtocartSchemaDataPagination;
     /**
      * 
      * @type {CategoryAddtocartSchemaDataMerchandising}
@@ -127,8 +133,6 @@ export type CategoryAddtocartSchemaDataMatchTypeEnum = typeof CategoryAddtocartS
  * Check if a given object implements the CategoryAddtocartSchemaData interface.
  */
 export function instanceOfCategoryAddtocartSchemaData(value: object): value is CategoryAddtocartSchemaData {
-    if (!('matchType' in value) || value['matchType'] === undefined) return false;
-    if (!('pagination' in value) || value['pagination'] === undefined) return false;
     if (!('results' in value) || value['results'] === undefined) return false;
     return true;
 }
@@ -143,12 +147,13 @@ export function CategoryAddtocartSchemaDataFromJSONTyped(json: any, ignoreDiscri
     }
     return {
         
+        'responseId': json['responseId'] == null ? undefined : json['responseId'],
         'rq': json['rq'] == null ? undefined : json['rq'],
-        'matchType': json['matchType'],
+        'matchType': json['matchType'] == null ? undefined : json['matchType'],
         'bgfilter': json['bgfilter'] == null ? undefined : ((json['bgfilter'] as Array<any>).map(AutocompleteAddtocartSchemaDataBgfilterInnerFromJSON)),
         'filter': json['filter'] == null ? undefined : ((json['filter'] as Array<any>).map(AutocompleteAddtocartSchemaDataFilterInnerFromJSON)),
         'sort': json['sort'] == null ? undefined : ((json['sort'] as Array<any>).map(AutocompleteAddtocartSchemaDataSortInnerFromJSON)),
-        'pagination': CategoryAddtocartSchemaDataPaginationFromJSON(json['pagination']),
+        'pagination': json['pagination'] == null ? undefined : CategoryAddtocartSchemaDataPaginationFromJSON(json['pagination']),
         'merchandising': json['merchandising'] == null ? undefined : CategoryAddtocartSchemaDataMerchandisingFromJSON(json['merchandising']),
         'results': ((json['results'] as Array<any>).map(ProductFromJSON)),
     };
@@ -165,6 +170,7 @@ export function CategoryAddtocartSchemaDataFromJSONTyped(json: any, ignoreDiscri
 
     return {
         
+        'responseId': value['responseId'],
         'rq': value['rq'],
         'matchType': value['matchType'],
         'bgfilter': value['bgfilter'] == null ? undefined : ((value['bgfilter'] as Array<any>).map(AutocompleteAddtocartSchemaDataBgfilterInnerToJSON)),

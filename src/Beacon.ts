@@ -1228,9 +1228,9 @@ export function additionalRequestKeys(
 		case 'category':
 			const searchSchema = schema as SearchSchema | AutocompleteSchema | CategorySchema;
 			value += `||rq=${searchSchema.data.rq || ''}`;
-			value += `||page=${searchSchema.data.pagination.page}`;
-			value += `||resultsPerPage=${searchSchema.data.pagination.resultsPerPage}`;
-			value += `||totalResults=${searchSchema.data.pagination.totalResults}`;
+			value += `||page=${searchSchema.data.pagination?.page}`;
+			value += `||resultsPerPage=${searchSchema.data.pagination?.resultsPerPage}`;
+			value += `||totalResults=${searchSchema.data.pagination?.totalResults}`;
 			break;
 		case 'recommendation':
 			const recommendationsSchema = schema as RecommendationsSchema;

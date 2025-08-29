@@ -70,6 +70,12 @@ import {
  */
 export interface CategorySchemaData {
     /**
+     * Unique ID of the Search API response, returned as `responseId` from the Search API. Used to join events together
+     * @type {string}
+     * @memberof CategorySchemaData
+     */
+    responseId?: string;
+    /**
      * Refined query passed as the `rq` query string parameter to the Search API. This should be omitted if search within search results is not implemented.
      * @type {string}
      * @memberof CategorySchemaData
@@ -80,7 +86,7 @@ export interface CategorySchemaData {
      * @type {string}
      * @memberof CategorySchemaData
      */
-    matchType: CategorySchemaDataMatchTypeEnum;
+    matchType?: CategorySchemaDataMatchTypeEnum;
     /**
      * List of active background filters passed to the Search API
      * @type {Array<AutocompleteAddtocartSchemaDataBgfilterInner>}
@@ -104,7 +110,7 @@ export interface CategorySchemaData {
      * @type {CategoryAddtocartSchemaDataPagination}
      * @memberof CategorySchemaData
      */
-    pagination: CategoryAddtocartSchemaDataPagination;
+    pagination?: CategoryAddtocartSchemaDataPagination;
     /**
      * 
      * @type {CategoryAddtocartSchemaDataMerchandising}
@@ -122,7 +128,7 @@ export interface CategorySchemaData {
      * @type {Array<BannersInner>}
      * @memberof CategorySchemaData
      */
-    banners: Array<BannersInner>;
+    banners?: Array<BannersInner>;
 }
 
 
@@ -140,10 +146,7 @@ export type CategorySchemaDataMatchTypeEnum = typeof CategorySchemaDataMatchType
  * Check if a given object implements the CategorySchemaData interface.
  */
 export function instanceOfCategorySchemaData(value: object): value is CategorySchemaData {
-    if (!('matchType' in value) || value['matchType'] === undefined) return false;
-    if (!('pagination' in value) || value['pagination'] === undefined) return false;
     if (!('results' in value) || value['results'] === undefined) return false;
-    if (!('banners' in value) || value['banners'] === undefined) return false;
     return true;
 }
 
@@ -157,15 +160,16 @@ export function CategorySchemaDataFromJSONTyped(json: any, ignoreDiscriminator: 
     }
     return {
         
+        'responseId': json['responseId'] == null ? undefined : json['responseId'],
         'rq': json['rq'] == null ? undefined : json['rq'],
-        'matchType': json['matchType'],
+        'matchType': json['matchType'] == null ? undefined : json['matchType'],
         'bgfilter': json['bgfilter'] == null ? undefined : ((json['bgfilter'] as Array<any>).map(AutocompleteAddtocartSchemaDataBgfilterInnerFromJSON)),
         'filter': json['filter'] == null ? undefined : ((json['filter'] as Array<any>).map(AutocompleteAddtocartSchemaDataFilterInnerFromJSON)),
         'sort': json['sort'] == null ? undefined : ((json['sort'] as Array<any>).map(AutocompleteAddtocartSchemaDataSortInnerFromJSON)),
-        'pagination': CategoryAddtocartSchemaDataPaginationFromJSON(json['pagination']),
+        'pagination': json['pagination'] == null ? undefined : CategoryAddtocartSchemaDataPaginationFromJSON(json['pagination']),
         'merchandising': json['merchandising'] == null ? undefined : CategoryAddtocartSchemaDataMerchandisingFromJSON(json['merchandising']),
         'results': ((json['results'] as Array<any>).map(ItemFromJSON)),
-        'banners': ((json['banners'] as Array<any>).map(BannersInnerFromJSON)),
+        'banners': json['banners'] == null ? undefined : ((json['banners'] as Array<any>).map(BannersInnerFromJSON)),
     };
 }
 
@@ -180,6 +184,7 @@ export function CategorySchemaDataFromJSONTyped(json: any, ignoreDiscriminator: 
 
     return {
         
+        'responseId': value['responseId'],
         'rq': value['rq'],
         'matchType': value['matchType'],
         'bgfilter': value['bgfilter'] == null ? undefined : ((value['bgfilter'] as Array<any>).map(AutocompleteAddtocartSchemaDataBgfilterInnerToJSON)),
@@ -188,7 +193,7 @@ export function CategorySchemaDataFromJSONTyped(json: any, ignoreDiscriminator: 
         'pagination': CategoryAddtocartSchemaDataPaginationToJSON(value['pagination']),
         'merchandising': CategoryAddtocartSchemaDataMerchandisingToJSON(value['merchandising']),
         'results': ((value['results'] as Array<any>).map(ItemToJSON)),
-        'banners': ((value['banners'] as Array<any>).map(BannersInnerToJSON)),
+        'banners': value['banners'] == null ? undefined : ((value['banners'] as Array<any>).map(BannersInnerToJSON)),
     };
 }
 

@@ -28,11 +28,17 @@ import {
  */
 export interface RecommendationsSchemaData {
     /**
+     * Unique ID of the Search API response, returned as `responseId` from the Search API. Used to join events together
+     * @type {string}
+     * @memberof RecommendationsSchemaData
+     */
+    responseId?: string;
+    /**
      * Tag of the personalized recommendation profile the shopper interacted with
      * @type {string}
      * @memberof RecommendationsSchemaData
      */
-    tag: string;
+    tag?: string;
     /**
      * List of tracked Searchspring result(s). An empty array will indicate zero results were returned in the API response.
      * @type {Array<Item>}
@@ -45,7 +51,6 @@ export interface RecommendationsSchemaData {
  * Check if a given object implements the RecommendationsSchemaData interface.
  */
 export function instanceOfRecommendationsSchemaData(value: object): value is RecommendationsSchemaData {
-    if (!('tag' in value) || value['tag'] === undefined) return false;
     if (!('results' in value) || value['results'] === undefined) return false;
     return true;
 }
@@ -60,7 +65,8 @@ export function RecommendationsSchemaDataFromJSONTyped(json: any, ignoreDiscrimi
     }
     return {
         
-        'tag': json['tag'],
+        'responseId': json['responseId'] == null ? undefined : json['responseId'],
+        'tag': json['tag'] == null ? undefined : json['tag'],
         'results': ((json['results'] as Array<any>).map(ItemFromJSON)),
     };
 }
@@ -76,6 +82,7 @@ export function RecommendationsSchemaDataFromJSONTyped(json: any, ignoreDiscrimi
 
     return {
         
+        'responseId': value['responseId'],
         'tag': value['tag'],
         'results': ((value['results'] as Array<any>).map(ItemToJSON)),
     };

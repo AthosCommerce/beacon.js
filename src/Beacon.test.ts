@@ -951,7 +951,7 @@ describe('Beacon', () => {
 
 				let baseKey = `${mockGlobals.siteId}||${endpoint}`;
 				const key = additionalRequestKeys(baseKey, endpoint, schema);
-				const expected = `${mockGlobals.siteId}||${endpoint}||${pageLoadId}||${sessionId}||rq=${rq}||page=${pagination.page}||resultsPerPage=${pagination.resultsPerPage}||totalResults=${pagination.totalResults}||q=${q}||correctedQuery=${correctedQuery}||matchType=${matchType}`;
+				const expected = `${mockGlobals.siteId}||${endpoint}||${pageLoadId}||${sessionId}||rq=${rq}||page=${pagination?.page}||resultsPerPage=${pagination?.resultsPerPage}||totalResults=${pagination?.totalResults}||q=${q}||correctedQuery=${correctedQuery}||matchType=${matchType}`;
 				expect(key).toStrictEqual(expected);
 			});
 			it('handles CategorySchema', () => {
@@ -967,7 +967,7 @@ describe('Beacon', () => {
 
 				let baseKey = `${mockGlobals.siteId}||${endpoint}`;
 				const key = additionalRequestKeys(baseKey, endpoint, schema);
-				const expected = `${mockGlobals.siteId}||${endpoint}||${pageLoadId}||${sessionId}||rq=${rq}||page=${pagination.page}||resultsPerPage=${pagination.resultsPerPage}||totalResults=${pagination.totalResults}`;
+				const expected = `${mockGlobals.siteId}||${endpoint}||${pageLoadId}||${sessionId}||rq=${rq}||page=${pagination?.page}||resultsPerPage=${pagination?.resultsPerPage}||totalResults=${pagination?.totalResults}`;
 				expect(key).toStrictEqual(expected);
 			});
 			it('handles RecommendationsSchema', () => {
