@@ -950,7 +950,7 @@ export class Beacon {
 				sendStorageError(e, this, storageKey, data.value);
 			}
 
-			return this[key];
+			return data.value;
 		}
 	}
 
