@@ -990,10 +990,16 @@ export class Beacon {
 	}
 
 	public getShopperId(): string {
-		let shopperId: string | null = null;
 		try {
 			// cookie value is always a string, but localstorage could be a number
-			this.shopperId = this.getCookie(SHOPPER_ID_KEY) || ('' + this.getLocalStorageItem(SHOPPER_ID_KEY) as string);
+			const cookieValue = this.getCookie(SHOPPER_ID_KEY);
+			const storageValue = this.getLocalStorageItem(SHOPPER_ID_KEY) as string;
+
+			// set the shopperId to the cookie value if it exists, otherwise use the local storage value and then convert to string if they exist
+			const shopperId = cookieValue || (storageValue ? '' + storageValue : undefined);
+			if (shopperId) {
+				this.shopperId = shopperId;
+			}
 		} catch {
 			// noop
 		}
