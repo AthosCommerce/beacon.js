@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.42](https://github.com/searchspring/beacon.js/compare/v0.0.41...v0.0.42) (2025-09-05)
+
+
+### Bug Fixes
+
+* **beacon:** ensuring that shopperId is always a string when stored and retrieved ([8012719](https://github.com/searchspring/beacon.js/commit/801271990fc3ea3beda142e956c0bc8b2f164ed1))
+
 ### [0.0.41](https://github.com/searchspring/beacon.js/compare/v0.0.40...v0.0.41) (2025-09-03)
 
 
