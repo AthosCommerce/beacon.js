@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.43](https://github.com/searchspring/beacon.js/compare/v0.0.42...v0.0.43) (2025-10-23)
+
+
+### Features
+
+* **featureflags:** adding featureFlags utils to check if storage & cookies are allowed ([8cf21a2](https://github.com/searchspring/beacon.js/commit/8cf21a2f46b10008d4d0f85d68f1c43462550238))
+
 ### [0.0.42](https://github.com/searchspring/beacon.js/compare/v0.0.41...v0.0.42) (2025-09-05)
 
 
