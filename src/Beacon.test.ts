@@ -10,13 +10,9 @@ import {
 	REQUEST_GROUPING_TIMEOUT,
 } from './Beacon';
 import {
-	AutocompleteSchema,
-	AutocompleteSchemaDataMatchTypeEnum,
-	CategorySchema,
-	ContextCurrency,
-	ItemTypeEnum,
+	Currency,
 	Product,
-	RecommendationsSchema,
+	ResultProductType,
 } from './client';
 
 const resetAllCookies = () => {
@@ -39,6 +35,9 @@ describe('Beacon', () => {
 	const mockConfig = {
 		apis: {
 			fetch: mockFetchApi,
+		},
+		headers: {
+			'Content-Type': 'application/json',
 		},
 		mode: 'development' as const,
 	};
@@ -87,12 +86,12 @@ describe('Beacon', () => {
 
 	describe('Storage', () => {
 		describe('Cart', () => {
-			const multiQuantityTestProduct = { uid: 'multiQuantityText', qty: 3, price: 10 };
+			const multiQuantityTestProduct = { uid: 'multiQuantityText', parentUid: 'multiQuantityParentText', qty: 3, price: 10 };
 			const mockProducts: Product[] = [
-				{ uid: 'productUid1', childUid: 'productChildUid1', sku: 'productSku1', childSku: 'productChildSku1', qty: 1, price: 9.99 },
-				{ uid: 'productUid2', childUid: 'productChildUid2', sku: 'productSku2', childSku: 'productChildSku2', qty: 2, price: 10.99 },
-				{ uid: 'productUid3', childUid: 'productChildUid3', sku: 'productSku3', childSku: 'productChildSku3', qty: 3, price: 0 },
-				{ uid: 'productUid4', qty: 3, price: 0 },
+				{ uid: 'productUid1', parentUid: 'productParentUid1', sku: 'productSku1', qty: 1, price: 9.99 },
+				{ uid: 'productUid2', parentUid: 'productParentUid2', sku: 'productSku2', qty: 2, price: 10.99 },
+				{ uid: 'productUid3', parentUid: 'productParentUid3', sku: 'productSku3', qty: 3, price: 0 },
+				{ uid: 'productUid4', parentUid: 'productParentUid4', qty: 3, price: 0 },
 				multiQuantityTestProduct,
 			];
 
@@ -105,7 +104,7 @@ describe('Beacon', () => {
 
 				// cookie contains cart data
 				expect(global.document.cookie).toContain(
-					`${CART_KEY}=${encodeURIComponent(mockProducts.map((product) => product.childSku || product.childUid || product.sku || product.uid).join(','))}`
+					`${CART_KEY}=${encodeURIComponent(mockProducts.map((product) => product.sku || product.uid).join(','))}`
 				);
 
 				// localStorage contains cart data
@@ -114,7 +113,7 @@ describe('Beacon', () => {
 				expect(data).toBe(JSON.stringify({ value: mockProducts }));
 
 				// can add to exisiting cart data and should be at the front
-				const product = { uid: 'productUid5', childUid: 'productChildUid5', sku: 'productSku5', childSku: 'productChildSku5', qty: 1, price: 9.99 };
+				const product = { uid: 'productUid5', parentUid: 'productParentUid5', sku: 'productSku5', qty: 1, price: 9.99 };
 				beacon.storage.cart.add([product]);
 
 				const updatedCartData = beacon.storage.cart.get();
@@ -140,7 +139,7 @@ describe('Beacon', () => {
 				]);
 
 				// can add to exisiting cart data and should be at the front
-				const product2 = { uid: 'productUid6', childUid: 'productChildUid6', sku: 'productSku6', childSku: 'productChildSku6', qty: 1, price: 9.99 };
+				const product2 = { uid: 'productUid6', parentUid: 'productParentUid6', sku: 'productSku6', qty: 1, price: 9.99 };
 				beacon.storage.cart.add([product2]);
 				const addedCartData = beacon.storage.cart.get();
 				expect(addedCartData).toEqual([product2, ...removedSingleQuantityCartData]);
@@ -354,7 +353,7 @@ describe('Beacon', () => {
 			expect(beacon['currency']).toStrictEqual({ code: '' });
 
 			// set currency
-			const currency: ContextCurrency = { code: 'EUR' };
+			const currency: Currency = { code: 'EUR' };
 			beacon.setCurrency(currency);
 
 			// should be stored on class property
@@ -391,492 +390,777 @@ describe('Beacon', () => {
 	});
 
 	describe('Events', () => {
-		const baseSearchSchema = {
-			q: 'test',
-			matchType: AutocompleteSchemaDataMatchTypeEnum.Primary,
-			pagination: {
-				totalResults: 100,
-				page: 1,
-				resultsPerPage: 20,
-			},
-			results: [
-				{ type: ItemTypeEnum.Product, position: 1, uid: 'prodUid1', childUid: 'prodChildUid1', sku: 'prodSku1', childSku: 'prodChildSku1' },
-				{ type: ItemTypeEnum.Product, position: 2, uid: 'prodUid2', childUid: 'prodChildUid2', sku: 'prodSku2', childSku: 'prodChildSku2' },
-				{ type: ItemTypeEnum.Product, position: 3, uid: 'prodUid3', childUid: 'prodChildUid3', sku: 'prodSku3', childSku: 'prodChildSku3' },
-				{ type: ItemTypeEnum.Product, position: 4, uid: 'prodUid4', childUid: 'prodChildUid4', sku: 'prodSku4', childSku: 'prodChildSku4' },
-			],
-			banners: [],
-		};
-
 		const otherFetchParams = {
 			headers: {
-				'Content-Type': 'text/plain',
+				'Content-Type': 'application/json',
 			},
 			method: 'POST',
 		};
 		describe('Shopper Login', () => {
 			it('can process login event', async () => {
-				const spy = jest.spyOn(beacon['apis'].shopper, 'login');
 				const shopperId = 'shopper123';
 				const data = {
 					id: shopperId,
 				};
-				const payload = beacon.events.shopper.login({ data })!;
-				await new Promise((resolve) => setTimeout(resolve, 0));
-				expect(beacon['shopperId']).toBe(shopperId);
-
-				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.shopperLoginSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
-			});
-
-			it('can process login event with keepalive when mode is production', async () => {
-				beacon = new Beacon(mockGlobals, { ...mockConfig, mode: 'production' });
 				const spy = jest.spyOn(beacon['apis'].shopper, 'login');
-				const shopperId = 'shopper123';
-				const data = {
-					id: shopperId,
-				};
-				const payload = beacon.events.shopper.login({ data })!;
+				beacon.events.shopper.login({ data })!;
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				await new Promise((resolve) => setTimeout(resolve, 0));
 				expect(beacon['shopperId']).toBe(shopperId);
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.shopperLoginSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams, keepalive: true });
+				expect(mockFetchApi).toHaveBeenNthCalledWith(1, expect.stringContaining('/preflightCache'), expect.any(Object));
+				expect(mockFetchApi).toHaveBeenNthCalledWith(2, expect.any(String), fetchPayloadAssertion);
 			});
 		});
 		describe('Autocomplete', () => {
-			const data = { ...baseSearchSchema };
-
 			it('can process render event', async () => {
+				const data = {
+					responseId: 'responseId-test',
+				}
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteRender');
 
-				const payload = beacon.events.autocomplete.render({ data });
+				beacon.events.autocomplete.render({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.autocompleteSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 			it('can process impression event', async () => {
+				const data = {
+					responseId: 'test-response-id',
+					results: [
+						{ type: ResultProductType.Product, parentUid: 'parentUid1', uid: 'prodUid1', sku: 'prodSku1' },
+						{ type: ResultProductType.Product, parentUid: 'parentUid2', uid: 'prodUid2', sku: 'prodSku2' },
+						{ type: ResultProductType.Product, parentUid: 'parentUid3', uid: 'prodUid3', sku: 'prodSku3' },
+						{ type: ResultProductType.Product, parentUid: 'parentUid4', uid: 'prodUid4', sku: 'prodSku4' },
+						{ type: ResultProductType.Banner, uid: 'inlinebanneruid' },
+					],
+					banners: [
+						{ uid: 'merchandisingbanneruid' },
+					],
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteImpression');
-				const payload = beacon.events.autocomplete.impression({ data });
+				beacon.events.autocomplete.impression({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.autocompleteSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 			it('can process addToCart event', async () => {
 				beacon.storage.cart.clear();
 
 				const data = {
-					...baseSearchSchema,
-					banners: undefined,
+					responseId: 'test-response-id',
 					results: [
-						{ uid: 'prodUid1', childUid: 'prodChildUid1', sku: 'prodSku1', childSku: 'prodChildSku1', qty: 1, price: 10.99 },
-						{ uid: 'prodUid2', childUid: 'prodChildUid2', sku: 'prodSku2', childSku: 'prodChildSku2', qty: 1, price: 10.99 },
+						{ uid: 'prodUid1', parentUid: 'prodParentUid1', sku: 'prodSku1', qty: 1, price: 10.99 },
+						{ uid: 'prodUid2', parentUid: 'prodParentUid2', sku: 'prodSku2', qty: 1, price: 10.99 },
 					],
 				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
 
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteAddtocart');
 
-				const payload = beacon.events.autocomplete.addToCart({ data });
+				beacon.events.autocomplete.addToCart({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.autocompleteAddtocartSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 
 				// validate cart storage data
 				const cartData = beacon.storage.cart.get();
 				expect(cartData).toEqual(data.results);
 			});
 			it('can process clickThrough event', async () => {
+				const data = {
+					responseId: 'test-response-id',
+					results: [{ type: ResultProductType.Product, parentUid: 'parentUid1', uid: 'prodUid1', sku: 'prodSku1' }],
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteClickthrough');
-				const payload = beacon.events.autocomplete.clickThrough({ data });
+
+				beacon.events.autocomplete.clickThrough({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.autocompleteSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 			it('can process redirect event', async () => {
-				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteRedirect');
 				const data = {
+					responseId: 'test-response-id',
 					redirect: '/new-url',
 				};
-				const payload = beacon.events.autocomplete.redirect({ data });
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
+				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteRedirect');
+
+				beacon.events.autocomplete.redirect({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.autocompleteRedirectSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 		});
 		describe('Search', () => {
-			const data = { ...baseSearchSchema };
 			it('can process render event', async () => {
+				const data = {
+					responseId: 'test-response-id',
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].search, 'searchRender');
-				const payload = beacon.events.search.render({ data });
+
+				beacon.events.search.render({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.searchSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 			it('can process impression event', async () => {
+				const data = {
+					responseId: 'test-response-id',
+					results: [
+						{ type: ResultProductType.Product, parentUid: 'parentUid1', uid: 'prodUid1', sku: 'prodSku1' },
+						{ type: ResultProductType.Product, parentUid: 'parentUid2', uid: 'prodUid2', sku: 'prodSku2' },
+						{ type: ResultProductType.Product, parentUid: 'parentUid3', uid: 'prodUid3', sku: 'prodSku3' },
+						{ type: ResultProductType.Product, parentUid: 'parentUid4', uid: 'prodUid4', sku: 'prodSku4' },
+						{ type: ResultProductType.Banner, uid: 'inlinebanneruid' },
+					],
+					banners: [
+						{ uid: 'merchandisingbanneruid' },
+					],
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].search, 'searchImpression');
-				const payload = beacon.events.search.impression({ data });
+
+				beacon.events.search.impression({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.searchSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 			it('can process addToCart event', async () => {
 				beacon.storage.cart.clear();
 
 				const data = {
-					...baseSearchSchema,
-					banners: undefined,
+					responseId: 'test-response-id',
 					results: [
-						{ uid: 'prodUid1', childUid: 'prodChildUid1', sku: 'prodSku1', childSku: 'prodChildSku1', qty: 1, price: 10.99 },
-						{ uid: 'prodUid2', childUid: 'prodChildUid2', sku: 'prodSku2', childSku: 'prodChildSku2', qty: 1, price: 10.99 },
+						{ uid: 'prodUid1', parentUid: 'prodParentUid1', sku: 'prodSku1', qty: 1, price: 10.99 },
+						{ uid: 'prodUid2', parentUid: 'prodParentUid2', sku: 'prodSku2', qty: 1, price: 10.99 },
 					],
 				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
 
 				const spy = jest.spyOn(beacon['apis'].search, 'searchAddtocart');
 
-				const payload = beacon.events.search.addToCart({ data });
+				beacon.events.search.addToCart({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.searchAddtocartSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 
 				// validate cart storage data
 				const cartData = beacon.storage.cart.get();
 				expect(cartData).toEqual(data.results);
 			});
 			it('can process clickThrough event', async () => {
+				const data = {
+					responseId: 'test-response-id',
+					results: [{ type: ResultProductType.Product, parentUid: 'parentUid1', uid: 'prodUid1', sku: 'prodSku1' }],
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].search, 'searchClickthrough');
-				const payload = beacon.events.search.clickThrough({ data });
+
+				beacon.events.search.clickThrough({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.searchSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 			it('can process redirect event', async () => {
-				const spy = jest.spyOn(beacon['apis'].search, 'searchRedirect');
 				const data = {
+					responseId: 'test-response-id',
 					redirect: '/new-url',
 				};
-				const payload = beacon.events.search.redirect({ data });
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
+				const spy = jest.spyOn(beacon['apis'].search, 'searchRedirect');
+
+				beacon.events.search.redirect({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.searchRedirectSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 		});
 		describe('Category', () => {
-			const data = { ...baseSearchSchema, q: undefined };
-
 			it('can process render event', async () => {
+				const data = {
+					responseId: 'test-response-id',
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryRender');
-				const payload = beacon.events.category.render({ data });
+
+				beacon.events.category.render({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.categorySchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 			it('can process impression event', async () => {
+				const data = {
+					responseId: 'test-response-id',
+					results: [
+						{ type: ResultProductType.Product, parentUid: 'parentUid1', uid: 'prodUid1', sku: 'prodSku1' },
+						{ type: ResultProductType.Product, parentUid: 'parentUid2', uid: 'prodUid2', sku: 'prodSku2' },
+						{ type: ResultProductType.Product, parentUid: 'parentUid3', uid: 'prodUid3', sku: 'prodSku3' },
+						{ type: ResultProductType.Product, parentUid: 'parentUid4', uid: 'prodUid4', sku: 'prodSku4' },
+						{ type: ResultProductType.Banner, uid: 'inlinebanneruid' },
+					],
+					banners: [
+						{ uid: 'merchandisingbanneruid' },
+					],
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryImpression');
-				const payload = beacon.events.category.impression({ data });
+
+				beacon.events.category.impression({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.categorySchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 			it('can process addToCart event', async () => {
 				beacon.storage.cart.clear();
 
 				const data = {
-					...baseSearchSchema,
-					q: undefined,
-					banners: undefined,
+					responseId: 'test-response-id',
 					results: [
-						{ uid: 'prodUid1', childUid: 'prodChildUid1', sku: 'prodSku1', childSku: 'prodChildSku1', qty: 1, price: 10.99 },
-						{ uid: 'prodUid2', childUid: 'prodChildUid2', sku: 'prodSku2', childSku: 'prodChildSku2', qty: 1, price: 10.99 },
+						{ uid: 'prodUid1', parentUid: 'prodParentUid1', sku: 'prodSku1', qty: 1, price: 10.99 },
+						{ uid: 'prodUid2', parentUid: 'prodParentUid2', sku: 'prodSku2', qty: 1, price: 10.99 },
 					],
 				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
 
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryAddtocart');
 
-				const payload = beacon.events.category.addToCart({ data });
+				beacon.events.category.addToCart({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.categoryAddtocartSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 
 				// validate cart storage data
 				const cartData = beacon.storage.cart.get();
 				expect(cartData).toEqual(data.results);
 			});
 			it('can process clickThrough event', async () => {
+				const data = {
+					responseId: 'test-response-id',
+					results: [{ type: ResultProductType.Product, parentUid: 'parentUid1', uid: 'prodUid1', sku: 'prodSku1' }],
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryClickthrough');
-				const payload = beacon.events.category.clickThrough({ data });
+
+				beacon.events.category.clickThrough({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.categorySchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 		});
 		describe('Recommendations', () => {
-			const data = {
-				tag: 'test-tag',
-				results: [...baseSearchSchema.results],
-			};
 			it('can process render event', async () => {
+				const data = {
+					tag: 'test-tag',
+					responseId: 'test-response-id',
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsRender');
-				const payload = beacon.events.recommendations.render({ data });
+
+				beacon.events.recommendations.render({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.recommendationsSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 			it('can process impression event', async () => {
+				const data = {
+					responseId: 'test-response-id',
+					tag: 'test-tag',
+					results: [
+						{ type: ResultProductType.Product, parentUid: 'parentUid1', uid: 'prodUid1', sku: 'prodSku1' },
+						{ type: ResultProductType.Product, parentUid: 'parentUid2', uid: 'prodUid2', sku: 'prodSku2' },
+						{ type: ResultProductType.Product, parentUid: 'parentUid3', uid: 'prodUid3', sku: 'prodSku3' },
+						{ type: ResultProductType.Product, parentUid: 'parentUid4', uid: 'prodUid4', sku: 'prodSku4' },
+						{ type: ResultProductType.Banner, uid: 'inlinebanneruid' },
+					],
+					banners: [
+						{ uid: 'merchandisingbanneruid' },
+					],
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsImpression');
-				const payload = beacon.events.recommendations.impression({ data });
+
+				beacon.events.recommendations.impression({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.recommendationsSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 			it('can process addToCart event', async () => {
 				beacon.storage.cart.clear();
 
 				const data = {
+					responseId: 'test-response-id',
 					tag: 'test-tag',
 					results: [
-						{ uid: 'prodUid1', childUid: 'prodChildUid1', sku: 'prodSku1', childSku: 'prodChildSku1', qty: 1, price: 10.99 },
-						{ uid: 'prodUid2', childUid: 'prodChildUid2', sku: 'prodSku2', childSku: 'prodChildSku2', qty: 1, price: 10.99 },
+						{ uid: 'prodUid1', parentUid: 'prodParentUid1', sku: 'prodSku1', qty: 1, price: 10.99 },
+						{ uid: 'prodUid2', parentUid: 'prodParentUid2', sku: 'prodSku2', qty: 1, price: 10.99 },
 					],
 				};
 
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsAddtocart');
 
-				const payload = beacon.events.recommendations.addToCart({ data });
+				beacon.events.recommendations.addToCart({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.recommendationsAddtocartSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 
 				// validate cart storage data
 				const cartData = beacon.storage.cart.get();
 				expect(cartData).toEqual(data.results);
 			});
 			it('can process clickThrough event', async () => {
+				const data = {
+					responseId: 'test-response-id',
+					tag: 'test-tag',
+					results: [{ type: ResultProductType.Product, parentUid: 'parentUid1', uid: 'prodUid1', sku: 'prodSku1' }],
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsClickthrough');
-				const payload = beacon.events.recommendations.clickThrough({ data });
+
+				beacon.events.recommendations.clickThrough({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.recommendationsSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 		});
 		describe('Product', () => {
-			const data = {
-				result: { uid: 'prodUid1', childUid: 'prodChildUid1', sku: 'prodSku1', childSku: 'prodChildSku1' },
-			};
 			it('can process pageView event', async () => {
+				const data = {
+					result: { uid: 'prodUid1', parentUid: 'prodParentUid1', sku: 'prodSku1' },
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
-				const payload = beacon.events.product.pageView({ data });
+
+				beacon.events.product.pageView({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.productPageviewSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 		});
 		describe('Cart', () => {
-			const data = {
-				results: [
-					{ uid: 'prodUid1', childUid: 'prodChildUid1', sku: 'prodSku1', childSku: 'prodChildSku1', qty: 1, price: 10 },
-					{ uid: 'prodUid2', childUid: 'prodChildUid2', sku: 'prodSku2', childSku: 'prodChildSku2', qty: 1, price: 10 },
-					{ uid: 'prodUid3', childUid: 'prodChildUid3', sku: 'prodSku3', childSku: 'prodChildSku3', qty: 1, price: 10 },
-					{ uid: 'prodUid4', childUid: 'prodChildUid4', sku: 'prodSku4', childSku: 'prodChildSku4', qty: 1, price: 10 },
-				],
-			};
 			it('can process add event', async () => {
 				const cart = [
-					{ uid: 'prodUidA', childUid: 'prodChildUidA', sku: 'prodSkuA', childSku: 'prodChildSkuA', qty: 1, price: 10.99 },
-					{ uid: 'prodUidB', childUid: 'prodChildUidB', sku: 'prodSkuB', childSku: 'prodChildSkuB', qty: 1, price: 10.99 },
+					{ uid: 'prodUidA', parentUid: 'prodParentUidA', sku: 'prodSkuA', qty: 1, price: 10.99 },
+					{ uid: 'prodUidB', parentUid: 'prodParentUidB', sku: 'prodSkuB', qty: 1, price: 10.99 },
 				];
 
 				beacon.storage.cart.set(cart);
 
+				const results = [
+					{ uid: 'prodUid1', parentUid: 'prodParentUid1', sku: 'prodSku1', qty: 1, price: 10 },
+					{ uid: 'prodUid2', parentUid: 'prodParentUid2', sku: 'prodSku2', qty: 1, price: 10 },
+					{ uid: 'prodUid3', parentUid: 'prodParentUid3', sku: 'prodSku3', qty: 1, price: 10 },
+					{ uid: 'prodUid4', parentUid: 'prodParentUid4', sku: 'prodSku4', qty: 1, price: 10 },
+				];
+				const data = {
+					results,
+					cart: cart.concat(results),
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].cart, 'cartAdd');
-				const payload = beacon.events.cart.add({ data });
+
+				beacon.events.cart.add({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify({
-					...payload.cartSchema,
-					data: {
-						...payload.cartSchema.data,
-						results: payload.cartSchema.data.results,
-					},
-				});
 
 				// actual event is the third request due to storage changes sending preflights
-				expect(mockFetchApi).toHaveBeenNthCalledWith(3, expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenNthCalledWith(3, expect.any(String), fetchPayloadAssertion);
 
 				// validate cart storage data
 				const cartData = beacon.storage.cart.get();
-				expect(cartData).toEqual([...data.results, ...cart]);
-			});
-
-			it('can process add event with supplied cart', async () => {
-				const cart = [
-					{ uid: 'prodUidA', childUid: 'prodChildUidA', sku: 'prodSkuA', childSku: 'prodChildSkuA', qty: 1, price: 10.99 },
-					{ uid: 'prodUidB', childUid: 'prodChildUidB', sku: 'prodSkuB', childSku: 'prodChildSkuB', qty: 1, price: 10.99 },
-					...data.results,
-				];
-
-				const cartData = {
-					...data,
-					cart,
-				};
-
-				const spy = jest.spyOn(beacon['apis'].cart, 'cartAdd');
-				const payload = beacon.events.cart.add({ data: cartData });
-				await new Promise((resolve) => setTimeout(resolve, 0));
-
-				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify({
-					...payload.cartSchema,
-					data: {
-						results: payload.cartSchema.data.results,
-						cart: payload.cartSchema.data.cart,
-					},
-				});
-
-				// actual event is the second request due to storage change sending preflights
-				expect(mockFetchApi).toHaveBeenNthCalledWith(2, expect.any(String), { body, ...otherFetchParams });
-
-				// validate cart storage data
-				const storedCartData = beacon.storage.cart.get();
-				expect(storedCartData).toEqual(cart);
+				expect(cartData).toEqual(data.cart);
 			});
 
 			it('can process remove event', async () => {
 				const cart = [
-					{ uid: 'prodUidA', childUid: 'prodChildUidA', sku: 'prodSkuA', childSku: 'prodChildSkuA', qty: 1, price: 10.99 },
-					{ uid: 'prodUidB', childUid: 'prodChildUidB', sku: 'prodSkuB', childSku: 'prodChildSkuB', qty: 1, price: 10.99 },
+					{ uid: 'prodUidA', parentUid: 'prodParentUidA', sku: 'prodSkuA', qty: 1, price: 10.99 },
+					{ uid: 'prodUidB', parentUid: 'prodParentUidB', sku: 'prodSkuB', qty: 1, price: 10.99 },
+					{ uid: 'prodUid1', parentUid: 'prodParentUid1', sku: 'prodSku1', qty: 1, price: 10 },
+					{ uid: 'prodUid2', parentUid: 'prodParentUid2', sku: 'prodSku2', qty: 1, price: 10 },
+					{ uid: 'prodUid3', parentUid: 'prodParentUid3', sku: 'prodSku3', qty: 1, price: 10 },
+					{ uid: 'prodUid4', parentUid: 'prodParentUid4', sku: 'prodSku4', qty: 1, price: 10 },
 				];
-
-				const removeData = {
-					...data,
-					results: [{ uid: 'prodUidA', childUid: 'prodChildUidA', sku: 'prodSkuA', childSku: 'prodChildSkuA', qty: 1, price: 10.99 }],
-				};
 
 				beacon.storage.cart.set(cart);
 
-				const spy = jest.spyOn(beacon['apis'].cart, 'cartRemove');
-				const payload = beacon.events.cart.remove({ data: removeData });
-				await new Promise((resolve) => setTimeout(resolve, 0));
-
-				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.cartSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
-
-				// validate cart storage data
-				const storedCartData = beacon.storage.cart.get();
-				expect(storedCartData).toEqual([cart[1]]);
-			});
-
-			it('can process remove event with supplied cart', async () => {
-				const cart = [{ uid: 'prodUidB', childUid: 'prodChildUidB', sku: 'prodSkuB', childSku: 'prodChildSkuB', qty: 1, price: 10.99 }];
-
-				const removeData = {
-					...data,
-					results: [{ uid: 'prodUidA', childUid: 'prodChildUidA', sku: 'prodSkuA', childSku: 'prodChildSkuA', qty: 1, price: 10.99 }],
-					cart,
+				const results = [
+					{ uid: 'prodUidA', parentUid: 'prodParentUidA', sku: 'prodSkuA', qty: 1, price: 10.99 },
+					{ uid: 'prodUid1', parentUid: 'prodParentUid1', sku: 'prodSku1', qty: 1, price: 10 },
+				];
+				const data = {
+					results,
+					cart: [
+						{ uid: 'prodUidB', parentUid: 'prodParentUidB', sku: 'prodSkuB', qty: 1, price: 10.99 },
+						{ uid: 'prodUid2', parentUid: 'prodParentUid2', sku: 'prodSku2', qty: 1, price: 10 },
+						{ uid: 'prodUid3', parentUid: 'prodParentUid3', sku: 'prodSku3', qty: 1, price: 10 },
+						{ uid: 'prodUid4', parentUid: 'prodParentUid4', sku: 'prodSku4', qty: 1, price: 10 },
+					],
 				};
 
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].cart, 'cartRemove');
-				const payload = beacon.events.cart.remove({ data: removeData });
+
+				beacon.events.cart.remove({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.cartSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 
 				// validate cart storage data
 				const storedCartData = beacon.storage.cart.get();
-				expect(storedCartData).toEqual(cart);
+				expect(storedCartData).toEqual(data.cart);
 			});
 		});
 		describe('Order', () => {
-			const data = {
-				orderId: '12345',
-				transactionTotal: 100,
-				total: 110,
-				city: 'test-city',
-				state: 'test-state',
-				country: 'test-country',
-				results: [
-					{ uid: 'prodUid1', childUid: 'prodChildUid1', sku: 'prodSku1', childSku: 'prodChildSku1', qty: 1, price: 10 },
-					{ uid: 'prodUid2', childUid: 'prodChildUid2', sku: 'prodSku2', childSku: 'prodChildSku2', qty: 1, price: 10 },
-					{ uid: 'prodUid3', childUid: 'prodChildUid3', sku: 'prodSku3', childSku: 'prodChildSku3', qty: 1, price: 10 },
-					{ uid: 'prodUid4', childUid: 'prodChildUid4', sku: 'prodSku4', childSku: 'prodChildSku4', qty: 1, price: 10 },
-				],
-			};
 			it('can process transaction event', async () => {
+				const data = {
+					orderId: '12345',
+					transactionTotal: 100,
+					total: 110,
+					city: 'test-city',
+					state: 'test-state',
+					country: 'test-country',
+					results: [
+						{ uid: 'prodUid1', parentUid: 'prodParentUid1', sku: 'prodSku1', qty: 1, price: 10 },
+						{ uid: 'prodUid2', parentUid: 'prodParentUid2', sku: 'prodSku2', qty: 1, price: 10 },
+						{ uid: 'prodUid3', parentUid: 'prodParentUid3', sku: 'prodSku3', qty: 1, price: 10 },
+						{ uid: 'prodUid4', parentUid: 'prodParentUid4', sku: 'prodSku4', qty: 1, price: 10 },
+					],
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].order, 'orderTransaction');
-				const payload = beacon.events.order.transaction({ data });
+
+				beacon.events.order.transaction({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.orderTransactionSchema);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 		});
 		describe('Error', () => {
-			const data = {
-				message: 'test-message',
-				stack: 'test-stack',
-				details: { test: 'test' },
-			};
 			it('can process shopifypixel event', async () => {
+				const data = {
+					message: 'test-message',
+					stack: 'test-stack',
+					details: { test: 'test' },
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].error, 'logShopifypixel');
-				const payload = beacon.events.error.shopifypixel({ data });
+
+				beacon.events.error.shopifypixel({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.shopifyPixelExtensionLogEvent);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 			it('can process snap event', async () => {
+				const data = {
+					message: 'test-message',
+					stack: 'test-stack',
+					details: { test: 'test' },
+				};
+
+				const fetchPayloadAssertion = {
+					...otherFetchParams,
+					body: {
+						data,
+						context: {
+							...beacon.getContext(),
+							timestamp: expect.any(String),
+						}
+					}
+				}
+
 				const spy = jest.spyOn(beacon['apis'].error, 'logSnap');
-				const payload = beacon.events.error.snap({ data });
+
+				beacon.events.error.snap({ data });
 				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				expect(spy).toHaveBeenCalled();
-				const body = JSON.stringify(payload.snapLogEvent);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), { body, ...otherFetchParams });
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 			});
 		});
 	});
@@ -898,14 +1182,12 @@ describe('Beacon', () => {
 			dev: true,
 		};
 		const mockData = {
-			q: 'shoes',
-			rq: 'rq',
-			correctedQuery: 'correctedQuery',
-			matchType: AutocompleteSchemaDataMatchTypeEnum.Primary,
+			responseId: 'responseId',
+			tag: 'tag',
 			banners: [],
 			results: [
-				{ type: ItemTypeEnum.Product, position: 1, uid: 'product1', sku: 'sku1' },
-				{ type: ItemTypeEnum.Product, position: 2, uid: 'product2', sku: 'sku2' },
+				{ type: ResultProductType.Product, parentUid: 'parentUid1', uid: 'product1', sku: 'sku1' },
+				{ type: ResultProductType.Product, parentUid: 'parentUid2', uid: 'product2', sku: 'sku2' },
 			],
 			pagination: {
 				totalResults: 100,
@@ -914,85 +1196,35 @@ describe('Beacon', () => {
 			},
 		};
 		describe('additionalRequestKeys', () => {
-			it('can handles unknown endpoint', () => {
+			it('handles search impression type', () => {
 				const schema = {
 					context: mockContext,
 					data: mockData,
 				};
-				const endpoint = 'unknown' as any;
 				const context = schema.context;
+				const data = schema.data;
 				const { pageLoadId, sessionId } = context;
+				const { responseId } = data;
 
-				let baseKey = `${mockGlobals.siteId}||${endpoint}`;
-				const key = additionalRequestKeys(baseKey, endpoint, schema);
-				const expected = `${mockGlobals.siteId}||${endpoint}||${pageLoadId}||${sessionId}`;
+				let baseKey = `${mockGlobals.siteId}||search`;
+				const key = additionalRequestKeys(baseKey, 'search', schema);
+				const expected = `${baseKey}||${pageLoadId}||${sessionId}||responseId=${responseId}`;
 				expect(key).toStrictEqual(expected);
 			});
-			it('handles SearchSchema', () => {
+
+			it('handles recommendation impression type', () => {
 				const schema = {
 					context: mockContext,
 					data: mockData,
 				};
-				const endpoint = 'search';
 				const context = schema.context;
 				const data = schema.data;
 				const { pageLoadId, sessionId } = context;
-				const { rq, pagination, q, correctedQuery, matchType } = data;
+				const { responseId, tag } = data;
 
-				let baseKey = `${mockGlobals.siteId}||${endpoint}`;
-				const key = additionalRequestKeys(baseKey, endpoint, schema);
-				const expected = `${mockGlobals.siteId}||${endpoint}||${pageLoadId}||${sessionId}||rq=${rq}||page=${pagination.page}||resultsPerPage=${pagination.resultsPerPage}||totalResults=${pagination.totalResults}||q=${q}||correctedQuery=${correctedQuery}||matchType=${matchType}`;
-				expect(key).toStrictEqual(expected);
-			});
-			it('handles AutocompleteSchema', () => {
-				const schema: AutocompleteSchema = {
-					context: mockContext,
-					data: mockData,
-				};
-				const endpoint = 'autocomplete';
-				const context = schema.context;
-				const data = schema.data;
-				const { pageLoadId, sessionId } = context;
-				const { rq, pagination, q, correctedQuery, matchType } = data;
-
-				let baseKey = `${mockGlobals.siteId}||${endpoint}`;
-				const key = additionalRequestKeys(baseKey, endpoint, schema);
-				const expected = `${mockGlobals.siteId}||${endpoint}||${pageLoadId}||${sessionId}||rq=${rq}||page=${pagination.page}||resultsPerPage=${pagination.resultsPerPage}||totalResults=${pagination.totalResults}||q=${q}||correctedQuery=${correctedQuery}||matchType=${matchType}`;
-				expect(key).toStrictEqual(expected);
-			});
-			it('handles CategorySchema', () => {
-				const schema: CategorySchema = {
-					context: mockContext,
-					data: mockData,
-				};
-				const endpoint = 'category';
-				const context = schema.context;
-				const data = schema.data;
-				const { pageLoadId, sessionId } = context;
-				const { rq, pagination } = data;
-
-				let baseKey = `${mockGlobals.siteId}||${endpoint}`;
-				const key = additionalRequestKeys(baseKey, endpoint, schema);
-				const expected = `${mockGlobals.siteId}||${endpoint}||${pageLoadId}||${sessionId}||rq=${rq}||page=${pagination.page}||resultsPerPage=${pagination.resultsPerPage}||totalResults=${pagination.totalResults}`;
-				expect(key).toStrictEqual(expected);
-			});
-			it('handles RecommendationsSchema', () => {
-				const schema: RecommendationsSchema = {
-					context: mockContext,
-					data: {
-						tag: 'tag',
-						results: mockData.results,
-					},
-				};
-				const endpoint = 'recommendation';
-				const context = schema.context;
-				const data = schema.data;
-				const { pageLoadId, sessionId } = context;
-				const { tag } = data;
-
-				let baseKey = `${mockGlobals.siteId}||${endpoint}`;
-				const key = additionalRequestKeys(baseKey, endpoint, schema);
-				const expected = `${mockGlobals.siteId}||${endpoint}||${pageLoadId}||${sessionId}||tag=${tag}`;
+				let baseKey = `${mockGlobals.siteId}||recommendation`;
+				const key = additionalRequestKeys(baseKey, 'recommendation', schema);
+				const expected = `${baseKey}||${pageLoadId}||${sessionId}||responseId=${responseId}||tag=${tag}`;
 				expect(key).toStrictEqual(expected);
 			});
 		});
@@ -1007,10 +1239,10 @@ describe('Beacon', () => {
 					batches: {},
 				};
 
-				const schemaName = 'searchSchema';
+				const schemaName = 'impressionSchema';
 				const initialRequest = {
 					apiType: 'search' as const,
-					endpoint: 'searchRender',
+					endpoint: 'searchImpression',
 					payload: {
 						[schemaName]: {
 							context: mockContext,
@@ -1022,9 +1254,9 @@ describe('Beacon', () => {
 				const data = initialRequest.payload[schemaName].data;
 
 				const { pageLoadId, sessionId } = context;
-				const { rq, pagination, q, correctedQuery, matchType } = data;
+				const { responseId } = data;
 
-				const key = `${mockGlobals.siteId}||${initialRequest.endpoint}||${pageLoadId}||${sessionId}||rq=${rq}||page=${pagination.page}||resultsPerPage=${pagination.resultsPerPage}||totalResults=${pagination.totalResults}||q=${q}||correctedQuery=${correctedQuery}||matchType=${matchType}`;
+				const key = `${mockGlobals.siteId}||${initialRequest.endpoint}||${pageLoadId}||${sessionId}||responseId=${responseId}`;
 
 				// first request should initialize the key in batches
 				appendResults(acc, key, schemaName, initialRequest);
@@ -1035,15 +1267,15 @@ describe('Beacon', () => {
 				// additional request should append results to same key
 				const additionalRequest = {
 					apiType: 'search' as const,
-					endpoint: 'searchRender',
+					endpoint: 'searchImpression',
 					payload: {
 						[schemaName]: {
 							context: mockContext,
 							data: {
 								...mockData,
 								results: [
-									{ position: 3, uid: 'product3', sku: 'sku3' },
-									{ position: 4, uid: 'product4', sku: 'sku4' },
+									{ parentUid: 'parentUid3', uid: 'product3', sku: 'sku3' },
+									{ parentUid: 'parentUid4', uid: 'product4', sku: 'sku4' },
 								],
 							},
 						},
@@ -1075,7 +1307,7 @@ describe('Beacon', () => {
 				expect(acc.batches[key].payload[schemaName].data.results[2].uid).toBe('product3');
 
 				// Test with different key - should create a new batch
-				// Simulate page load with different pageLoadId and pagination data
+				// Simulate different responseId
 				const differentRequest = {
 					...additionalRequest,
 					payload: {
@@ -1087,11 +1319,7 @@ describe('Beacon', () => {
 							},
 							data: {
 								...additionalRequest.payload[schemaName].data,
-								pagination: {
-									page: 2,
-									resultsPerPage: 20,
-									totalResults: 100,
-								},
+								responseId: 'differentResponseId',
 							},
 						},
 					},
@@ -1099,7 +1327,7 @@ describe('Beacon', () => {
 
 				const context2 = differentRequest.payload[schemaName].context;
 				const data2 = differentRequest.payload[schemaName].data;
-				const key2 = `${mockGlobals.siteId}||${differentRequest.endpoint}||${context2.pageLoadId}||${context2.sessionId}||rq=${data2.rq}||page=${data2.pagination.page}||resultsPerPage=${data2.pagination.resultsPerPage}||totalResults=${data2.pagination.totalResults}||q=${data2.q}||correctedQuery=${data2.correctedQuery}||matchType=${data2.matchType}`;
+				const key2 = `${mockGlobals.siteId}||${differentRequest.endpoint}||${context2.pageLoadId}||${context2.sessionId}||responseId=${data2.responseId}`;
 
 				appendResults(acc, key2, schemaName, differentRequest);
 
@@ -1114,14 +1342,15 @@ describe('Beacon', () => {
 				expect(acc.batches[key2].payload[schemaName].data.results.length).toBe(2);
 
 				// Test different schema on same original pageLoadId
-				const recsSchemaName = 'recommendationsSchema';
+				const recsSchemaName = 'recommendationsImpressionSchema';
 				const recommendationsRequest = {
 					apiType: 'recommendations' as const,
-					endpoint: 'recommendationsRender',
+					endpoint: 'recommendationsImpression',
 					payload: {
 						[recsSchemaName]: {
 							context: mockContext,
 							data: {
+								responseId: 'recResponseId',
 								tag: 'tag',
 								results: [
 									{ uid: 'recProduct1', sku: 'recSku1' },
@@ -1133,7 +1362,8 @@ describe('Beacon', () => {
 				};
 
 				const recs_context = recommendationsRequest.payload[recsSchemaName].context;
-				const recsKey = `${mockGlobals.siteId}||${recommendationsRequest.endpoint}||${recs_context.pageLoadId}||${recs_context.sessionId}`;
+				const recs_data = recommendationsRequest.payload[recsSchemaName].data;
+				const recsKey = `${mockGlobals.siteId}||${recommendationsRequest.endpoint}||${recs_context.pageLoadId}||${recs_context.sessionId}||responseId=${recs_data.responseId}||tag=${recs_data.tag}`;
 
 				appendResults(acc, recsKey, recsSchemaName, recommendationsRequest);
 
@@ -1155,7 +1385,7 @@ describe('Beacon', () => {
 	describe('sendPreflight', () => {
 		it('can sendPreflight via POST', async () => {
 			// only add 1 product to be under threshold and still generate GET request
-			const items = [{ uid: 'uid123', sku: 'sku123', childUid: 'childUid123', childSku: 'childSku123', qty: 1, price: 10.99 }];
+			const items = [{ uid: 'uid123', sku: 'sku123', parentUid: 'parentUid123', qty: 1, price: 10.99 }];
 
 			beacon.storage.cart.add(items);
 
@@ -1172,7 +1402,7 @@ describe('Beacon', () => {
 				},
 				body: JSON.stringify({
 					...body,
-					cart: items.map((item) => item.childSku || item.childUid || item.sku || item.uid),
+					cart: items.map((item) => item.sku || item.uid),
 				}),
 				keepalive: true,
 			});

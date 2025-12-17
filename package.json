@@ -17,7 +17,7 @@
     "commit": "cz",
     "test": "jest",
     "test:watch": "jest --watch",
-    "generate": "rm -fr ./src/client &&  openapi-generator-cli generate -i ./beacon.v2.snap.types.oas.yaml -g typescript-fetch -o ./src/client",
+    "generate": "rm -fr ./src/client && openapi-generator-cli generate -i ./beacon.v2.snap.types.oas.yaml -g typescript-fetch -o ./src/client",
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx}' '!src/client/**'",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "prepare": "husky",
@@ -28,7 +28,7 @@
     "uuid": "9.0.1"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.18.4",
+    "@openapitools/openapi-generator-cli": "^2.25.2",
     "@searchspring/prettier": "1.0.2",
     "@types/jest": "^29.5.14",
     "@types/uuid": "^10.0.0",
