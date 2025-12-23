@@ -179,7 +179,9 @@ export class Beacon {
 		this.initiator = this.config.initiator || `beaconjs/${version}`;
 
 		const fetchApi = this.config.apis?.fetch;
-		const apiConfig = new Configuration({ fetchApi, basePath: this.config.requesters?.beacon?.origin, headers: { 'Content-Type': 'text/plain' } });
+		
+		const basePath = `${globals.siteId}`.toLowerCase().startsWith('at') ? "https://beacon.athoscommerce.io/beacon/v2".replace(/\/+$/, "") : "https://beacon.searchspring.io/beacon/v2".replace(/\/+$/, "");
+		const apiConfig = new Configuration({ fetchApi, basePath: this.config.requesters?.beacon?.origin || basePath, headers: { 'Content-Type': 'text/plain' } });
 		this.apis = {
 			shopper: new ShopperApi(apiConfig),
 			autocomplete: new AutocompleteApi(apiConfig),
@@ -1191,7 +1193,8 @@ export class Beacon {
 				preflightParams.lastViewed = lastViewed.map((item) => this.getProductId(item));
 			}
 
-			const origin = this.config.requesters?.personalization?.origin || `https://${siteId}.a.searchspring.io`;
+			const domain = `${siteId}`.toLowerCase().startsWith('at') ? 'athoscommerce.io' : 'searchspring.io';
+			const origin = this.config.requesters?.personalization?.origin || `https://${siteId}.a.${domain}`;
 			const endpoint = `${origin}/api/personalization/preflightCache`;
 
 			if (this.config.apis?.fetch || typeof fetch !== 'undefined') {

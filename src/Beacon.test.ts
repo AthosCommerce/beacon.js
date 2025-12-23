@@ -389,6 +389,39 @@ describe('Beacon', () => {
 		});
 	});
 
+	describe('searchspring.io tests', () => {
+		it('can switch siteIds to searchspring', async () => {
+			const beacon = new Beacon(mockGlobals, mockConfig);
+			const basePath = 'beacon.searchspring.io';
+			expect(beacon['apis'].shopper['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].autocomplete['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].search['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].category['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].recommendations['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].product['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].cart['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].order['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].error['configuration'].basePath).toContain(basePath);
+		});
+	});
+
+	describe('athoscommerce.io tests', () => {
+		it('can switch siteIds to athoscommerce', async () => {
+			const athosSiteId = 'athos-site-id';
+			const beacon = new Beacon({ siteId: athosSiteId }, mockConfig);
+			const basePath = 'beacon.athoscommerce.io';
+			expect(beacon['apis'].shopper['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].autocomplete['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].search['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].category['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].recommendations['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].product['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].cart['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].order['configuration'].basePath).toContain(basePath);
+			expect(beacon['apis'].error['configuration'].basePath).toContain(basePath);
+		});
+	});
+
 	describe('Events', () => {
 		const otherFetchParams = {
 			headers: {
@@ -420,7 +453,7 @@ describe('Beacon', () => {
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenNthCalledWith(1, expect.stringContaining('/preflightCache'), expect.any(Object));
-				expect(mockFetchApi).toHaveBeenNthCalledWith(2, expect.any(String), fetchPayloadAssertion);
+				expect(mockFetchApi).toHaveBeenNthCalledWith(2, expect.stringContaining('beacon.searchspring.io/beacon/v2'), fetchPayloadAssertion);
 			});
 		});
 		describe('Autocomplete', () => {
@@ -1396,6 +1429,33 @@ describe('Beacon', () => {
 				cart: items,
 			};
 			expect(mockFetchApi).toHaveBeenCalledWith(`https://${mockGlobals.siteId}.a.searchspring.io/api/personalization/preflightCache`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					...body,
+					cart: items.map((item) => item.sku || item.uid),
+				}),
+				keepalive: true,
+			});
+		});
+
+		it('can sendPreflight via POST to athoscommerce.io', async () => {
+			// only add 1 product to be under threshold and still generate GET request
+			const items = [{ uid: 'uid123', sku: 'sku123', parentUid: 'parentUid123', qty: 1, price: 10.99 }];
+
+			const athosSiteId = 'athos-site-id';
+			beacon = new Beacon({...mockGlobals, siteId: athosSiteId}, mockConfig);
+			beacon.storage.cart.add(items);
+
+			const body = {
+				userId: beacon.getUserId(),
+				// @ts-ignore - accessing protected property
+				siteId: beacon.globals.siteId,
+				cart: items,
+			};
+			expect(mockFetchApi).toHaveBeenCalledWith(`https://${athosSiteId}.a.athoscommerce.io/api/personalization/preflightCache`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
