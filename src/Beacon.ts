@@ -179,7 +179,7 @@ export class Beacon {
 		this.initiator = this.config.initiator || `beaconjs/${version}`;
 
 		const fetchApi = this.config.apis?.fetch;
-		
+
 		const basePath = `${globals.siteId}`.toLowerCase().startsWith('at') ? "https://beacon.athoscommerce.io/beacon/v2".replace(/\/+$/, "") : "https://beacon.searchspring.io/beacon/v2".replace(/\/+$/, "");
 		const apiConfig = new Configuration({ fetchApi, basePath: this.config.requesters?.beacon?.origin || basePath, headers: { 'Content-Type': 'text/plain' } });
 		this.apis = {
@@ -345,16 +345,13 @@ export class Beacon {
 						.reverse()
 						.forEach((product) => {
 							// ensure objects have properties
-							const isSkuAlreadyInCart = cartProducts.find(
-								(cartProduct) =>
-									cartProduct.uid === product.uid
-							);
+							const isSkuAlreadyInCart = cartProducts.find((cartProduct) => cartProduct.uid === product.uid);
 							if (!isSkuAlreadyInCart) {
 								cartProducts.unshift(product);
 							} else {
 								isSkuAlreadyInCart.qty += product.qty;
 								isSkuAlreadyInCart.price = product.price || isSkuAlreadyInCart.price;
-								if(product.parentUid !== isSkuAlreadyInCart.parentUid || product.sku !== isSkuAlreadyInCart.sku) {
+								if (product.parentUid !== isSkuAlreadyInCart.parentUid || product.sku !== isSkuAlreadyInCart.sku) {
 									// parentUid or sku are set to the same values if fallback (due to localstorage disabled/full) to storing in cookie.
 									isSkuAlreadyInCart.parentUid = product.parentUid;
 									isSkuAlreadyInCart.sku = product.sku;
@@ -378,7 +375,7 @@ export class Beacon {
 						if (isSkuAlreadyInCart) {
 							if (isSkuAlreadyInCart.qty > 0) {
 								isSkuAlreadyInCart.qty -= product.qty || 1;
-								if(product.parentUid !== isSkuAlreadyInCart.parentUid || product.sku !== isSkuAlreadyInCart.sku) {
+								if (product.parentUid !== isSkuAlreadyInCart.parentUid || product.sku !== isSkuAlreadyInCart.sku) {
 									// parentUid or sku are set to the same values if fallback (due to localstorage disabled/full) to storing in cookie.
 									isSkuAlreadyInCart.parentUid = product.parentUid;
 									isSkuAlreadyInCart.sku = product.sku;
@@ -455,12 +452,7 @@ export class Beacon {
 							parentUid: product.parentUid,
 							uid: product.uid,
 						};
-						const isItemAlreadyViewed = viewedProducts.find(
-							(viewedProduct) =>
-								viewedProduct.parentUid === item.parentUid &&
-								viewedProduct.uid === item.uid &&
-								viewedProduct.sku === item.sku
-						);
+						const isItemAlreadyViewed = viewedProducts.find((viewedProduct) => viewedProduct.uid === item.uid);
 						if (isItemAlreadyViewed) {
 							// item has been viewed remove it from array
 							const index = viewedProducts.indexOf(isItemAlreadyViewed);
@@ -1112,13 +1104,13 @@ export class Beacon {
 					keepalive: this.mode === 'production' ? true : undefined,
 					body: isJSON ? init.body : JSON.stringify(init.body),
 					headers: this.config.headers ? { ...init.headers, ...this.config.headers } : init.headers,
-				};	
+				};
 			};
 
 			// typing is difficult due to dynamic API and method call
 			(api as any)[apiMethod as keyof typeof api](request.payload, initOverrides).catch((e: any) => {
 				// noop - do not throw errors
-				if(this.mode === 'development') {
+				if (this.mode === 'development') {
 					console.debug(e)
 				}
 			});
@@ -1220,7 +1212,7 @@ export class Beacon {
 	}
 
 	protected getProductId(product: Product | ProductPageviewSchemaDataResult): string {
-		return `${product.sku || product.uid}`.trim();
+		return `${product.sku || product.uid || ''}`.trim();
 	}
 }
 

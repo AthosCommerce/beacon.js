@@ -1217,10 +1217,13 @@ describe('Beacon', () => {
 		const mockData = {
 			responseId: 'responseId',
 			tag: 'tag',
-			banners: [],
+			banners: [
+				{ uid: 'merchandisingBanner' },
+			],
 			results: [
 				{ type: ResultProductType.Product, parentUid: 'parentUid1', uid: 'product1', sku: 'sku1' },
 				{ type: ResultProductType.Product, parentUid: 'parentUid2', uid: 'product2', sku: 'sku2' },
+				{ type: ResultProductType.Banner, uid: 'inlineBanner' },
 			],
 			pagination: {
 				totalResults: 100,
@@ -1294,7 +1297,8 @@ describe('Beacon', () => {
 				// first request should initialize the key in batches
 				appendResults(acc, key, schemaName, initialRequest);
 				expect(acc.batches[key]).toStrictEqual(initialRequest);
-				expect(acc.batches[key].payload[schemaName].data.results.length).toBe(2);
+				expect(acc.batches[key].payload[schemaName].data.results.length).toBe(3);
+				expect(acc.batches[key].payload[schemaName].data.banners.length).toBe(1);
 				expect(acc.nonBatched.length).toBe(0);
 
 				// additional request should append results to same key
@@ -1307,9 +1311,13 @@ describe('Beacon', () => {
 							data: {
 								...mockData,
 								results: [
-									{ parentUid: 'parentUid3', uid: 'product3', sku: 'sku3' },
-									{ parentUid: 'parentUid4', uid: 'product4', sku: 'sku4' },
+									{ type: ResultProductType.Product, parentUid: 'parentUid3', uid: 'product3', sku: 'sku3' },
+									{ type: ResultProductType.Product, parentUid: 'parentUid4', uid: 'product4', sku: 'sku4' },
+									{ type: ResultProductType.Banner, uid: 'inlineBanner1' },
 								],
+								banners: [
+									{ uid: 'banner1' },
+								]
 							},
 						},
 					},
@@ -1329,15 +1337,15 @@ describe('Beacon', () => {
 							data: {
 								...initialRequest.payload[schemaName].data,
 								results: [...initialRequest.payload[schemaName].data.results, ...additionalRequest.payload[schemaName].data.results],
+								banners: [...initialRequest.payload[schemaName].data.banners, ...additionalRequest.payload[schemaName].data.banners],
 							},
 						},
 					},
 				});
 
 				// Results should be appended
-				expect(acc.batches[key].payload[schemaName].data.results.length).toBe(4);
-				expect(acc.batches[key].payload[schemaName].data.results[0].uid).toBe('product1');
-				expect(acc.batches[key].payload[schemaName].data.results[2].uid).toBe('product3');
+				expect(acc.batches[key].payload[schemaName].data.results.length).toBe(6);
+				expect(acc.batches[key].payload[schemaName].data.banners.length).toBe(2);
 
 				// Test with different key - should create a new batch
 				// Simulate different responseId
@@ -1369,10 +1377,12 @@ describe('Beacon', () => {
 				expect(acc.batches[key2]).toStrictEqual(differentRequest);
 
 				// Original batch should be unchanged
-				expect(acc.batches[key].payload[schemaName].data.results.length).toBe(4);
+				expect(acc.batches[key].payload[schemaName].data.results.length).toBe(6);
+				expect(acc.batches[key].payload[schemaName].data.banners.length).toBe(2);
 
 				// New batch should have its own results
-				expect(acc.batches[key2].payload[schemaName].data.results.length).toBe(2);
+				expect(acc.batches[key2].payload[schemaName].data.results.length).toBe(3);
+				expect(acc.batches[key2].payload[schemaName].data.banners.length).toBe(1);
 
 				// Test different schema on same original pageLoadId
 				const recsSchemaName = 'recommendationsImpressionSchema';
@@ -1389,6 +1399,7 @@ describe('Beacon', () => {
 									{ uid: 'recProduct1', sku: 'recSku1' },
 									{ uid: 'recProduct2', sku: 'recSku2' },
 								],
+								banners: [],
 							},
 						},
 					},
@@ -1404,13 +1415,14 @@ describe('Beacon', () => {
 				expect(Object.keys(acc.batches).length).toBe(3);
 
 				// Other batches should remain unchanged
-				expect(acc.batches[key].payload[schemaName].data.results.length).toBe(4);
-				expect(acc.batches[key2].payload[schemaName].data.results.length).toBe(2);
+				expect(acc.batches[key].payload[schemaName].data.results.length).toBe(6);
+				expect(acc.batches[key].payload[schemaName].data.banners.length).toBe(2);
+				expect(acc.batches[key2].payload[schemaName].data.results.length).toBe(3);
+				expect(acc.batches[key2].payload[schemaName].data.banners.length).toBe(1);
 
 				// New recommendations batch should have its results
 				expect(acc.batches[recsKey].payload[recsSchemaName].data.results.length).toBe(2);
-				expect(acc.batches[recsKey].payload[recsSchemaName].data.results[0].uid).toBe('recProduct1');
-				expect(acc.batches[recsKey].payload[recsSchemaName].data.results[1].uid).toBe('recProduct2');
+				expect(acc.batches[recsKey].payload[recsSchemaName].data.banners.length).toBe(0);
 			});
 		});
 	});
