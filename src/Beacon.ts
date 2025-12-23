@@ -5,68 +5,68 @@ import { featureFlags } from './utils/featureFlags';
 import { v4 as uuidv4 } from 'uuid';
 import {
 	Context,
-	AutocompleteAddtocartRequest,
 	AutocompleteApi,
 	AutocompleteClickthroughRequest,
 	AutocompleteImpressionRequest,
-	AutocompleteRedirectRequest,
-	AutocompleteRenderRequest,
-	AutocompleteSchemaData,
-	CartAddRequest,
-	CartRemoveRequest,
-	CategoryAddtocartRequest,
+	CartApi,
+	CartSchemaData,
+	CategoryApi,
 	CategoryClickthroughRequest,
 	CategoryImpressionRequest,
-	CategoryRenderRequest,
-	LoginRequest,
-	OrderTransactionRequest,
+	ErrorLogsApi,
+	OrderApi,
+	OrderTransactionSchemaData,
+	Product,
 	ProductApi,
-	ProductPageviewRequest,
-	RecommendationsAddtocartRequest,
+	RecommendationsApi,
 	RecommendationsClickthroughRequest,
 	RecommendationsImpressionRequest,
-	RecommendationsRenderRequest,
-	SearchAddtocartRequest,
+	SearchApi,
 	SearchClickthroughRequest,
 	SearchImpressionRequest,
-	SearchRedirectRequest,
-	SearchRenderRequest,
 	ShopperApi,
-	AutocompleteRedirectSchemaData,
-	SearchRedirectSchemaData,
-	SearchSchemaData,
-	CategorySchemaData,
-	RecommendationsSchemaData,
-	CartSchemaData,
-	OrderTransactionSchemaData,
-	ProductPageviewSchemaData,
-	Item,
-	Product,
-	ContextAttributionInner,
-	ContextCurrency,
-	SearchApi,
-	CategoryApi,
-	RecommendationsApi,
-	OrderApi,
-	CartApi,
-	SearchSchema,
-	RecommendationsSchema,
-	AutocompleteSchema,
-	CategorySchema,
-	ErrorLogsApi,
-	LogShopifypixelRequest,
-	Log,
-	LogSnapRequest,
 	Configuration,
 	InitOverrideFunction,
 	FetchAPI,
-	AutocompleteAddtocartSchemaData,
-	SearchAddtocartSchemaData,
-	CategoryAddtocartSchemaData,
+	RecommendationsImpressionSchema,
+	RedirectSchemaData,
+	ClickthroughSchemaData,
+	AddtocartSchemaData,
+	ImpressionSchemaData,
+	RecommendationsRenderSchemaData,
+	RecommendationsImpressionSchemaData,
 	RecommendationsAddtocartSchemaData,
+	RecommendationsClickthroughSchemaData,
+	RenderSchemaData,
+	ProductPageviewSchemaData,
 	ProductPageviewSchemaDataResult,
-	RecommendationsAddtocartSchema,
+	ImpressionSchema,
+	AttributionInner,
+	Currency,
+	LogSchema,
+	LogSchemaData,
+	ShopperContext,
+	HTTPHeaders,
 } from './client';
+import type {
+	AutocompleteAddtocartRequest,
+	AutocompleteRedirectRequest,
+	AutocompleteRenderRequest,
+	CartAddRequest,
+	CartRemoveRequest,
+	CategoryAddtocartRequest,
+	CategoryRenderRequest,
+	LoginRequest,
+	OrderTransactionRequest,
+	ProductPageviewRequest,
+	RecommendationsAddtocartRequest,
+	RecommendationsRenderRequest,
+	SearchAddtocartRequest,
+	SearchRedirectRequest,
+	SearchRenderRequest,
+	LogShopifypixelRequest,
+	LogSnapRequest,
+} from './client/apis';
 
 declare global {
 	interface Window {
@@ -97,12 +97,13 @@ export type BeaconConfig = {
 	apis?: {
 		fetch?: FetchAPI;
 	};
+	headers?: HTTPHeaders;
 	href?: string;
 	userAgent?: string;
 };
 type BeaconGlobals = {
 	siteId: string;
-	currency?: ContextCurrency;
+	currency?: Currency;
 	cart?: Product[];
 };
 
@@ -154,8 +155,8 @@ export class Beacon {
 	private userId: string = '';
 	private sessionId: string = '';
 	private shopperId: string = '';
-	private attribution: ContextAttributionInner[] | undefined;
-	private currency: ContextCurrency = {
+	private attribution: AttributionInner[] | undefined;
+	private currency: Currency = {
 		code: '',
 	};
 	private initiator: string = '';
@@ -178,7 +179,9 @@ export class Beacon {
 		this.initiator = this.config.initiator || `beaconjs/${version}`;
 
 		const fetchApi = this.config.apis?.fetch;
-		const apiConfig = new Configuration({ fetchApi, basePath: this.config.requesters?.beacon?.origin });
+
+		const basePath = `${globals.siteId}`.toLowerCase().startsWith('at') ? "https://beacon.athoscommerce.io/beacon/v2".replace(/\/+$/, "") : "https://beacon.searchspring.io/beacon/v2".replace(/\/+$/, "");
+		const apiConfig = new Configuration({ fetchApi, basePath: this.config.requesters?.beacon?.origin || basePath, headers: { 'Content-Type': 'text/plain' } });
 		this.apis = {
 			shopper: new ShopperApi(apiConfig),
 			autocomplete: new AutocompleteApi(apiConfig),
@@ -232,22 +235,22 @@ export class Beacon {
 					expiresString = 'expires=' + d['toUTCString']() + ';';
 				}
 				const valueString = encodeURIComponent(value) + ';';
-				if(domain) {
-					window.document.cookie = name+"="+valueString+expiresString+sameSiteString+secureString+"path=/; domain="+domain;
+				if (domain) {
+					window.document.cookie = name + "=" + valueString + expiresString + sameSiteString + secureString + "path=/; domain=" + domain;
 				} else {
 					const host = window?.location?.hostname;
 					if (!host || host.split('.').length === 1) {
-						window.document.cookie = name+"="+valueString+expiresString+sameSiteString+secureString+"path=/";
+						window.document.cookie = name + "=" + valueString + expiresString + sameSiteString + secureString + "path=/";
 					} else {
 						const domainParts = host.split('.');
 						domainParts.shift();
-						domain = '.'+domainParts.join('.');
-		
-						window.document.cookie = name+"="+valueString+expiresString+sameSiteString+secureString+"path=/; domain="+domain;
-		
+						domain = '.' + domainParts.join('.');
+
+						window.document.cookie = name + "=" + valueString + expiresString + sameSiteString + secureString + "path=/; domain=" + domain;
+
 						if (this.getCookie(name) == null || this.getCookie(name) != value) {
-							domain = '.'+host;
-							window.document.cookie = name+"="+valueString+expiresString+sameSiteString+secureString+"path=/; domain="+domain;
+							domain = '.' + host;
+							window.document.cookie = name + "=" + valueString + expiresString + sameSiteString + secureString + "path=/; domain=" + domain;
 						}
 					}
 				}
@@ -307,7 +310,7 @@ export class Beacon {
 					return storedSkus
 						.split(',')
 						.filter((sku) => sku)
-						.map((sku) => ({ uid: sku, sku: sku, qty: 1, price: 0 }));
+						.map((sku) => ({ parentUid: sku, uid: sku, sku: sku, qty: 1, price: 0 }));
 				}
 
 				return [];
@@ -342,18 +345,17 @@ export class Beacon {
 						.reverse()
 						.forEach((product) => {
 							// ensure objects have properties
-							const isSkuAlreadyInCart = cartProducts.find(
-								(cartProduct) =>
-									cartProduct.childUid === product.childUid &&
-									cartProduct.childSku === product.childSku &&
-									cartProduct.uid === product.uid &&
-									cartProduct.sku === product.sku
-							);
+							const isSkuAlreadyInCart = cartProducts.find((cartProduct) => cartProduct.uid === product.uid);
 							if (!isSkuAlreadyInCart) {
 								cartProducts.unshift(product);
 							} else {
 								isSkuAlreadyInCart.qty += product.qty;
 								isSkuAlreadyInCart.price = product.price || isSkuAlreadyInCart.price;
+								if (product.parentUid !== isSkuAlreadyInCart.parentUid || product.sku !== isSkuAlreadyInCart.sku) {
+									// parentUid or sku are set to the same values if fallback (due to localstorage disabled/full) to storing in cookie.
+									isSkuAlreadyInCart.parentUid = product.parentUid;
+									isSkuAlreadyInCart.sku = product.sku;
+								}
 							}
 						});
 
@@ -368,14 +370,16 @@ export class Beacon {
 					products.forEach((product) => {
 						const isSkuAlreadyInCart = cartProducts.find(
 							(cartProduct) =>
-								cartProduct.childUid === product.childUid &&
-								cartProduct.childSku === product.childSku &&
-								cartProduct.uid === product.uid &&
-								cartProduct.sku === product.sku
+								cartProduct.uid === product.uid
 						);
 						if (isSkuAlreadyInCart) {
 							if (isSkuAlreadyInCart.qty > 0) {
 								isSkuAlreadyInCart.qty -= product.qty || 1;
+								if (product.parentUid !== isSkuAlreadyInCart.parentUid || product.sku !== isSkuAlreadyInCart.sku) {
+									// parentUid or sku are set to the same values if fallback (due to localstorage disabled/full) to storing in cookie.
+									isSkuAlreadyInCart.parentUid = product.parentUid;
+									isSkuAlreadyInCart.sku = product.sku;
+								}
 							}
 						}
 					});
@@ -410,7 +414,7 @@ export class Beacon {
 					return storedSkus
 						.split(',')
 						.filter((sku) => sku)
-						.map((sku) => ({ uid: sku, sku: sku }));
+						.map((sku) => ({ parentUid: sku, uid: sku, sku: sku }));
 				}
 				return [];
 			},
@@ -418,7 +422,7 @@ export class Beacon {
 				const currentViewedItems = this.storage.viewed.get();
 				// remove qty and price if product is provided
 				const normalizedItems: ProductPageviewSchemaDataResult[] = products
-					.map((item) => ({ sku: item.sku, uid: item.uid, childUid: item.childUid, childSku: item.childSku }))
+					.map((item) => ({ sku: item.sku, parentUid: item.parentUid, uid: item.uid }))
 					.slice(0, MAX_VIEWED_COUNT);
 
 				const stringifiedNormalizedItems = JSON.stringify(normalizedItems);
@@ -445,17 +449,10 @@ export class Beacon {
 					products.forEach((product) => {
 						const item: ProductPageviewSchemaDataResult = {
 							sku: product.sku,
+							parentUid: product.parentUid,
 							uid: product.uid,
-							childUid: product.childUid,
-							childSku: product.childSku,
 						};
-						const isItemAlreadyViewed = viewedProducts.find(
-							(viewedProduct) =>
-								viewedProduct.uid === item.uid &&
-								viewedProduct.sku === item.sku &&
-								viewedProduct.childUid === item.childUid &&
-								viewedProduct.childSku === item.childSku
-						);
+						const isItemAlreadyViewed = viewedProducts.find((viewedProduct) => viewedProduct.uid === item.uid);
 						if (isItemAlreadyViewed) {
 							// item has been viewed remove it from array
 							const index = viewedProducts.indexOf(isItemAlreadyViewed);
@@ -472,26 +469,25 @@ export class Beacon {
 
 	events = {
 		shopper: {
-			login: (event: Payload<{ id: string }>): LoginRequest | void => {
+			login: (event: Payload<{ id: string }>) => {
 				const setNewId = this.setShopperId(event.data.id);
 				if (setNewId) {
 					const payload: LoginRequest = {
 						siteId: event?.siteId || this.globals.siteId,
 						shopperLoginSchema: {
-							context: this.getContext(),
+							context: this.getContext() as ShopperContext,
 						},
 					};
 					const request = this.createRequest('shopper', 'login', payload);
 					this.sendRequests([request]);
-					return payload;
 				}
 			},
 		},
 		autocomplete: {
-			render: (event: Payload<AutocompleteSchemaData>): AutocompleteRenderRequest => {
+			render: (event: Payload<RenderSchemaData>) => {
 				const payload: AutocompleteRenderRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					autocompleteSchema: {
+					renderSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -499,12 +495,11 @@ export class Beacon {
 
 				const request = this.createRequest('autocomplete', 'autocompleteRender', payload);
 				this.queueRequest(request);
-				return payload;
 			},
-			impression: (event: Payload<AutocompleteSchemaData>): AutocompleteImpressionRequest => {
+			impression: (event: Payload<ImpressionSchemaData>) => {
 				const payload: AutocompleteImpressionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					autocompleteSchema: {
+					impressionSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -512,16 +507,15 @@ export class Beacon {
 
 				const request = this.createRequest('autocomplete', 'autocompleteImpression', payload);
 				this.queueRequest(request);
-				return payload;
 			},
-			addToCart: (event: Payload<AutocompleteAddtocartSchemaData>): AutocompleteAddtocartRequest => {
+			addToCart: (event: Payload<AddtocartSchemaData>) => {
 				if (event.data.results) {
 					this.storage.cart.add(event.data.results);
 				}
 
 				const payload: AutocompleteAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					autocompleteAddtocartSchema: {
+					addtocartSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -529,12 +523,11 @@ export class Beacon {
 
 				const request = this.createRequest('autocomplete', 'autocompleteAddtocart', payload);
 				this.sendRequests([request]);
-				return payload;
 			},
-			clickThrough: (event: Payload<AutocompleteSchemaData>): AutocompleteClickthroughRequest => {
+			clickThrough: (event: Payload<ClickthroughSchemaData>) => {
 				const payload: AutocompleteClickthroughRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					autocompleteSchema: {
+					clickthroughSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -542,12 +535,11 @@ export class Beacon {
 
 				const request = this.createRequest('autocomplete', 'autocompleteClickthrough', payload);
 				this.sendRequests([request]);
-				return payload;
 			},
-			redirect: (event: Payload<AutocompleteRedirectSchemaData>): AutocompleteRedirectRequest => {
+			redirect: (event: Payload<RedirectSchemaData>) => {
 				const payload: AutocompleteRedirectRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					autocompleteRedirectSchema: {
+					redirectSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -555,14 +547,13 @@ export class Beacon {
 
 				const request = this.createRequest('autocomplete', 'autocompleteRedirect', payload);
 				this.sendRequests([request]);
-				return payload;
 			},
 		},
 		search: {
-			render: (event: Payload<SearchSchemaData>): SearchRenderRequest => {
+			render: (event: Payload<RenderSchemaData>) => {
 				const payload: SearchRenderRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					searchSchema: {
+					renderSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -570,12 +561,11 @@ export class Beacon {
 
 				const request = this.createRequest('search', 'searchRender', payload);
 				this.queueRequest(request);
-				return payload;
 			},
-			impression: (event: Payload<SearchSchemaData>): SearchImpressionRequest => {
+			impression: (event: Payload<ImpressionSchemaData>) => {
 				const payload: SearchImpressionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					searchSchema: {
+					impressionSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -583,16 +573,15 @@ export class Beacon {
 
 				const request = this.createRequest('search', 'searchImpression', payload);
 				this.queueRequest(request);
-				return payload;
 			},
-			addToCart: (event: Payload<SearchAddtocartSchemaData>): SearchAddtocartRequest => {
+			addToCart: (event: Payload<AddtocartSchemaData>) => {
 				if (event.data.results) {
 					this.storage.cart.add(event.data.results);
 				}
 
 				const payload: SearchAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					searchAddtocartSchema: {
+					addtocartSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -600,12 +589,11 @@ export class Beacon {
 
 				const request = this.createRequest('search', 'searchAddtocart', payload);
 				this.sendRequests([request]);
-				return payload;
 			},
-			clickThrough: (event: Payload<SearchSchemaData>): SearchClickthroughRequest => {
+			clickThrough: (event: Payload<ClickthroughSchemaData>) => {
 				const payload: SearchClickthroughRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					searchSchema: {
+					clickthroughSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -613,12 +601,11 @@ export class Beacon {
 
 				const request = this.createRequest('search', 'searchClickthrough', payload);
 				this.sendRequests([request]);
-				return payload;
 			},
-			redirect: (event: Payload<SearchRedirectSchemaData>): SearchRedirectRequest => {
+			redirect: (event: Payload<RedirectSchemaData>) => {
 				const payload: SearchRedirectRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					searchRedirectSchema: {
+					redirectSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -626,14 +613,13 @@ export class Beacon {
 
 				const request = this.createRequest('search', 'searchRedirect', payload);
 				this.sendRequests([request]);
-				return payload;
 			},
 		},
 		category: {
-			render: (event: Payload<CategorySchemaData>): CategoryRenderRequest => {
+			render: (event: Payload<RenderSchemaData>) => {
 				const payload: CategoryRenderRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					categorySchema: {
+					renderSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -641,12 +627,11 @@ export class Beacon {
 
 				const request = this.createRequest('category', 'categoryRender', payload);
 				this.queueRequest(request);
-				return payload;
 			},
-			impression: (event: Payload<CategorySchemaData>): CategoryImpressionRequest => {
+			impression: (event: Payload<ImpressionSchemaData>) => {
 				const payload: CategoryImpressionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					categorySchema: {
+					impressionSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -654,16 +639,15 @@ export class Beacon {
 
 				const request = this.createRequest('category', 'categoryImpression', payload);
 				this.queueRequest(request);
-				return payload;
 			},
-			addToCart: (event: Payload<CategoryAddtocartSchemaData>): CategoryAddtocartRequest => {
+			addToCart: (event: Payload<AddtocartSchemaData>) => {
 				if (event.data.results) {
 					this.storage.cart.add(event.data.results);
 				}
 
 				const payload: CategoryAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					categoryAddtocartSchema: {
+					addtocartSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -671,12 +655,11 @@ export class Beacon {
 
 				const request = this.createRequest('category', 'categoryAddtocart', payload);
 				this.sendRequests([request]);
-				return payload;
 			},
-			clickThrough: (event: Payload<CategorySchemaData>): CategoryClickthroughRequest => {
+			clickThrough: (event: Payload<ClickthroughSchemaData>) => {
 				const payload: CategoryClickthroughRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					categorySchema: {
+					clickthroughSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -684,14 +667,13 @@ export class Beacon {
 
 				const request = this.createRequest('category', 'categoryClickthrough', payload);
 				this.sendRequests([request]);
-				return payload;
 			},
 		},
 		recommendations: {
-			render: (event: Payload<RecommendationsSchemaData>): RecommendationsRenderRequest => {
+			render: (event: Payload<RecommendationsRenderSchemaData>) => {
 				const payload: RecommendationsRenderRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					recommendationsSchema: {
+					recommendationsRenderSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -699,12 +681,11 @@ export class Beacon {
 
 				const request = this.createRequest('recommendations', 'recommendationsRender', payload);
 				this.queueRequest(request);
-				return payload;
 			},
-			impression: (event: Payload<RecommendationsSchemaData>): RecommendationsImpressionRequest => {
+			impression: (event: Payload<RecommendationsImpressionSchemaData>) => {
 				const payload: RecommendationsImpressionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					recommendationsSchema: {
+					recommendationsImpressionSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -712,9 +693,8 @@ export class Beacon {
 
 				const request = this.createRequest('recommendations', 'recommendationsImpression', payload);
 				this.queueRequest(request);
-				return payload;
 			},
-			addToCart: (event: Payload<RecommendationsAddtocartSchemaData>): RecommendationsAddtocartRequest => {
+			addToCart: (event: Payload<RecommendationsAddtocartSchemaData>) => {
 				if (event.data.results) {
 					this.storage.cart.add(event.data.results);
 				}
@@ -729,12 +709,11 @@ export class Beacon {
 
 				const request = this.createRequest('recommendations', 'recommendationsAddtocart', payload);
 				this.queueRequest(request);
-				return payload;
 			},
-			clickThrough: (event: Payload<RecommendationsSchemaData>): RecommendationsClickthroughRequest => {
+			clickThrough: (event: Payload<RecommendationsClickthroughSchemaData>) => {
 				const payload: RecommendationsClickthroughRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					recommendationsSchema: {
+					recommendationsClickthroughSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -742,11 +721,10 @@ export class Beacon {
 
 				const request = this.createRequest('recommendations', 'recommendationsClickthrough', payload);
 				this.sendRequests([request]);
-				return payload;
 			},
 		},
 		product: {
-			pageView: (event: Payload<ProductPageviewSchemaData>): ProductPageviewRequest => {
+			pageView: (event: Payload<ProductPageviewSchemaData>) => {
 				const payload: ProductPageviewRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					productPageviewSchema: {
@@ -760,11 +738,10 @@ export class Beacon {
 
 				const item = event.data.result;
 				this.storage.viewed.add([item]);
-				return payload;
 			},
 		},
 		cart: {
-			add: (event: Payload<CartSchemaData>): CartAddRequest => {
+			add: (event: Payload<CartSchemaData>) => {
 				const data = {
 					...event.data,
 				};
@@ -787,10 +764,8 @@ export class Beacon {
 				};
 				const request = this.createRequest('cart', 'cartAdd', payload);
 				this.sendRequests([request]);
-
-				return payload;
 			},
-			remove: (event: Payload<CartSchemaData>): CartRemoveRequest => {
+			remove: (event: Payload<CartSchemaData>) => {
 				const data = {
 					...event.data,
 				};
@@ -813,12 +788,10 @@ export class Beacon {
 
 				const request = this.createRequest('cart', 'cartRemove', payload);
 				this.sendRequests([request]);
-
-				return payload;
 			},
 		},
 		order: {
-			transaction: (event: Payload<OrderTransactionSchemaData>): OrderTransactionRequest => {
+			transaction: (event: Payload<OrderTransactionSchemaData>) => {
 				const payload: OrderTransactionRequest = {
 					siteId: event?.siteId || this.globals.siteId,
 					orderTransactionSchema: {
@@ -830,14 +803,13 @@ export class Beacon {
 				const request = this.createRequest('order', 'orderTransaction', payload);
 				this.sendRequests([request]);
 				this.storage.cart.clear();
-				return payload;
 			},
 		},
 		error: {
-			shopifypixel: (event: Payload<Log>): LogShopifypixelRequest => {
+			shopifypixel: (event: Payload<LogSchemaData>) => {
 				const payload: LogShopifypixelRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					shopifyPixelExtensionLogEvent: {
+					logSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -845,12 +817,11 @@ export class Beacon {
 
 				const request = this.createRequest('error', 'logShopifypixel', payload);
 				this.sendRequests([request]);
-				return payload;
 			},
-			snap: (event: Payload<Log>): LogSnapRequest => {
+			snap: (event: Payload<LogSchemaData>) => {
 				const payload: LogSnapRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					snapLogEvent: {
+					logSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -858,7 +829,6 @@ export class Beacon {
 
 				const request = this.createRequest('error', 'logSnap', payload);
 				this.sendRequests([request]);
-				return payload;
 			},
 		},
 	};
@@ -933,7 +903,7 @@ export class Beacon {
 				/**
 				 * TODO: move this expiration to setLocalStorageItem at value level instead of data.value level and
 				 * then create a new return type getLocalStorageItem with Product[], Item[],
-				 *  ContextAttributionInner[], and { timestamp: string; value: string }
+				 *  AttributionInner[], and { timestamp: string; value: string }
 				 */
 				this.attribution = undefined;
 			} else {
@@ -1038,8 +1008,8 @@ export class Beacon {
 		}
 	}
 
-	private getAttribution(): ContextAttributionInner[] | undefined {
-		let attribution: ContextAttributionInner[] = [];
+	private getAttribution(): AttributionInner[] | undefined {
+		let attribution: AttributionInner[] = [];
 
 		let urlAttribution: string | null = null;
 		try {
@@ -1049,12 +1019,12 @@ export class Beacon {
 			// noop - URL failed to parse empty url
 		}
 
-		const storedAttribution = this.getCookie(ATTRIBUTION_KEY) || (this.getLocalStorageItem(ATTRIBUTION_KEY) as ContextAttributionInner[]);
+		const storedAttribution = this.getCookie(ATTRIBUTION_KEY) || (this.getLocalStorageItem(ATTRIBUTION_KEY) as AttributionInner[]);
 		if (storedAttribution) {
 			try {
 				if (typeof storedAttribution === 'string') {
 					// from cookie
-					attribution = JSON.parse(storedAttribution) as ContextAttributionInner[];
+					attribution = JSON.parse(storedAttribution) as AttributionInner[];
 				} else if (Array.isArray(storedAttribution)) {
 					attribution = storedAttribution;
 				}
@@ -1095,7 +1065,7 @@ export class Beacon {
 		return new Date().toISOString();
 	}
 
-	setCurrency(currency: ContextCurrency): void {
+	setCurrency(currency: Currency): void {
 		if (currency && currency.code && this.currency?.code !== currency.code) {
 			this.currency = currency;
 		}
@@ -1126,17 +1096,23 @@ export class Beacon {
 			const api = this.getApiClient(request.apiType);
 			const apiMethod = request.endpoint;
 
+			const isJSON = this.config.headers && 'Content-Type' in this.config.headers && this.config.headers['Content-Type'] === 'application/json'
+
 			const initOverrides: InitOverrideFunction = async ({ init }) => {
 				return {
 					// Cypress intecepts does not support keepalive
 					keepalive: this.mode === 'production' ? true : undefined,
-					body: JSON.stringify(init.body),
+					body: isJSON ? init.body : JSON.stringify(init.body),
+					headers: this.config.headers ? { ...init.headers, ...this.config.headers } : init.headers,
 				};
 			};
 
 			// typing is difficult due to dynamic API and method call
-			(api as any)[apiMethod as keyof typeof api](request.payload, initOverrides).catch(() => {
+			(api as any)[apiMethod as keyof typeof api](request.payload, initOverrides).catch((e: any) => {
 				// noop - do not throw errors
+				if (this.mode === 'development') {
+					console.debug(e)
+				}
 			});
 		}
 	}
@@ -1150,34 +1126,25 @@ export class Beacon {
 				let key = `${request.payload.siteId}||${request.endpoint}`;
 
 				switch (request.endpoint) {
-					case 'recommendationsRender':
 					case 'recommendationsImpression':
-						const recommendationsSchema = request.payload.recommendationsSchema as RecommendationsSchema;
-						key += additionalRequestKeys(key, 'recommendation', recommendationsSchema);
-						appendResults(acc, key, 'recommendationsSchema', request);
+						const recommendationsImpression = (request.payload as RecommendationsImpressionRequest).recommendationsImpressionSchema;
+						key += additionalRequestKeys(key, 'recommendation', recommendationsImpression);
+						appendResults(acc, key, 'recommendationsImpressionSchema', request);
 						break;
-					case 'recommendationsAddtocart':
-						const recommendationsAddtocartSchema = request.payload.recommendationsAddtocartSchema as RecommendationsAddtocartSchema;
-						key += additionalRequestKeys(key, 'recommendation', recommendationsAddtocartSchema);
-						appendResults(acc, key, 'recommendationsAddtocartSchema', request);
-						break;
-					case 'searchRender':
 					case 'searchImpression':
-						const searchSchema = request.payload.searchSchema as SearchSchema;
-						key += additionalRequestKeys(key, 'search', searchSchema);
-						appendResults(acc, key, 'searchSchema', request);
+						const searchImpression = (request.payload as SearchImpressionRequest).impressionSchema;
+						key += additionalRequestKeys(key, 'search', searchImpression);
+						appendResults(acc, key, 'impressionSchema', request);
 						break;
-					case 'autocompleteRender':
 					case 'autocompleteImpression':
-						const autocompleteSchema = request.payload.autocompleteSchema as AutocompleteSchema;
-						key += additionalRequestKeys(key, 'autocomplete', autocompleteSchema);
-						appendResults(acc, key, 'autocompleteSchema', request);
+						const autocompleteImpression = (request.payload as AutocompleteImpressionRequest).impressionSchema;
+						key += additionalRequestKeys(key, 'autocomplete', autocompleteImpression);
+						appendResults(acc, key, 'impressionSchema', request);
 						break;
-					case 'categoryRender':
 					case 'categoryImpression':
-						const categorySchema = request.payload.categorySchema as CategorySchema;
-						key += additionalRequestKeys(key, 'category', categorySchema);
-						appendResults(acc, key, 'categorySchema', request);
+						const categoryImpression = (request.payload as CategoryImpressionRequest).impressionSchema;
+						key += additionalRequestKeys(key, 'category', categoryImpression);
+						appendResults(acc, key, 'impressionSchema', request);
 						break;
 					default:
 						// non-batched requests
@@ -1204,7 +1171,7 @@ export class Beacon {
 		this.sendRequests(requestsToSend);
 	}
 
-	public sendPreflight(overrides?: { userId: string; siteId: string; shopper: string; cart: Product[]; lastViewed: Item[] }): void {
+	public sendPreflight(overrides?: { userId: string; siteId: string; shopper: string; cart: Product[]; lastViewed: ProductPageviewSchemaDataResult[] }): void {
 		const userId = overrides?.userId || this.getUserId();
 		const siteId = overrides?.siteId || this.globals.siteId;
 		const shopper = overrides?.shopper || this.getShopperId();
@@ -1227,7 +1194,8 @@ export class Beacon {
 				preflightParams.lastViewed = lastViewed.map((item) => this.getProductId(item));
 			}
 
-			const origin = this.config.requesters?.personalization?.origin || `https://${siteId}.a.searchspring.io`;
+			const domain = `${siteId}`.toLowerCase().startsWith('at') ? 'athoscommerce.io' : 'searchspring.io';
+			const origin = this.config.requesters?.personalization?.origin || `https://${siteId}.a.${domain}`;
 			const endpoint = `${origin}/api/personalization/preflightCache`;
 
 			if (this.config.apis?.fetch || typeof fetch !== 'undefined') {
@@ -1243,8 +1211,8 @@ export class Beacon {
 		}
 	}
 
-	protected getProductId(product: Product | Item | ProductPageviewSchemaDataResult): string {
-		return `${product.childSku || product.childUid || product.sku || product.uid || ''}`.trim();
+	protected getProductId(product: Product | ProductPageviewSchemaDataResult): string {
+		return `${product.sku || product.uid || ''}`.trim();
 	}
 }
 
@@ -1254,7 +1222,7 @@ export function appendResults(
 		batches: Record<string, PayloadRequest>;
 	},
 	key: string,
-	schemaName: 'searchSchema' | 'autocompleteSchema' | 'categorySchema' | 'recommendationsSchema' | 'recommendationsAddtocartSchema',
+	schemaName: string,
 	request: PayloadRequest
 ) {
 	if (!acc.batches[key]) {
@@ -1262,50 +1230,42 @@ export function appendResults(
 		acc.batches[key] = JSON.parse(JSON.stringify(request));
 	} else {
 		// append results
-		const results = acc.batches[key].payload[schemaName].data.results;
-		const resultsToAdd = request.payload[schemaName].data.results;
-		const newResults = [...results, ...resultsToAdd].sort((a, b) => a.position - b.position);
-		acc.batches[key].payload[schemaName].data.results = newResults;
+		const batchPayload = acc.batches[key].payload;
+		const requestPayload = request.payload;
+		const batchSchema = batchPayload[schemaName];
+		const requestSchema = requestPayload[schemaName];
+
+		if (requestSchema?.data?.results) {
+			const results = batchSchema.data.results || [];
+			const resultsToAdd = requestSchema.data.results;
+			const newResults = [...results, ...resultsToAdd];
+			batchSchema.data.results = newResults;
+		}
+		// also do this for banners
+		if (requestSchema?.data?.banners) {
+			const banners = batchSchema?.data?.banners || [];
+			const bannersToAdd = requestSchema.data.banners;
+			const newBanners = [...banners, ...bannersToAdd];
+			batchSchema.data.banners = newBanners;
+		}
 	}
 }
 
 export function additionalRequestKeys(
 	key: string,
 	type: 'search' | 'autocomplete' | 'category' | 'recommendation',
-	schema: SearchSchema | AutocompleteSchema | CategorySchema | RecommendationsSchema | RecommendationsAddtocartSchema
+	schema: ImpressionSchema | RecommendationsImpressionSchema
 ): string {
 	let value = key;
 	value += `||${schema.context.pageLoadId}`;
 	value += `||${schema.context.sessionId}`;
 
-	switch (type) {
-		case 'search':
-		case 'autocomplete':
-		case 'category':
-			const searchSchema = schema as SearchSchema | AutocompleteSchema | CategorySchema;
-			value += `||rq=${searchSchema.data.rq || ''}`;
-			value += `||page=${searchSchema.data.pagination.page}`;
-			value += `||resultsPerPage=${searchSchema.data.pagination.resultsPerPage}`;
-			value += `||totalResults=${searchSchema.data.pagination.totalResults}`;
-			break;
-		case 'recommendation':
-			const recommendationsSchema = schema as RecommendationsSchema;
-			value += `||tag=${recommendationsSchema.data.tag}`;
-			break;
-		default:
-			break;
+	if (schema.data.responseId) {
+		value += `||responseId=${schema.data.responseId}`;
 	}
 
-	switch (type) {
-		case 'search':
-		case 'autocomplete':
-			const searchSchema = schema as SearchSchema | AutocompleteSchema;
-			value += `||q=${searchSchema.data.q}`;
-			value += `||correctedQuery=${searchSchema.data.correctedQuery || ''}`;
-			value += `||matchType=${searchSchema.data.matchType || ''}`;
-			break;
-		default:
-			break;
+	if (type === 'recommendation') {
+		value += `||tag=${(schema as RecommendationsImpressionSchema).data.tag}`;
 	}
 
 	return value;
