@@ -27,10 +27,9 @@ const beacon = new Beacon({ siteId: 'abc123', currency: { code: 'USD' } });
 | siteId | Required siteId | production | ✔️ |
 | currency.code | ISO 4217 currency code |   |   |
 | cart | array of current cart products |   |   |
+| cart[].parentId | parent product uid |   |   |
 | cart[].uid | product uid |   |   |
 | cart[].sku | (optional) product sku |   |   |
-| cart[].childUid | (optional) product child uid |   |   |
-| cart[].childSku | (optional) product child sku |   |   |
 | cart[].qty | (optional) product qty |   |   |
 | cart[].price | (optional) product price |   |   |
 
