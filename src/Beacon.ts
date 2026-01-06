@@ -169,6 +169,7 @@ export class Beacon {
 	private requests: PayloadRequest[] = [];
 
 	constructor(globals: BeaconGlobals, config?: BeaconConfig) {
+		console.log("Beacon!")
 		if (typeof globals != 'object' || typeof globals.siteId != 'string') {
 			throw new Error(`Invalid config passed to tracker. The "siteId" attribute must be provided.`);
 		}
@@ -183,7 +184,7 @@ export class Beacon {
 
 		const fetchApi = this.config.apis?.fetch;
 
-		const basePath = `${globals.siteId}`.toLowerCase().startsWith('at') ? "https://beacon.athoscommerce.io/beacon/v2".replace(/\/+$/, "") : "https://beacon.searchspring.io/beacon/v2".replace(/\/+$/, "");
+		const basePath = `${globals.siteId}`.toLowerCase().startsWith('at') ? "https://analytics.athoscommerce.net/beacon/v2".replace(/\/+$/, "") : undefined;
 		const apiConfig = new Configuration({ fetchApi, basePath: this.config.requesters?.beacon?.origin || basePath, headers: { 'Content-Type': 'text/plain' } });
 		this.apis = {
 			shopper: new ShopperApi(apiConfig),
