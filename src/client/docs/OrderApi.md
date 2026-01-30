@@ -1,6 +1,6 @@
 # OrderApi
 
-All URIs are relative to *https://analytics.searchspring.net/beacon/v2*
+All URIs are relative to *https://analytics.athoscommerce.net/beacon/v2*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|

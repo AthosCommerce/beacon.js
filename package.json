@@ -13,8 +13,9 @@
   "prettier": "@searchspring/prettier",
   "scripts": {
     "analyze": "webpack --config webpack.prod.js --analyze",
-    "build": "rm -rf ./dist && npm run generate && tsc && tsc -p tsconfig.cjs.json",
-    "build:cdn": "rm -rf ./dist && webpack --config webpack.prod.js",
+    "build": "rm -rf ./dist && npm run generate && tsc && tsc -p tsconfig.cjs.json && npm run build:cdn",
+    "build:cdn": "webpack --config webpack.prod.js",
+    "dev:server": "http-server ./public",
     "dev": "tsc --watch",
     "commit": "cz",
     "test": "jest",
@@ -27,7 +28,7 @@
     "postversion": "git push && git push --tags"
   },
   "dependencies": {
-    "@searchspring/snap-toolbox": "latest",
+    "@searchspring/snap-toolbox": "0.73.7",
     "uuid": "9.0.1"
   },
   "devDependencies": {
@@ -43,6 +44,7 @@
     "cz-conventional-changelog": "3.3.0",
     "eslint": "9.23.0",
     "eslint-config-prettier": "10.1.1",
+    "http-server": "^14.1.1",
     "husky": "9.1.7",
     "jest": "29.7.0",
     "jest-environment-jsdom": "^29.7.0",

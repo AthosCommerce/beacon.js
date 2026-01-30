@@ -106,10 +106,13 @@ export type BeaconConfig = {
 	href?: string;
 	userAgent?: string;
 };
-type BeaconGlobals = {
+export type BeaconGlobals = {
 	siteId: string;
 	currency?: Currency;
-	cart?: Product[];
+	shopper?: {
+		cart?: Product[];
+		id?: string;
+	}
 };
 
 interface ApiMethodMap {
@@ -187,7 +190,7 @@ export class Beacon {
 
 		const fetchApi = this.config.apis?.fetch;
 
-		const basePath = `${globals.siteId}`.toLowerCase().startsWith('at') ? "https://beacon.athoscommerce.io/beacon/v2".replace(/\/+$/, "") : "https://beacon.searchspring.io/beacon/v2".replace(/\/+$/, "");
+		const basePath = `${globals.siteId}`.toLowerCase().startsWith('at') ? "https://analytics.athoscommerce.net/beacon/v2".replace(/\/+$/, "") : "https://beacon.searchspring.io/beacon/v2".replace(/\/+$/, "");
 		const apiConfig = new Configuration({ fetchApi, basePath: this.config.requesters?.beacon?.origin || basePath, headers: { 'Content-Type': 'text/plain' } });
 		this.apis = {
 			shopper: new ShopperApi(apiConfig),
@@ -206,6 +209,13 @@ export class Beacon {
 
 		if (this.globals.currency) {
 			this.setCurrency(this.globals.currency);
+		}
+
+		if (this.globals.shopper?.cart) {
+			this.storage.cart.set(this.globals.shopper.cart);
+		}
+		if (this.globals.shopper?.id) {
+			this.setShopperId(this.globals.shopper.id);
 		}
 	}
 
@@ -477,12 +487,13 @@ export class Beacon {
 	events = {
 		shopper: {
 			login: (event: Payload<{ id: string }>) => {
-				const setNewId = this.setShopperId(event.data.id);
-				if (setNewId) {
+				const context = this.getContext() as ShopperContext;
+				context.shopperId = event.data?.id;
+				if(event.data?.id) {
 					const payload: LoginRequest = {
 						siteId: event?.siteId || this.globals.siteId,
 						shopperLoginSchema: {
-							context: this.getContext() as ShopperContext,
+							context,
 						},
 					};
 					const request = this.createRequest('shopper', 'login', payload);
@@ -997,7 +1008,7 @@ export class Beacon {
 		return this.shopperId || '';
 	}
 
-	public setShopperId(shopperId: string): string | void {
+	public setShopperId(shopperId: string): void {
 		if (!shopperId) {
 			return;
 		}
@@ -1010,8 +1021,8 @@ export class Beacon {
 			} catch (e: any) {
 				sendStorageError(e, this, SHOPPER_ID_KEY, this.shopperId);
 			}
+			this.events.shopper.login({ data: { id: this.shopperId }});
 			this._sendPreflight();
-			return this.shopperId;
 		}
 	}
 

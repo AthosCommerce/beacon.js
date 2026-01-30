@@ -1,14 +1,14 @@
 openapi: 3.1.0
 info:
   version: 2.2.48
-  title: analytics.searchspring.net
+  title: analytics.athoscommerce.net
   x-logo:
     url: ./images/athos_commerce_logo.png
     altText: Athos Commerce logo
   contact:
     name: Athos Commerce
 servers:
-  - url: https://analytics.searchspring.net/beacon/v2
+  - url: https://analytics.athoscommerce.net/beacon/v2
     description: Beacon v2
 tags:
   - name: Autocomplete

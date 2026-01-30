@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 
+    <script id="searchspring-context" src="https://snapui.searchspring.io/snap/0.70.0/bundle.js">
+        shopper = {
+            id: 'snapdev'
+        };
+    </script> -->
+
+    <title>Document</title>
+    <!-- TODO: remove this id after new Snap toolbox release -->
+    <!-- <script siteId="8uyt2m" src="./beacon.js">
+        shopper = {
+            id: 'snapdev',
+            cart: [
+                {
+                    parentId: 'parentId_123',
+                    uid: 'uid_123',
+                    qty: 1,
+                    price: 10.99
+                }
+            ]
+        };
+    </script> -->
+    <script siteId="abc123" src="./beacon.js">
+    </script>
+    <script>
+        window.searchspring.tracker.events.search.render({ data: { responseId: 'response_123' } });
+    </script>
+</head>
+<body>
+    
+</body>
+</html>
