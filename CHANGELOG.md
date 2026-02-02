@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.50](https://github.com/searchspring/beacon.js/compare/v0.0.49...v0.0.50) (2026-02-02)
+
+
+### Features
+
+* add oidc setup for publish workflow ([a3e8ba2](https://github.com/searchspring/beacon.js/commit/a3e8ba21a345135ea4c77e6b92a05f9d1adcc673))
+
 ### [0.0.49](https://github.com/searchspring/beacon.js/compare/v0.0.48...v0.0.49) (2026-02-02)
 
 
