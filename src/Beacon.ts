@@ -72,7 +72,9 @@ import type {
 
 declare global {
 	interface Window {
+		Beacon?: typeof Beacon;
 		searchspring?: any;
+		athos?: any;
 	}
 }
 type LocalStorageItem = string | number | boolean | object | null;
@@ -104,10 +106,8 @@ export type BeaconConfig = {
 	href?: string;
 	userAgent?: string;
 };
-type BeaconGlobals = {
+export type BeaconGlobals = {
 	siteId: string;
-	currency?: Currency;
-	cart?: Product[];
 };
 
 interface ApiMethodMap {
@@ -133,6 +133,7 @@ export type Payload<T> = {
 };
 
 export const REQUEST_GROUPING_TIMEOUT = 300;
+export const PREFLIGHT_DEBOUNCE_TIMEOUT = 300;
 const USER_ID_KEY = 'ssUserId';
 export const PAGE_LOAD_ID_KEY = 'ssPageLoadId';
 const SESSION_ID_KEY = 'ssSessionId';
@@ -164,6 +165,7 @@ export class Beacon {
 	};
 	private initiator: string = '';
 	private batchIntervalTimeout: number | NodeJS.Timeout = 0;
+	private preflightTimeout: number | NodeJS.Timeout = 0;
 	private apis: ApiMethodMap;
 
 	private requests: PayloadRequest[] = [];
@@ -178,12 +180,11 @@ export class Beacon {
 		if (this.config.mode && ['production', 'development'].includes(this.config.mode)) {
 			this.mode = this.config.mode;
 		}
-		// TODO: account for standalone beacon.js cdn usage vs package usage
-		this.initiator = this.config.initiator || `beaconjs/${version}`;
 
 		const fetchApi = this.config.apis?.fetch;
 
-		const basePath = `${globals.siteId}`.toLowerCase().startsWith('at') ? "https://beacon.athoscommerce.io/beacon/v2".replace(/\/+$/, "") : "https://beacon.searchspring.io/beacon/v2".replace(/\/+$/, "");
+		const domain = `${globals.siteId}`.trim().toLowerCase().startsWith('at') ? 'athos' : 'searchspring';
+		const basePath = domain === 'searchspring' ? "https://beacon.searchspring.io/beacon/v2".replace(/\/+$/, "") : "https://analytics.athoscommerce.net/beacon/v2".replace(/\/+$/, "");
 		const apiConfig = new Configuration({ fetchApi, basePath: this.config.requesters?.beacon?.origin || basePath, headers: { 'Content-Type': 'text/plain' } });
 		this.apis = {
 			shopper: new ShopperApi(apiConfig),
@@ -197,11 +198,15 @@ export class Beacon {
 			error: new ErrorLogsApi(apiConfig),
 		};
 
+		this.initiator = this.config.initiator || `${domain}/beaconjs/${version}`;
+
 		this.globals = globals;
 		this.pageLoadId = this.getPageLoadId();
 
-		if (this.globals.currency) {
-			this.setCurrency(this.globals.currency);
+		if(!this.globals?.siteId) {
+			throw new Error('Beacon: No siteId found in globals. Beacon will not initialize.');
+		} else {
+			this.globals.siteId = `${this.globals.siteId}`.trim().toLowerCase();
 		}
 	}
 
@@ -335,7 +340,7 @@ export class Beacon {
 
 				const productsHaveChanged = JSON.stringify(currentCartProducts) !== stringifiedProducts;
 				if (productsHaveChanged) {
-					this.sendPreflight();
+					this._sendPreflight();
 				}
 			},
 			add: (products: Product[]): void => {
@@ -442,7 +447,7 @@ export class Beacon {
 
 				const productsHaveChanged = JSON.stringify(currentViewedItems) !== stringifiedNormalizedItems;
 				if (productsHaveChanged) {
-					this.sendPreflight();
+					this._sendPreflight();
 				}
 			},
 			add: (products: ProductPageviewSchemaDataResult[]): void => {
@@ -473,12 +478,13 @@ export class Beacon {
 	events = {
 		shopper: {
 			login: (event: Payload<{ id: string }>) => {
-				const setNewId = this.setShopperId(event.data.id);
-				if (setNewId) {
+				const context = this.getContext() as ShopperContext;
+				context.shopperId = event.data?.id;
+				if(event.data?.id) {
 					const payload: LoginRequest = {
 						siteId: event?.siteId || this.globals.siteId,
 						shopperLoginSchema: {
-							context: this.getContext() as ShopperContext,
+							context,
 						},
 					};
 					const request = this.createRequest('shopper', 'login', payload);
@@ -993,12 +999,12 @@ export class Beacon {
 		return this.shopperId || '';
 	}
 
-	public setShopperId(shopperId: string): string | void {
+	public setShopperId(shopperId: string): void {
 		if (!shopperId) {
 			return;
 		}
-		const exisitingShopperId = this.getShopperId();
-		if (exisitingShopperId !== shopperId) {
+		const existingShopperId = this.getShopperId();
+		if (existingShopperId !== shopperId) {
 			this.shopperId = '' + shopperId; // ensure string
 			this.setCookie(SHOPPER_ID_KEY, this.shopperId, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
 			try {
@@ -1006,8 +1012,8 @@ export class Beacon {
 			} catch (e: any) {
 				sendStorageError(e, this, SHOPPER_ID_KEY, this.shopperId);
 			}
-			this.sendPreflight();
-			return this.shopperId;
+			this.events.shopper.login({ data: { id: this.shopperId }});
+			this._sendPreflight();
 		}
 	}
 
@@ -1193,6 +1199,13 @@ export class Beacon {
 		this.sendRequests(requestsToSend);
 	}
 
+	private _sendPreflight(): void {
+		clearTimeout(this.preflightTimeout);
+		this.preflightTimeout = setTimeout(() => {
+			this.sendPreflight();
+		}, PREFLIGHT_DEBOUNCE_TIMEOUT);
+	}
+
 	public sendPreflight(overrides?: { userId: string; siteId: string; shopper: string; cart: Product[]; lastViewed: ProductPageviewSchemaDataResult[] }): void {
 		const userId = overrides?.userId || this.getUserId();
 		const siteId = overrides?.siteId || this.globals.siteId;
@@ -1224,7 +1237,7 @@ export class Beacon {
 				(this.config.apis?.fetch || fetch)(endpoint, {
 					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json',
+						'Content-Type': 'text/plain',
 						...this.config.requesters?.personalization?.headers || {},
 					},
 					body: JSON.stringify(preflightParams),
