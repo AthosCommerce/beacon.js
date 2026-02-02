@@ -180,12 +180,11 @@ export class Beacon {
 		if (this.config.mode && ['production', 'development'].includes(this.config.mode)) {
 			this.mode = this.config.mode;
 		}
-		// TODO: account for standalone beacon.js cdn usage vs package usage
-		this.initiator = this.config.initiator || `beaconjs/${version}`;
 
 		const fetchApi = this.config.apis?.fetch;
 
-		const basePath = `${globals.siteId}`.toLowerCase().startsWith('at') ? "https://analytics.athoscommerce.net/beacon/v2".replace(/\/+$/, "") : "https://beacon.searchspring.io/beacon/v2".replace(/\/+$/, "");
+		const domain = `${globals.siteId}`.trim().toLowerCase().startsWith('at') ? 'athos' : 'searchspring';
+		const basePath = domain === 'searchspring' ? "https://beacon.searchspring.io/beacon/v2".replace(/\/+$/, "") : "https://analytics.athoscommerce.net/beacon/v2".replace(/\/+$/, "");
 		const apiConfig = new Configuration({ fetchApi, basePath: this.config.requesters?.beacon?.origin || basePath, headers: { 'Content-Type': 'text/plain' } });
 		this.apis = {
 			shopper: new ShopperApi(apiConfig),
@@ -199,11 +198,15 @@ export class Beacon {
 			error: new ErrorLogsApi(apiConfig),
 		};
 
+		this.initiator = this.config.initiator || `${domain}/beaconjs/${version}`;
+
 		this.globals = globals;
 		this.pageLoadId = this.getPageLoadId();
 
-		if (this.globals.currency) {
-			this.setCurrency(this.globals.currency);
+		if(!this.globals?.siteId) {
+			throw new Error('Beacon: No siteId found in globals. Beacon will not initialize.');
+		} else {
+			this.globals.siteId = `${this.globals.siteId}`.trim().toLowerCase();
 		}
 	}
 
