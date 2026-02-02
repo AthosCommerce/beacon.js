@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.49](https://github.com/searchspring/beacon.js/compare/v0.0.48...v0.0.49) (2026-02-02)
+
+
+### Features
+
+* add initial README docs, add CDN build, rebuild with latest spec ([bbd7ac0](https://github.com/searchspring/beacon.js/commit/bbd7ac08b4fa79a4442cd78afb64061d4e6f9f10))
+* debounce sendPreflight, move preflight to text/plain ([b57daa2](https://github.com/searchspring/beacon.js/commit/b57daa2ab343e5a145d350ef5d83a296455cdb00))
+
+
+### Bug Fixes
+
+* improve initiator ([fb3ccf7](https://github.com/searchspring/beacon.js/commit/fb3ccf76d6933b4d6e92586400e863977b749ba4))
+* more cdn improvements ([bc50ec8](https://github.com/searchspring/beacon.js/commit/bc50ec8f31c31b433351eaaa7de80c7fd32e07e9))
+* preflight debounce bug, update testing ([2c6d12d](https://github.com/searchspring/beacon.js/commit/2c6d12d98db5ec3ff99bb8dfef94e96ce485beb3))
+* typo ([7316814](https://github.com/searchspring/beacon.js/commit/73168144327eb2c2a928c0fceaf5eff36303893e))
+
+
+### Docs
+
+* updated docs ([06b4685](https://github.com/searchspring/beacon.js/commit/06b46853633e531cac84e06961f05006a0843bc5))
+
 ### [0.0.48](https://github.com/searchspring/beacon.js/compare/v0.0.47...v0.0.48) (2025-12-30)
 
 
