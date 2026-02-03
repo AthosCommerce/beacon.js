@@ -1,5 +1,6 @@
 {
   "releaseCommitMessageFormat": "chore(release): {{currentTag}} [skip actions]",
+  "preset": "conventionalcommits",
   "types": [
     {"type": "chore", "section":"Others", "hidden": true},
     {"type": "revert", "section":"Reverts", "hidden": false},
