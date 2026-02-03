@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/searchspring/beacon.js/compare/v0.1.1...v0.2.0) (2026-02-03)
+
+
+### Features
+
+* **publishing:** moving to `postversion` and correcting permissions issue ([ce304a7](https://github.com/searchspring/beacon.js/commit/ce304a7f53ef8de588fea4f8cf30971ae036dca3))
+
 ### [0.1.1](https://github.com/searchspring/beacon.js/compare/v0.0.50...v0.1.1) (2026-02-03)
 
 
