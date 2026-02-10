@@ -8,7 +8,7 @@
   "module": "dist/esm/src/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/athoscommerce/beacon.js.git"
+    "url": "git+https://github.com/AthosCommerce/beacon.js.git"
   },
   "prettier": "@searchspring/prettier",
   "scripts": {
