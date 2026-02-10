@@ -1183,7 +1183,7 @@ export class Beacon {
 					case 'login':
 						const shopperLogin = (request.payload as LoginRequest).shopperLoginSchema;
 						key += additionalRequestKeys(key, 'shopper', shopperLogin);
-						appendResults(acc, key, 'impressionSchema', request);
+						appendResults(acc, key, 'shopperLoginSchema', request);
 						break;
 					default:
 						// non-batched requests
