@@ -1114,7 +1114,7 @@ export class Beacon {
 				const headers = { ...init.headers, ...(this.config.requesters?.beacon?.headers || {}) };
 				const isJSON = headers && 'Content-Type' in headers && headers['Content-Type'] === 'application/json';
 				return {
-					// Cypress intecepts does not support keepalive
+					// Cypress intercepts does not support keepalive
 					keepalive: this.mode === 'production' ? true : undefined,
 					body: isJSON ? init.body : JSON.stringify(init.body),
 					headers,
