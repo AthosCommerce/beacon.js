@@ -14,7 +14,7 @@
   "scripts": {
     "build": "rm -rf ./dist && npm run generate && tsc && tsc -p tsconfig.cjs.json && npm run build:cdn",
     "build:cdn": "webpack --config webpack.prod.js",
-    "dev": "webpack serve --config webpack.dev.js",
+    "dev": "tsc --watch & webpack serve --config webpack.dev.js",
     "commit": "cz",
     "test": "jest",
     "test:watch": "jest --watch",
