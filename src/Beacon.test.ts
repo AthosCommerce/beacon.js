@@ -421,7 +421,7 @@ describe('Beacon', () => {
 		});
 	});
 
-	describe('athoscommerce.io tests', () => {
+	describe('athoscommerce.net tests', () => {
 		it('can switch siteIds to athoscommerce', async () => {
 			const athosSiteId = 'athos-site-id';
 			const beacon = new Beacon({ siteId: athosSiteId }, mockConfig);
@@ -470,7 +470,7 @@ describe('Beacon', () => {
 
 				expect(spy).toHaveBeenCalledTimes(1);
 				expect(mockFetchApi).toHaveBeenCalledTimes(2);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/preflightCache'), expect.any(Object));
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('analytics.searchspring.net/beacon/v2'), fetchPayloadAssertion);
 			});
 
@@ -499,7 +499,7 @@ describe('Beacon', () => {
 
 				expect(spy).toHaveBeenCalledTimes(1);
 				expect(mockFetchApi).toHaveBeenCalledTimes(2);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/preflightCache'), expect.any(Object));
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('analytics.searchspring.net/beacon/v2'), fetchPayloadAssertion);
 			});
 		});
@@ -1531,10 +1531,11 @@ describe('Beacon', () => {
 				siteId: beacon.globals.siteId,
 				cart: items,
 			};
-			jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
 
+			jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
 			await flushPromises();
-			expect(mockFetchApi).toHaveBeenCalledWith(`https://${mockGlobals.siteId}.a.searchspring.io/api/personalization/preflightCache`, {
+
+			expect(mockFetchApi).toHaveBeenCalledWith(`https://${mockGlobals.siteId}.a.searchspring.io/v1/preflight`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'text/plain',
@@ -1561,10 +1562,11 @@ describe('Beacon', () => {
 				siteId: beacon.globals.siteId,
 				cart: items,
 			};
-			jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
 
+			jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
 			await flushPromises();
-			expect(mockFetchApi).toHaveBeenCalledWith(`https://${athosSiteId}.a.athoscommerce.io/api/personalization/preflightCache`, {
+
+			expect(mockFetchApi).toHaveBeenCalledWith(`https://${athosSiteId}.a.athoscommerce.net/v1/preflight`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'text/plain',
