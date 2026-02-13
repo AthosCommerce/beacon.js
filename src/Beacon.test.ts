@@ -10,12 +10,7 @@ import {
 	PREFLIGHT_DEBOUNCE_TIMEOUT,
 	REQUEST_GROUPING_TIMEOUT,
 } from './Beacon';
-import {
-	Currency,
-	ImpressionSchemaData,
-	Product,
-	ResultProductType,
-} from './client';
+import { Currency, ImpressionSchemaData, Product, ResultProductType } from './client';
 
 const resetAllCookies = () => {
 	const cookies = document.cookie.split(';');
@@ -42,8 +37,8 @@ describe('Beacon', () => {
 			beacon: {
 				headers: {
 					'Content-Type': 'application/json',
-				}
-			}
+				},
+			},
 		},
 		mode: 'development' as const,
 	};
@@ -450,9 +445,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				await new Promise((resolve) => setTimeout(resolve, PREFLIGHT_DEBOUNCE_TIMEOUT));
 				expect(beacon['shopperId']).toBe(shopperId);
@@ -466,7 +461,7 @@ describe('Beacon', () => {
 			it('can batch multiple login events', async () => {
 				const shopperId = 'shopper123';
 				const spy = jest.spyOn(beacon['apis'].shopper, 'login');
-				
+
 				beacon.events.shopper.login({ data: { id: shopperId } });
 				beacon.events.shopper.login({ data: { id: shopperId } });
 				beacon.events.shopper.login({ data: { id: shopperId } });
@@ -477,9 +472,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				await new Promise((resolve) => setTimeout(resolve, PREFLIGHT_DEBOUNCE_TIMEOUT));
 				expect(beacon['shopperId']).toBe(shopperId);
@@ -494,7 +489,7 @@ describe('Beacon', () => {
 			it('can process render event', async () => {
 				const data = {
 					responseId: 'responseId-test',
-				}
+				};
 				const fetchPayloadAssertion = {
 					...otherFetchParams,
 					body: {
@@ -502,9 +497,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteRender');
 
@@ -524,9 +519,7 @@ describe('Beacon', () => {
 						{ type: ResultProductType.Product, parentId: 'parentId4', uid: 'prodUid4', sku: 'prodSku4' },
 						{ type: ResultProductType.Banner, uid: 'inlinebanneruid' },
 					],
-					banners: [
-						{ uid: 'merchandisingbanneruid' },
-					],
+					banners: [{ uid: 'merchandisingbanneruid' }],
 				};
 
 				const fetchPayloadAssertion = {
@@ -536,9 +529,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteImpression');
 				beacon.events.autocomplete.impression({ data });
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
@@ -564,9 +557,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteAddtocart');
 
@@ -593,9 +586,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteClickthrough');
 
@@ -618,9 +611,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteRedirect');
 
@@ -644,9 +637,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].search, 'searchRender');
 
@@ -663,11 +656,8 @@ describe('Beacon', () => {
 					{ type: ResultProductType.Product, parentId: 'parentId3', uid: 'prodUid3', sku: 'prodSku3' },
 					{ type: ResultProductType.Product, parentId: 'parentId4', uid: 'prodUid4', sku: 'prodSku4' },
 					{ type: ResultProductType.Banner, uid: 'inlinebanneruid' },
-				]
-				const banners = [
-					{ uid: 'merchandisingbanneruid2' },
-					{ uid: 'merchandisingbanneruid3' }
-				]
+				];
+				const banners = [{ uid: 'merchandisingbanneruid2' }, { uid: 'merchandisingbanneruid3' }];
 				const data: ImpressionSchemaData = {
 					responseId: 'test-response-id',
 					results: [],
@@ -685,9 +675,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].search, 'searchImpression');
 
@@ -698,26 +688,25 @@ describe('Beacon', () => {
 								...data,
 								results: [{ type: ResultProductType.Product, parentId: 'parentId0', uid: 'prodUid0', sku: 'prodSku0' }, result],
 								banners: [{ uid: 'merchandisingbanneruid0' }, { uid: 'merchandisingbanneruid1' }],
-							}
+							},
 						});
 					} else {
 						beacon.events.search.impression({
 							data: {
 								...data,
 								results: [result],
-							}
+							},
 						});
 					}
-
-				})
-				banners.forEach(banner => {
+				});
+				banners.forEach((banner) => {
 					beacon.events.search.impression({
 						data: {
 							...data,
 							banners: [banner],
-						}
+						},
 					});
-				})
+				});
 
 				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
 
@@ -742,9 +731,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].search, 'searchAddtocart');
 
@@ -771,9 +760,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].search, 'searchClickthrough');
 
@@ -796,9 +785,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].search, 'searchRedirect');
 
@@ -822,9 +811,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryRender');
 
@@ -844,9 +833,7 @@ describe('Beacon', () => {
 						{ type: ResultProductType.Product, parentId: 'parentId4', uid: 'prodUid4', sku: 'prodSku4' },
 						{ type: ResultProductType.Banner, uid: 'inlinebanneruid' },
 					],
-					banners: [
-						{ uid: 'merchandisingbanneruid' },
-					],
+					banners: [{ uid: 'merchandisingbanneruid' }],
 				};
 
 				const fetchPayloadAssertion = {
@@ -856,9 +843,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryImpression');
 
@@ -886,9 +873,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryAddtocart');
 
@@ -915,9 +902,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryClickthrough');
 
@@ -942,9 +929,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsRender');
 
@@ -965,9 +952,7 @@ describe('Beacon', () => {
 						{ type: ResultProductType.Product, parentId: 'parentId4', uid: 'prodUid4', sku: 'prodSku4' },
 						{ type: ResultProductType.Banner, uid: 'inlinebanneruid' },
 					],
-					banners: [
-						{ uid: 'merchandisingbanneruid' },
-					],
+					banners: [{ uid: 'merchandisingbanneruid' }],
 				};
 
 				const fetchPayloadAssertion = {
@@ -977,9 +962,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsImpression');
 
@@ -1008,9 +993,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsAddtocart');
 
@@ -1038,9 +1023,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsClickthrough');
 
@@ -1064,9 +1049,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
 
@@ -1104,9 +1089,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].cart, 'cartAdd');
 
@@ -1156,9 +1141,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].cart, 'cartRemove');
 
@@ -1197,9 +1182,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].order, 'orderTransaction');
 
@@ -1225,9 +1210,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].error, 'logShopifypixel');
 
@@ -1251,9 +1236,9 @@ describe('Beacon', () => {
 						context: {
 							...beacon.getContext(),
 							timestamp: expect.any(String),
-						}
-					}
-				}
+						},
+					},
+				};
 
 				const spy = jest.spyOn(beacon['apis'].error, 'logSnap');
 
@@ -1285,9 +1270,7 @@ describe('Beacon', () => {
 		const mockData = {
 			responseId: 'responseId',
 			tag: 'tag',
-			banners: [
-				{ uid: 'merchandisingBanner' },
-			],
+			banners: [{ uid: 'merchandisingBanner' }],
 			results: [
 				{ type: ResultProductType.Product, parentId: 'parentId1', uid: 'product1', sku: 'sku1' },
 				{ type: ResultProductType.Product, parentId: 'parentId2', uid: 'product2', sku: 'sku2' },
@@ -1383,9 +1366,7 @@ describe('Beacon', () => {
 									{ type: ResultProductType.Product, parentId: 'parentId4', uid: 'product4', sku: 'sku4' },
 									{ type: ResultProductType.Banner, uid: 'inlineBanner1' },
 								],
-								banners: [
-									{ uid: 'banner1' },
-								]
+								banners: [{ uid: 'banner1' }],
 							},
 						},
 					},
