@@ -8,7 +8,7 @@ module.exports = merge(prod, {
 	devServer: {
 		server: 'https',
 		hot: true,
-		allowedHosts: 'all',
+		allowedHosts: 'auto',
 		headers: {
 			'Access-Control-Allow-Origin': '*',
 		},
