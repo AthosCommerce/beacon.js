@@ -459,7 +459,7 @@ describe('Beacon', () => {
 
 				expect(spy).toHaveBeenCalledTimes(1);
 				expect(mockFetchApi).toHaveBeenCalledTimes(2);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/preflightCache'), expect.any(Object));
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('analytics.searchspring.net/beacon/v2'), fetchPayloadAssertion);
 			});
 
@@ -486,7 +486,7 @@ describe('Beacon', () => {
 
 				expect(spy).toHaveBeenCalledTimes(1);
 				expect(mockFetchApi).toHaveBeenCalledTimes(2);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/preflightCache'), expect.any(Object));
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('analytics.searchspring.net/beacon/v2'), fetchPayloadAssertion);
 			});
 		});
@@ -1509,7 +1509,7 @@ describe('Beacon', () => {
 				cart: items,
 			};
 			await new Promise((resolve) => setTimeout(resolve, PREFLIGHT_DEBOUNCE_TIMEOUT));
-			expect(mockFetchApi).toHaveBeenCalledWith(`https://${mockGlobals.siteId}.a.searchspring.io/api/personalization/preflightCache`, {
+			expect(mockFetchApi).toHaveBeenCalledWith(`https://${mockGlobals.siteId}.a.searchspring.io/v1/preflight`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'text/plain',
@@ -1537,7 +1537,7 @@ describe('Beacon', () => {
 				cart: items,
 			};
 			await new Promise((resolve) => setTimeout(resolve, PREFLIGHT_DEBOUNCE_TIMEOUT));
-			expect(mockFetchApi).toHaveBeenCalledWith(`https://${athosSiteId}.a.athoscommerce.io/api/personalization/preflightCache`, {
+			expect(mockFetchApi).toHaveBeenCalledWith(`https://${athosSiteId}.a.athoscommerce.io/v1/preflight`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'text/plain',

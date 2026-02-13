@@ -1242,7 +1242,7 @@ export class Beacon {
 
 			const domain = `${siteId}`.toLowerCase().startsWith('at') ? 'athoscommerce.io' : 'searchspring.io';
 			const origin = this.config.requesters?.personalization?.origin || `https://${siteId}.a.${domain}`;
-			const endpoint = `${origin}/api/personalization/preflightCache`;
+			const endpoint = `${origin}/v1/preflight`;
 
 			if (this.config.apis?.fetch || typeof fetch !== 'undefined') {
 				(this.config.apis?.fetch || fetch)(endpoint, {
