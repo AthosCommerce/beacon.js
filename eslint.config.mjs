@@ -9,8 +9,6 @@ export default tseslint.config(
 	{
 		ignores: [
 			'src/client/**',
-			'**/*.test.ts',
-			'**/*.test.tsx',
 			'dist/**',
 			'coverage/**',
 			'public/**',
@@ -24,7 +22,10 @@ export default tseslint.config(
 		rules: {
 			'no-debugger': 'error',
 			'no-unsafe-finally': 'warn',
-			'@typescript-eslint/ban-ts-comment': 'error',
+			'@typescript-eslint/ban-ts-comment': [
+				'warn',
+				{ 'ts-ignore': 'allow-with-description' },
+			],
 			'@typescript-eslint/no-explicit-any': 'warn',
 			'@typescript-eslint/no-non-null-assertion': 'error',
 			'@typescript-eslint/no-non-null-asserted-optional-chain': 'error',

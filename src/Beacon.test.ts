@@ -110,7 +110,7 @@ describe('Beacon', () => {
 
 				// localStorage contains cart data
 				expect(localStorageMock.setItem).toHaveBeenCalled();
-				const data = localStorageMock.getItem(CART_KEY)!;
+				const data = localStorageMock.getItem(CART_KEY);
 				expect(data).toBe(JSON.stringify({ value: mockProducts }));
 
 				// can add to existing cart data and should be at the front
@@ -157,7 +157,7 @@ describe('Beacon', () => {
 				const clearedCartData = beacon.storage.cart.get();
 				expect(clearedCartData).toEqual([]);
 				expect(global.document.cookie).toEqual(`${CART_KEY}=`);
-				const rawClearedItem = localStorageMock.getItem(CART_KEY)!;
+				const rawClearedItem = localStorageMock.getItem(CART_KEY);
 				expect(rawClearedItem).toBe(JSON.stringify({ value: [] }));
 			});
 		});
@@ -208,14 +208,17 @@ describe('Beacon', () => {
 				expect(pageLoadId2).toStrictEqual(pageLoadId1);
 
 				// should save generated id to storage
-				const stored = localStorageMock.getItem(PAGE_LOAD_ID_KEY)!;
-				expect(JSON.parse(stored)).toStrictEqual({
-					value: {
-						href,
-						value: pageLoadId1,
-						timestamp: expect.any(String),
-					},
-				});
+				const stored = localStorageMock.getItem(PAGE_LOAD_ID_KEY);
+				expect(stored).toBeTruthy();
+				if (stored) {
+					expect(JSON.parse(stored)).toStrictEqual({
+						value: {
+							href,
+							value: pageLoadId1,
+							timestamp: expect.any(String),
+						},
+					});
+				}
 			});
 
 			it('can getPageLoadId from storage', async () => {
@@ -232,16 +235,19 @@ describe('Beacon', () => {
 				expect(beacon['pageLoadId']).toStrictEqual(stored.value);
 
 				// stored value shouldn't change - timestamp should be different
-				const stored2 = localStorageMock.getItem(PAGE_LOAD_ID_KEY)!;
-				expect(JSON.parse(stored2)).toStrictEqual({
-					value: {
-						href: stored.href,
-						value: stored.value,
-						timestamp: expect.any(String),
-					},
-				});
-				expect(JSON.parse(stored2).value.value).toBe(stored.value);
-				expect(JSON.parse(stored2).value.timestamp).not.toBe(stored.timestamp);
+				const stored2 = localStorageMock.getItem(PAGE_LOAD_ID_KEY);
+				expect(stored2).toBeTruthy();
+				if (stored2) {
+					expect(JSON.parse(stored2)).toStrictEqual({
+						value: {
+							href: stored.href,
+							value: stored.value,
+							timestamp: expect.any(String),
+						},
+					});
+					expect(JSON.parse(stored2).value.value).toBe(stored.value);
+					expect(JSON.parse(stored2).value.timestamp).not.toBe(stored.timestamp);
+				}
 			});
 
 			it(
@@ -263,16 +269,19 @@ describe('Beacon', () => {
 					expect(beacon['pageLoadId']).toStrictEqual(expect.any(String));
 
 					// should save new id to storage
-					const stored2 = localStorageMock.getItem(PAGE_LOAD_ID_KEY)!;
-					expect(JSON.parse(stored2)).toStrictEqual({
-						value: {
-							href: stored.href,
-							value: expect.any(String),
-							timestamp: expect.any(String),
-						},
-					});
-					expect(JSON.parse(stored2).value.value).not.toBe(stored.value);
-					expect(JSON.parse(stored2).value.timestamp).not.toBe(stored.timestamp);
+					const stored2 = localStorageMock.getItem(PAGE_LOAD_ID_KEY);
+					expect(stored2).toBeTruthy();
+					if (stored2) {
+						expect(JSON.parse(stored2)).toStrictEqual({
+							value: {
+								href: stored.href,
+								value: expect.any(String),
+								timestamp: expect.any(String),
+							},
+						});
+						expect(JSON.parse(stored2).value.value).not.toBe(stored.value);
+						expect(JSON.parse(stored2).value.timestamp).not.toBe(stored.timestamp);
+					}
 				},
 				PAGE_LOAD_ID_EXPIRATION + 100
 			); // increase timeout to wait for expiration
@@ -1293,7 +1302,7 @@ describe('Beacon', () => {
 				const { pageLoadId, sessionId } = context;
 				const { responseId } = data;
 
-				let baseKey = `${mockGlobals.siteId}||search`;
+				const baseKey = `${mockGlobals.siteId}||search`;
 				const key = additionalRequestKeys(baseKey, 'search', schema);
 				const expected = `${baseKey}||${pageLoadId}||${sessionId}||responseId=${responseId}`;
 				expect(key).toStrictEqual(expected);
@@ -1309,7 +1318,7 @@ describe('Beacon', () => {
 				const { pageLoadId, sessionId } = context;
 				const { responseId, tag } = data;
 
-				let baseKey = `${mockGlobals.siteId}||recommendation`;
+				const baseKey = `${mockGlobals.siteId}||recommendation`;
 				const key = additionalRequestKeys(baseKey, 'recommendation', schema);
 				const expected = `${baseKey}||${pageLoadId}||${sessionId}||responseId=${responseId}||tag=${tag}`;
 				expect(key).toStrictEqual(expected);
