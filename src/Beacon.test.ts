@@ -25,6 +25,13 @@ const resetAllCookies = () => {
 // mocks fetch so beacon client does not make network requests
 jest.spyOn(global.window, 'fetch').mockImplementation(() => Promise.resolve({ status: 200, json: () => Promise.resolve({}) } as Response));
 
+// Helper to flush the microtask queue. Provides two microtask ticks:
+// 1) async function invocation schedules a microtask, 2) await Promise.resolve() schedules another.
+// This double-flush is needed for nested promise chains in the beacon code to fully resolve.
+const flushPromises = async () => {
+	await Promise.resolve();
+};
+
 describe('Beacon', () => {
 	let beacon: Beacon;
 	const mockFetchApi = jest.fn().mockResolvedValue(Promise.resolve({ status: 200, json: () => Promise.resolve({}) }));
@@ -67,6 +74,7 @@ describe('Beacon', () => {
 	console.error = jest.fn();
 
 	beforeEach(() => {
+		jest.useFakeTimers();
 		jest.clearAllMocks();
 		resetAllCookies();
 		localStorageMock.clear();
@@ -163,10 +171,13 @@ describe('Beacon', () => {
 		});
 		describe('Methods', () => {
 			it('can getStoredId', async () => {
+				// must use real timers with cookie expiration
+				jest.useRealTimers();
+
 				const id1 = beacon['getStoredId']('userId', 'storage-key', 0);
 				expect(id1).toStrictEqual(expect.any(String));
 
-				await new Promise((resolve) => setTimeout(resolve, 100));
+				await new Promise((resolve) => setTimeout(resolve, 101)); // wait for timestamp to change
 
 				const id2 = beacon['getStoredId']('userId', 'storage-key', 0);
 				expect(id2).toStrictEqual(expect.any(String));
@@ -174,7 +185,10 @@ describe('Beacon', () => {
 			});
 
 			it('can get new id with getStoredId when expired', async () => {
-				const expiration = 1000;
+				// must use real timers with cookie expiration
+				jest.useRealTimers();
+
+				const expiration = 100;
 				const id1 = beacon['getStoredId']('userId', 'storage-key', expiration);
 				expect(id1).toStrictEqual(expect.any(String));
 
@@ -201,31 +215,28 @@ describe('Beacon', () => {
 				const pageLoadId1 = beacon.getPageLoadId();
 				expect(pageLoadId1).toStrictEqual(expect.any(String));
 
-				await new Promise((resolve) => setTimeout(resolve, 100));
+				jest.advanceTimersByTime(100);
 
 				// should return the same id
 				const pageLoadId2 = beacon.getPageLoadId();
 				expect(pageLoadId2).toStrictEqual(pageLoadId1);
 
 				// should save generated id to storage
-				const stored = localStorageMock.getItem(PAGE_LOAD_ID_KEY);
-				expect(stored).toBeTruthy();
-				if (stored) {
-					expect(JSON.parse(stored)).toStrictEqual({
-						value: {
-							href,
-							value: pageLoadId1,
-							timestamp: expect.any(String),
-						},
-					});
-				}
+				const stored = localStorageMock.getItem(PAGE_LOAD_ID_KEY) || '{}';
+        expect(JSON.parse(stored)).toStrictEqual({
+          value: {
+            href,
+            value: pageLoadId1,
+            timestamp: expect.any(String),
+          },
+        });
 			});
 
 			it('can getPageLoadId from storage', async () => {
 				const stored = { href: 'test-href', value: 'test-value', timestamp: beacon.getTimestamp() };
 				localStorageMock.setItem(PAGE_LOAD_ID_KEY, JSON.stringify({ value: stored }));
 
-				await new Promise((resolve) => setTimeout(resolve, 100)); // wait for timestamp to change
+				jest.advanceTimersByTime(100); // wait for timestamp to change
 				// reconstruct beacon due to pageLoadId being created in constructor
 				beacon = new Beacon(mockGlobals, {
 					...mockConfig,
@@ -235,56 +246,47 @@ describe('Beacon', () => {
 				expect(beacon['pageLoadId']).toStrictEqual(stored.value);
 
 				// stored value shouldn't change - timestamp should be different
-				const stored2 = localStorageMock.getItem(PAGE_LOAD_ID_KEY);
-				expect(stored2).toBeTruthy();
-				if (stored2) {
-					expect(JSON.parse(stored2)).toStrictEqual({
-						value: {
-							href: stored.href,
-							value: stored.value,
-							timestamp: expect.any(String),
-						},
-					});
-					expect(JSON.parse(stored2).value.value).toBe(stored.value);
-					expect(JSON.parse(stored2).value.timestamp).not.toBe(stored.timestamp);
-				}
+				const stored2 = localStorageMock.getItem(PAGE_LOAD_ID_KEY) || '{}';
+        expect(JSON.parse(stored2)).toStrictEqual({
+          value: {
+            href: stored.href,
+            value: stored.value,
+            timestamp: expect.any(String),
+          },
+        });
+        expect(JSON.parse(stored2).value.value).toBe(stored.value);
+        expect(JSON.parse(stored2).value.timestamp).not.toBe(stored.timestamp);
 			});
 
-			it(
-				'does not get expired pageLoadId from storage',
-				async () => {
-					localStorageMock.clear();
-					const stored = { href: 'test-href', value: 'test-value', timestamp: beacon.getTimestamp() };
-					localStorageMock.setItem(PAGE_LOAD_ID_KEY, JSON.stringify({ value: stored }));
+			it('does not get expired pageLoadId from storage', async () => {
+				localStorageMock.clear();
+				const stored = { href: 'test-href', value: 'test-value', timestamp: beacon.getTimestamp() };
+				localStorageMock.setItem(PAGE_LOAD_ID_KEY, JSON.stringify({ value: stored }));
 
-					await new Promise((resolve) => setTimeout(resolve, PAGE_LOAD_ID_EXPIRATION + 10));
+				jest.advanceTimersByTime(PAGE_LOAD_ID_EXPIRATION + 10);
 
-					// reconstruct beacon due to pageLoadId being created in constructor
-					beacon = new Beacon(mockGlobals, {
-						...mockConfig,
-						href: stored.href,
-					});
-					expect(beacon['config'].href).toStrictEqual(stored.href);
-					expect(beacon['pageLoadId']).not.toBe(stored.value);
-					expect(beacon['pageLoadId']).toStrictEqual(expect.any(String));
+				// reconstruct beacon due to pageLoadId being created in constructor
+				beacon = new Beacon(mockGlobals, {
+					...mockConfig,
+					href: stored.href,
+				});
+				expect(beacon['config'].href).toStrictEqual(stored.href);
+				expect(beacon['pageLoadId']).not.toBe(stored.value);
+				expect(beacon['pageLoadId']).toStrictEqual(expect.any(String));
 
-					// should save new id to storage
-					const stored2 = localStorageMock.getItem(PAGE_LOAD_ID_KEY);
-					expect(stored2).toBeTruthy();
-					if (stored2) {
-						expect(JSON.parse(stored2)).toStrictEqual({
-							value: {
-								href: stored.href,
-								value: expect.any(String),
-								timestamp: expect.any(String),
-							},
-						});
-						expect(JSON.parse(stored2).value.value).not.toBe(stored.value);
-						expect(JSON.parse(stored2).value.timestamp).not.toBe(stored.timestamp);
-					}
-				},
-				PAGE_LOAD_ID_EXPIRATION + 100
-			); // increase timeout to wait for expiration
+				// should save new id to storage
+				const stored2 = localStorageMock.getItem(PAGE_LOAD_ID_KEY) || '{}';
+
+        expect(JSON.parse(stored2)).toStrictEqual({
+          value: {
+            href: stored.href,
+            value: expect.any(String),
+            timestamp: expect.any(String),
+          },
+        });
+        expect(JSON.parse(stored2).value.value).not.toBe(stored.value);
+        expect(JSON.parse(stored2).value.timestamp).not.toBe(stored.timestamp);
+			});
 		});
 	});
 
@@ -317,7 +319,9 @@ describe('Beacon', () => {
 			beacon.setCurrency({ code: 'EUR' });
 
 			const context1 = beacon.getContext();
-			await new Promise((resolve) => setTimeout(resolve, PREFLIGHT_DEBOUNCE_TIMEOUT));
+			jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+
+			await flushPromises();
 			const context2 = beacon.getContext();
 
 			expect(context1.userId).toBe(context2.userId);
@@ -346,7 +350,9 @@ describe('Beacon', () => {
 			// set shopperId
 			const shopperId = 'test-shopper-id';
 			beacon.setShopperId(shopperId);
-			await new Promise((resolve) => setTimeout(resolve, PREFLIGHT_DEBOUNCE_TIMEOUT));
+			jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+
+			await flushPromises();
 
 			// should be stored
 			const storedShopperId = beacon.getShopperId();
@@ -416,7 +422,7 @@ describe('Beacon', () => {
 		});
 	});
 
-	describe('athoscommerce.io tests', () => {
+	describe('athoscommerce.net tests', () => {
 		it('can switch siteIds to athoscommerce', async () => {
 			const athosSiteId = 'athos-site-id';
 			const beacon = new Beacon({ siteId: athosSiteId }, mockConfig);
@@ -458,12 +464,14 @@ describe('Beacon', () => {
 					},
 				};
 
-				await new Promise((resolve) => setTimeout(resolve, PREFLIGHT_DEBOUNCE_TIMEOUT));
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+
+				await flushPromises();
 				expect(beacon['shopperId']).toBe(shopperId);
 
 				expect(spy).toHaveBeenCalledTimes(1);
 				expect(mockFetchApi).toHaveBeenCalledTimes(2);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/preflightCache'), expect.any(Object));
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('analytics.searchspring.net/beacon/v2'), fetchPayloadAssertion);
 			});
 
@@ -485,12 +493,14 @@ describe('Beacon', () => {
 					},
 				};
 
-				await new Promise((resolve) => setTimeout(resolve, PREFLIGHT_DEBOUNCE_TIMEOUT));
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+
+				await flushPromises();
 				expect(beacon['shopperId']).toBe(shopperId);
 
 				expect(spy).toHaveBeenCalledTimes(1);
 				expect(mockFetchApi).toHaveBeenCalledTimes(2);
-				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/preflightCache'), expect.any(Object));
+				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('analytics.searchspring.net/beacon/v2'), fetchPayloadAssertion);
 			});
 		});
@@ -513,7 +523,9 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteRender');
 
 				beacon.events.autocomplete.render({ data });
-				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
+				jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -543,7 +555,9 @@ describe('Beacon', () => {
 				};
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteImpression');
 				beacon.events.autocomplete.impression({ data });
-				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
+				jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -573,7 +587,9 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteAddtocart');
 
 				beacon.events.autocomplete.addToCart({ data });
-				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
+				jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -602,7 +618,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteClickthrough');
 
 				beacon.events.autocomplete.clickThrough({ data });
-				await new Promise((resolve) => setTimeout(resolve, 0));
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -627,7 +643,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteRedirect');
 
 				beacon.events.autocomplete.redirect({ data });
-				await new Promise((resolve) => setTimeout(resolve, 0));
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -653,7 +669,9 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].search, 'searchRender');
 
 				beacon.events.search.render({ data });
-				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
+				jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -717,7 +735,9 @@ describe('Beacon', () => {
 					});
 				});
 
-				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
+				jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -747,7 +767,9 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].search, 'searchAddtocart');
 
 				beacon.events.search.addToCart({ data });
-				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
+				jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -776,7 +798,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].search, 'searchClickthrough');
 
 				beacon.events.search.clickThrough({ data });
-				await new Promise((resolve) => setTimeout(resolve, 0));
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -801,7 +823,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].search, 'searchRedirect');
 
 				beacon.events.search.redirect({ data });
-				await new Promise((resolve) => setTimeout(resolve, 0));
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -827,7 +849,9 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryRender');
 
 				beacon.events.category.render({ data });
-				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
+				jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -859,7 +883,9 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryImpression');
 
 				beacon.events.category.impression({ data });
-				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
+				jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -889,7 +915,9 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryAddtocart');
 
 				beacon.events.category.addToCart({ data });
-				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
+				jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -918,7 +946,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].category, 'categoryClickthrough');
 
 				beacon.events.category.clickThrough({ data });
-				await new Promise((resolve) => setTimeout(resolve, 0));
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -945,7 +973,9 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsRender');
 
 				beacon.events.recommendations.render({ data });
-				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
+				jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -978,7 +1008,9 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsImpression');
 
 				beacon.events.recommendations.impression({ data });
-				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
+				jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -1009,7 +1041,9 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsAddtocart');
 
 				beacon.events.recommendations.addToCart({ data });
-				await new Promise((resolve) => setTimeout(resolve, REQUEST_GROUPING_TIMEOUT));
+				jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -1039,7 +1073,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsClickthrough');
 
 				beacon.events.recommendations.clickThrough({ data });
-				await new Promise((resolve) => setTimeout(resolve, 0));
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -1065,7 +1099,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
 
 				beacon.events.product.pageView({ data });
-				await new Promise((resolve) => setTimeout(resolve, 0));
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -1105,7 +1139,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].cart, 'cartAdd');
 
 				beacon.events.cart.add({ data });
-				await new Promise((resolve) => setTimeout(resolve, 0));
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 
@@ -1157,7 +1191,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].cart, 'cartRemove');
 
 				beacon.events.cart.remove({ data });
-				await new Promise((resolve) => setTimeout(resolve, 0));
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -1198,7 +1232,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].order, 'orderTransaction');
 
 				beacon.events.order.transaction({ data });
-				await new Promise((resolve) => setTimeout(resolve, 0));
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -1226,7 +1260,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].error, 'logShopifypixel');
 
 				beacon.events.error.shopifypixel({ data });
-				await new Promise((resolve) => setTimeout(resolve, 0));
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -1252,7 +1286,7 @@ describe('Beacon', () => {
 				const spy = jest.spyOn(beacon['apis'].error, 'logSnap');
 
 				beacon.events.error.snap({ data });
-				await new Promise((resolve) => setTimeout(resolve, 0));
+				await flushPromises();
 
 				expect(spy).toHaveBeenCalled();
 				expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
@@ -1498,8 +1532,11 @@ describe('Beacon', () => {
 				siteId: beacon.globals.siteId,
 				cart: items,
 			};
-			await new Promise((resolve) => setTimeout(resolve, PREFLIGHT_DEBOUNCE_TIMEOUT));
-			expect(mockFetchApi).toHaveBeenCalledWith(`https://${mockGlobals.siteId}.a.searchspring.io/api/personalization/preflightCache`, {
+
+			jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+			await flushPromises();
+
+			expect(mockFetchApi).toHaveBeenCalledWith(`https://${mockGlobals.siteId}.a.searchspring.io/v1/preflight`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'text/plain',
@@ -1526,8 +1563,11 @@ describe('Beacon', () => {
 				siteId: beacon.globals.siteId,
 				cart: items,
 			};
-			await new Promise((resolve) => setTimeout(resolve, PREFLIGHT_DEBOUNCE_TIMEOUT));
-			expect(mockFetchApi).toHaveBeenCalledWith(`https://${athosSiteId}.a.athoscommerce.io/api/personalization/preflightCache`, {
+
+			jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+			await flushPromises();
+
+			expect(mockFetchApi).toHaveBeenCalledWith(`https://${athosSiteId}.a.athoscommerce.net/v1/preflight`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'text/plain',
