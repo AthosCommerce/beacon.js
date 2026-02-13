@@ -412,7 +412,7 @@ describe('Beacon', () => {
 		});
 	});
 
-	describe('athoscommerce.io tests', () => {
+	describe('athoscommerce.net tests', () => {
 		it('can switch siteIds to athoscommerce', async () => {
 			const athosSiteId = 'athos-site-id';
 			const beacon = new Beacon({ siteId: athosSiteId }, mockConfig);
