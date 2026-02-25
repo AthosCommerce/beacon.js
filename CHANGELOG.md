@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.4](https://github.com/AthosCommerce/beacon.js/compare/v1.0.3...v1.0.4) (2026-02-25)
+
+
+### Bug Fixes
+
+* **cdn:** removing dependency on snap-toolbox ([cea8382](https://github.com/AthosCommerce/beacon.js/commit/cea83820bb6c3ee44c63d4ab78dd8656386a41c3))
+
 ### [1.0.3](https://github.com/AthosCommerce/beacon.js/compare/v1.0.2...v1.0.3) (2026-02-13)
 
 
