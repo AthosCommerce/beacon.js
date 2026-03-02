@@ -61,7 +61,7 @@
     "whatwg-fetch": "^3.6.20"
   },
   "lint-staged": {
-    "*.{js,ts,tsx}": [
+    "!(src/client)/**/*.{js,ts,tsx}": [
       "prettier --write",
       "eslint"
     ]
