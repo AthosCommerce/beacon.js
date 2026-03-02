@@ -8,6 +8,7 @@ import {
 	PayloadRequest,
 	PREFLIGHT_DEBOUNCE_TIMEOUT,
 	REQUEST_GROUPING_TIMEOUT,
+	USER_ID,
 } from './Beacon';
 import { Currency, ImpressionSchemaData, Product, ResultProductType } from './client';
 
@@ -200,12 +201,12 @@ describe('Beacon', () => {
 				// must use real timers with cookie expiration
 				jest.useRealTimers();
 
-				const id1 = beacon['getStoredId']('userId', 0);
+				const id1 = beacon['getStoredId'](USER_ID, 0);
 				expect(id1).toStrictEqual(expect.any(String));
 
 				await new Promise((resolve) => setTimeout(resolve, 101)); // wait for timestamp to change
 
-				const id2 = beacon['getStoredId']('userId', 0);
+				const id2 = beacon['getStoredId'](USER_ID, 0);
 				expect(id2).toStrictEqual(expect.any(String));
 				expect(id1).toBe(id2);
 			});
@@ -215,18 +216,18 @@ describe('Beacon', () => {
 				jest.useRealTimers();
 
 				const expiration = 100;
-				const id1 = beacon['getStoredId']('userId', expiration);
+				const id1 = beacon['getStoredId'](USER_ID, expiration);
 				expect(id1).toStrictEqual(expect.any(String));
 
 				await new Promise((resolve) => setTimeout(resolve, expiration / 2));
 
-				const id2 = beacon['getStoredId']('userId', expiration);
+				const id2 = beacon['getStoredId'](USER_ID, expiration);
 				expect(id2).toStrictEqual(expect.any(String));
 				expect(id1).toBe(id2);
 
 				await new Promise((resolve) => setTimeout(resolve, expiration + 100));
 
-				const id3 = beacon['getStoredId']('userId', expiration);
+				const id3 = beacon['getStoredId'](USER_ID, expiration);
 				expect(id3).toStrictEqual(expect.any(String));
 				expect(id3).not.toBe(id2);
 			});
@@ -1323,11 +1324,11 @@ describe('Beacon', () => {
 
 	describe('Functions', () => {
 		const mockContext = {
-			userId: 'userId',
-			sessionId: 'sessionId',
-			shopperId: 'sessionId',
-			pageLoadId: 'pageLoadId',
-			timestamp: 'timestamp',
+			userId: 'user123',
+			sessionId: 'session123',
+			shopperId: 'shopper123',
+			pageLoadId: 'pageLoad123',
+			timestamp: '123',
 			pageUrl: 'pageUrl',
 			initiator: 'initiator',
 			attribution: [],
