@@ -250,8 +250,8 @@ export class Beacon {
 
 	private setCookie(keyName: keyof typeof STORAGE_KEYS, value: string, samesite: string, expiration: number, domain?: string): void {
 		if (featureFlags.cookies) {
-			const keys = STORAGE_KEYS[keyName];
-			[keys.primary, keys.legacy].forEach((name) => {
+			const keys = this.getKeysWrite(keyName);
+			keys.forEach((name) => {
 				try {
 					window.document.cookie = generateCookieString(name, value, samesite, expiration, domain);
 					if (this.getCookieRaw(name) == null || this.getCookieRaw(name) != value) {
@@ -266,17 +266,25 @@ export class Beacon {
 	}
 
 	private getLocalStorageItem<T = LocalStorageItem>(keyName: keyof typeof STORAGE_KEYS): T | undefined {
-		const keys = STORAGE_KEYS[keyName];
+		const keys = this.getKeysRead(keyName);
 		if (typeof window !== 'undefined' && featureFlags.storage) {
-			const rawData = window.localStorage?.getItem(keys.primary) || window.localStorage?.getItem(keys.legacy) || '';
+			let rawData = '';
+			for (const key of keys) {
+				const value = window.localStorage.getItem(key);
+				if (value) {
+					rawData = value;
+					break;
+				}
+			}
 			try {
 				const data = JSON.parse(rawData);
 				if (data && data.value) {
 					return data.value;
 				} else {
 					// corrupted - delete entry
-					window.localStorage.removeItem(keys.primary);
-					window.localStorage.removeItem(keys.legacy);
+					keys.forEach((key) => {
+						window.localStorage.removeItem(key);
+					});
 				}
 			} catch {
 				// noop - failed to parse stored value
@@ -284,23 +292,46 @@ export class Beacon {
 		}
 	}
 
-	private setLocalStorageItem(keyName: keyof typeof STORAGE_KEYS, value: LocalStorageItem): void {
+	private getKeysRead(keyName: keyof typeof STORAGE_KEYS): Array<string> {
 		const keys = STORAGE_KEYS[keyName];
+		if (this.globals.siteId.trim().toLowerCase().startsWith('at')) {
+			return [keys.primary, keys.legacy];
+		}
+		return [keys.legacy, keys.primary];
+	}
+
+	private getKeysWrite(keyName: keyof typeof STORAGE_KEYS): Array<string> {
+		const keys = STORAGE_KEYS[keyName];
+		if (this.globals.siteId.trim().toLowerCase().startsWith('at')) {
+			return [keys.primary];
+		}
+		return [keys.legacy];
+	}
+
+	private setLocalStorageItem(keyName: keyof typeof STORAGE_KEYS, value: LocalStorageItem): void {
+		const keys = this.getKeysWrite(keyName);
 		if (typeof window !== 'undefined' && featureFlags.storage) {
 			try {
 				const item = JSON.stringify({ value });
-				window.localStorage.setItem(keys.primary, item);
-				window.localStorage.setItem(keys.legacy, item);
+				keys.forEach((key) => {
+					window.localStorage.setItem(key, item);
+				});
 			} catch (e) {
-				console.warn(`Something went wrong setting local storage items '${keys.primary}'/'${keys.legacy}':`, e);
+				console.warn(`Something went wrong setting local storage item '${keyName}':`, e);
 				throw e;
 			}
 		}
 	}
 
 	private getCookie(keyName: keyof typeof STORAGE_KEYS): string {
-		const keys = STORAGE_KEYS[keyName];
-		return this.getCookieRaw(keys.primary) || this.getCookieRaw(keys.legacy);
+		const keys = this.getKeysRead(keyName);
+		for (const key of keys) {
+			const value = this.getCookieRaw(key);
+			if (value) {
+				return value;
+			}
+		}
+		return '';
 	}
 
 	private removeDualLocalStorageItem(keyName: keyof typeof STORAGE_KEYS): void {
