@@ -1,7 +1,6 @@
 import packageJSON from '../package.json';
 export const { version } = packageJSON;
-import { featureFlags } from './utils/featureFlags';
-
+import { featureFlags, generateCookieString } from './utils';
 import { v4 as uuidv4 } from 'uuid';
 import {
 	Context,
@@ -144,15 +143,14 @@ export const COOKIE_DOMAIN =
 	(typeof window !== 'undefined' && window.location.hostname && '.' + window.location.hostname.replace(/^www\./, '')) || undefined;
 
 export type KeyPair = { primary: string; legacy: string };
-export const KEYS: Record<string, KeyPair> = {
-	USER_ID: { primary: 'ssUserId', legacy: 'athosUserId' },
-	PAGE_LOAD_ID: { primary: 'ssPageLoadId', legacy: 'athosPageLoadId' },
-	SESSION_ID: { primary: 'ssSessionId', legacy: 'athosSessionId' },
-	SHOPPER_ID: { primary: 'ssShopperId', legacy: 'athosShopperId' },
-	CART_PRODUCTS: { primary: 'ssCartProducts', legacy: 'athosCartProducts' },
-	VIEWED_PRODUCTS: { primary: 'ssViewedProducts', legacy: 'athosViewedProducts' },
-	ATTRIBUTION_QUERY_PARAM: { primary: 'ss_attribution', legacy: 'athos_attribution' },
-	ATTRIBUTION: { primary: 'ssAttribution', legacy: 'athosAttribution' },
+export const STORAGE_KEYS: Record<string, KeyPair> = {
+	userId: { primary: 'athosUserId', legacy: 'ssUserId' },
+	pageLoadId: { primary: 'athosPageLoadId', legacy: 'ssPageLoadId' },
+	sessionId: { primary: 'athosSessionId', legacy: 'ssSessionId' },
+	shopperId: { primary: 'athosShopperId', legacy: 'ssShopperId' },
+	cartProducts: { primary: 'athosCartProducts', legacy: 'ssCartProducts' },
+	viewedProducts: { primary: 'athosViewedProducts', legacy: 'ssViewedProducts' },
+	attribution: { primary: 'athosAttribution', legacy: 'ssAttribution' },
 };
 
 export class Beacon {
@@ -175,7 +173,6 @@ export class Beacon {
 	private requests: PayloadRequest[] = [];
 
 	constructor(globals: BeaconGlobals, config?: BeaconConfig) {
-		console.log('got here beacon!!!');
 		if (typeof globals != 'object' || typeof globals.siteId != 'string') {
 			throw new Error(`Invalid config passed to tracker. The "siteId" attribute must be provided.`);
 		}
@@ -240,42 +237,15 @@ export class Beacon {
 		return '';
 	}
 
-	private generateCookieString(name: string, value: string, samesite: string, expiration: number, domain?: string): string {
-		const secureString = window.location.protocol == 'https:' ? 'Secure;' : '';
-		const sameSiteString = 'SameSite=' + (samesite || 'Lax') + ';';
-		let expiresString = '';
-		if (expiration) {
-			const d = new Date();
-			d.setTime(d.getTime() + expiration);
-			expiresString = 'expires=' + d['toUTCString']() + ';';
-		}
-		const valueString = encodeURIComponent(value) + ';';
-
-		if (domain) {
-			// TODO: does domain need a semicolon?
-			return name + '=' + valueString + expiresString + sameSiteString + secureString + 'path=/; domain=' + domain;
-		}
-
-		const host = window?.location?.hostname;
-		if (!host || host.split('.').length === 1) {
-			return name + '=' + valueString + expiresString + sameSiteString + secureString + 'path=/';
-		}
-
-		const domainParts = host.split('.');
-		domainParts.shift();
-		domain = '.' + domainParts.join('.');
-
-		return name + '=' + valueString + expiresString + sameSiteString + secureString + 'path=/; domain=' + domain;
-	}
-
-	private setCookie(keys: KeyPair, value: string, samesite: string, expiration: number, domain?: string): void {
+	private setCookie(keyName: keyof typeof STORAGE_KEYS, value: string, samesite: string, expiration: number, domain?: string): void {
 		if (featureFlags.cookies) {
+			const keys = STORAGE_KEYS[keyName];
 			[keys.primary, keys.legacy].forEach((name) => {
 				try {
-					window.document.cookie = this.generateCookieString(name, value, samesite, expiration, domain);
+					window.document.cookie = generateCookieString(name, value, samesite, expiration, domain);
 					if (this.getCookieRaw(name) == null || this.getCookieRaw(name) != value) {
-						domain = '.' + window.location.hostname;
-						window.document.cookie = this.generateCookieString(name, value, samesite, expiration, domain);
+						const rootDomain = '.' + window.location.hostname;
+						window.document.cookie = generateCookieString(name, value, samesite, expiration, rootDomain);
 					}
 				} catch (e: any) {
 					console.error(`Failed to set '${name}' cookie:`, e);
@@ -284,7 +254,8 @@ export class Beacon {
 		}
 	}
 
-	private getLocalStorageItem<T = LocalStorageItem>(keys: KeyPair): T | undefined {
+	private getLocalStorageItem<T = LocalStorageItem>(keyName: keyof typeof STORAGE_KEYS): T | undefined {
+		const keys = STORAGE_KEYS[keyName];
 		if (typeof window !== 'undefined' && featureFlags.storage) {
 			const rawData = window.localStorage?.getItem(keys.primary) || window.localStorage?.getItem(keys.legacy) || '';
 			try {
@@ -302,24 +273,27 @@ export class Beacon {
 		}
 	}
 
-	private setLocalStorageItem(keys: KeyPair, value: LocalStorageItem): void {
+	private setLocalStorageItem(keyName: keyof typeof STORAGE_KEYS, value: LocalStorageItem): void {
+		const keys = STORAGE_KEYS[keyName];
 		if (typeof window !== 'undefined' && featureFlags.storage) {
 			try {
 				const item = JSON.stringify({ value });
 				window.localStorage.setItem(keys.primary, item);
 				window.localStorage.setItem(keys.legacy, item);
 			} catch (e: any) {
-				console.warn(`Something went wrong setting '${name}' to local storage:`, e);
+				console.warn(`Something went wrong setting local storage items '${keys.primary}'/'${keys.legacy}':`, e);
 				throw e;
 			}
 		}
 	}
 
-	private getCookie(keys: KeyPair): string {
+	private getCookie(keyName: keyof typeof STORAGE_KEYS): string {
+		const keys = STORAGE_KEYS[keyName];
 		return this.getCookieRaw(keys.primary) || this.getCookieRaw(keys.legacy);
 	}
 
-	private removeDualLocalStorageItem(keys: KeyPair): void {
+	private removeDualLocalStorageItem(keyName: keyof typeof STORAGE_KEYS): void {
+		const keys = STORAGE_KEYS[keyName];
 		if (typeof window !== 'undefined') {
 			window.localStorage?.removeItem(keys.primary);
 			window.localStorage?.removeItem(keys.legacy);
@@ -330,7 +304,7 @@ export class Beacon {
 		cart: {
 			get: (): Product[] => {
 				// perhaps... always get from storage and return Product[] - storage always has Product[]
-				const storedProducts = this.getLocalStorageItem(KEYS.CART_PRODUCTS) as Product[];
+				const storedProducts = this.getLocalStorageItem('cartProducts') as Product[];
 				if (storedProducts) {
 					try {
 						if (Array.isArray(storedProducts)) {
@@ -338,12 +312,12 @@ export class Beacon {
 						}
 					} catch {
 						// corrupted - delete entry
-						this.removeDualLocalStorageItem(KEYS.CART_PRODUCTS);
+						this.removeDualLocalStorageItem('cartProducts');
 
-						this.setCookie(KEYS.CART_PRODUCTS, '', COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
+						this.setCookie('cartProducts', '', COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
 					}
 				} else {
-					const storedSkus = this.getCookie(KEYS.CART_PRODUCTS);
+					const storedSkus = this.getCookie('cartProducts');
 					// split on ',' and remap to Product[], setting qty and price to unknowns (0?)
 					return storedSkus
 						.split(',')
@@ -359,14 +333,14 @@ export class Beacon {
 				const stringifiedProducts = JSON.stringify(products);
 
 				try {
-					this.setLocalStorageItem(KEYS.CART_PRODUCTS, products);
+					this.setLocalStorageItem('cartProducts', products);
 				} catch (e: any) {
-					sendStorageError(e, this, KEYS.CART_PRODUCTS, stringifiedProducts);
+					sendStorageError(e, this, 'cartProducts', stringifiedProducts);
 				}
 
 				// also set cookie with re-mapping - favoring the more specific variant
 				const storedProductsCookie = products.map((product) => this.getProductId(product)).join(',');
-				this.setCookie(KEYS.CART_PRODUCTS, storedProductsCookie, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
+				this.setCookie('cartProducts', storedProductsCookie, COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
 
 				const productsHaveChanged = JSON.stringify(currentCartProducts) !== stringifiedProducts;
 				if (productsHaveChanged) {
@@ -431,7 +405,7 @@ export class Beacon {
 		},
 		viewed: {
 			get: (): ProductPageviewSchemaDataResult[] => {
-				const storedItems = this.getLocalStorageItem(KEYS.VIEWED_PRODUCTS) as ProductPageviewSchemaDataResult[];
+				const storedItems = this.getLocalStorageItem('viewedProducts') as ProductPageviewSchemaDataResult[];
 				if (storedItems) {
 					try {
 						if (Array.isArray(storedItems)) {
@@ -439,12 +413,12 @@ export class Beacon {
 						}
 					} catch {
 						// corrupted - delete entry
-						this.removeDualLocalStorageItem(KEYS.VIEWED_PRODUCTS);
+						this.removeDualLocalStorageItem('viewedProducts');
 
-						this.setCookie(KEYS.VIEWED_PRODUCTS, '', COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
+						this.setCookie('viewedProducts', '', COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
 					}
 				} else {
-					const storedSkus = this.getCookie(KEYS.VIEWED_PRODUCTS);
+					const storedSkus = this.getCookie('viewedProducts');
 					// split on ',' and remap to Product[], setting qty and price to unknowns (0?)
 					return storedSkus
 						.split(',')
@@ -463,14 +437,14 @@ export class Beacon {
 				const stringifiedNormalizedItems = JSON.stringify(normalizedItems);
 
 				try {
-					this.setLocalStorageItem(KEYS.VIEWED_PRODUCTS, normalizedItems);
+					this.setLocalStorageItem('viewedProducts', normalizedItems);
 				} catch (e: any) {
-					sendStorageError(e, this, KEYS.VIEWED_PRODUCTS, stringifiedNormalizedItems);
+					sendStorageError(e, this, 'viewedProducts', stringifiedNormalizedItems);
 				}
 
 				// also set cookie with re-mapping - favoring the more specific variant
 				const storedProductsCookie = normalizedItems.map((item) => this.getProductId(item)).join(',');
-				this.setCookie(KEYS.VIEWED_PRODUCTS, storedProductsCookie, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
+				this.setCookie('viewedProducts', storedProductsCookie, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
 
 				const productsHaveChanged = JSON.stringify(currentViewedItems) !== stringifiedNormalizedItems;
 				if (productsHaveChanged) {
@@ -928,17 +902,16 @@ export class Beacon {
 		return context;
 	}
 
-	private getStoredId(key: 'userId' | 'sessionId', keyPair: KeyPair, expiration: number): string {
-		const keys = ['userId', 'sessionId'];
+	private getStoredId(keyName: 'userId' | 'sessionId', expiration: number): string {
 		let uuid: string = '';
 		let storedCookieValue: string = '';
 
 		try {
 			// try to get the value from the cookie
-			storedCookieValue = this.getCookie(keyPair);
+			storedCookieValue = this.getCookie(keyName);
 
 			// try to get the value from the local storage
-			const data = this.getLocalStorageItem(keyPair) as { timestamp: string; value: string };
+			const data = this.getLocalStorageItem(keyName) as { timestamp: string; value: string };
 			if (data.timestamp && new Date(data.timestamp).getTime() < Date.now() - expiration) {
 				uuid = this.generateId();
 				/**
@@ -958,20 +931,23 @@ export class Beacon {
 				timestamp: this.getTimestamp(),
 			};
 
-			if (keys.includes(key)) {
-				this[key] = data.value;
+			if (keyName === 'userId') {
+				this.userId = data.value;
+			}
+			if (keyName === 'sessionId') {
+				this.sessionId = data.value;
 			}
 
 			// set cookie
-			this.setCookie(keyPair, data.value, COOKIE_SAMESITE, EXPIRED_COOKIE, COOKIE_DOMAIN); // clear old subdomain cookie
-			this.setCookie(keyPair, data.value, COOKIE_SAMESITE, expiration); // attempt to store in cookie
+			this.setCookie(keyName, data.value, COOKIE_SAMESITE, EXPIRED_COOKIE, COOKIE_DOMAIN); // clear old subdomain cookie
+			this.setCookie(keyName, data.value, COOKIE_SAMESITE, expiration); // attempt to store in cookie
 
 			// set local storage
 			try {
-				this.setLocalStorageItem(keyPair, data);
+				this.setLocalStorageItem(keyName, data);
 			} catch (e: any) {
 				// failed to save value - storage may be disabled
-				sendStorageError(e, this, keyPair, data.value);
+				sendStorageError(e, this, keyName, data.value);
 			}
 
 			return data.value;
@@ -984,7 +960,7 @@ export class Beacon {
 		}
 
 		let pageLoadId = this.generateId();
-		const pageLoadData = this.getLocalStorageItem<PageLoadData>(KEYS.PAGE_LOAD_ID);
+		const pageLoadData = this.getLocalStorageItem<PageLoadData>('pageLoadId');
 		const currentHref = this.config.href || (typeof window !== 'undefined' && window.location.href) || '';
 		if (pageLoadData) {
 			const { href, value, timestamp } = pageLoadData;
@@ -996,28 +972,28 @@ export class Beacon {
 		this.pageLoadId = pageLoadId;
 
 		try {
-			this.setLocalStorageItem(KEYS.PAGE_LOAD_ID, { href: currentHref, value: pageLoadId, timestamp: this.getTimestamp() });
+			this.setLocalStorageItem('pageLoadId', { href: currentHref, value: pageLoadId, timestamp: this.getTimestamp() });
 		} catch (e: any) {
 			// failed to save value - storage may be disabled
-			sendStorageError(e, this, KEYS.PAGE_LOAD_ID, pageLoadId);
+			sendStorageError(e, this, 'pageLoadId', pageLoadId);
 		}
 
 		return pageLoadId;
 	}
 
 	public getUserId(): string {
-		return this.userId || this.getStoredId('userId', KEYS.USER_ID, MAX_EXPIRATION);
+		return this.userId || this.getStoredId('userId', MAX_EXPIRATION);
 	}
 
 	public getSessionId(): string {
-		return this.sessionId || this.getStoredId('sessionId', KEYS.SESSION_ID, THIRTY_MINUTES);
+		return this.sessionId || this.getStoredId('sessionId', THIRTY_MINUTES);
 	}
 
 	public getShopperId(): string {
 		try {
 			// cookie value is always a string, but localstorage could be a number
-			const cookieValue = this.getCookie(KEYS.SHOPPER_ID);
-			const storageValue = this.getLocalStorageItem(KEYS.SHOPPER_ID) as string;
+			const cookieValue = this.getCookie('shopperId');
+			const storageValue = this.getLocalStorageItem('shopperId') as string;
 
 			// set the shopperId to the cookie value if it exists, otherwise use the local storage value and then convert to string if they exist
 			const shopperId = cookieValue || (storageValue ? '' + storageValue : undefined);
@@ -1038,11 +1014,11 @@ export class Beacon {
 		const existingShopperId = this.getShopperId();
 		if (existingShopperId !== shopperId) {
 			this.shopperId = '' + shopperId; // ensure string
-			this.setCookie(KEYS.SHOPPER_ID, this.shopperId, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
+			this.setCookie('shopperId', this.shopperId, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
 			try {
-				this.setLocalStorageItem(KEYS.SHOPPER_ID, this.shopperId);
+				this.setLocalStorageItem('shopperId', this.shopperId);
 			} catch (e: any) {
-				sendStorageError(e, this, KEYS.SHOPPER_ID, this.shopperId);
+				sendStorageError(e, this, 'shopperId', this.shopperId);
 			}
 			this.events.shopper.login({ data: { id: this.shopperId } });
 			this._sendPreflight();
@@ -1055,12 +1031,12 @@ export class Beacon {
 		let urlAttribution: string | null = null;
 		try {
 			const url = new URL(this.config.href || (typeof window !== 'undefined' && window.location.href) || '');
-			urlAttribution = url.searchParams.get(KEYS.ATTRIBUTION_QUERY_PARAM.primary) || url.searchParams.get(KEYS.ATTRIBUTION_QUERY_PARAM.legacy);
+			urlAttribution = url.searchParams.get('athos_attribution') || url.searchParams.get('ss_attribution');
 		} catch {
 			// noop - URL failed to parse empty url
 		}
 
-		const storedAttribution = this.getCookie(KEYS.ATTRIBUTION) || (this.getLocalStorageItem(KEYS.ATTRIBUTION) as AttributionInner[]);
+		const storedAttribution = this.getCookie('attribution') || (this.getLocalStorageItem('attribution') as AttributionInner[]);
 		if (storedAttribution) {
 			try {
 				if (typeof storedAttribution === 'string') {
@@ -1087,11 +1063,11 @@ export class Beacon {
 
 		if (attribution.length) {
 			const stringifiedAttribution = JSON.stringify(attribution);
-			this.setCookie(KEYS.ATTRIBUTION, stringifiedAttribution, COOKIE_SAMESITE, THIRTY_MINUTES, COOKIE_DOMAIN);
+			this.setCookie('attribution', stringifiedAttribution, COOKIE_SAMESITE, THIRTY_MINUTES, COOKIE_DOMAIN);
 			try {
-				this.setLocalStorageItem(KEYS.ATTRIBUTION, attribution);
+				this.setLocalStorageItem('attribution', attribution);
 			} catch (e: any) {
-				sendStorageError(e, this, KEYS.ATTRIBUTION, stringifiedAttribution);
+				sendStorageError(e, this, 'attribution', stringifiedAttribution);
 			}
 			this.attribution = attribution;
 			return [...attribution];
@@ -1362,8 +1338,9 @@ export function additionalRequestKeys(
 	return value;
 }
 
-function sendStorageError(e: Error, beacon: Beacon, keys: KeyPair, value: string) {
+function sendStorageError(e: Error, beacon: Beacon, keyName: keyof typeof STORAGE_KEYS, value: string) {
 	if (e.name === 'QuotaExceededError') {
+		const keys = STORAGE_KEYS[keyName];
 		beacon.events.error.snap({
 			data: {
 				message: 'QuotaExceededError',
