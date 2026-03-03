@@ -227,34 +227,13 @@ export class Beacon {
 		}
 	}
 
-	private getCookieRaw(name: string): string {
-		if (typeof window !== 'undefined' && featureFlags.cookies) {
-			const cookieName = name + '=';
-			const cookiesList = window.document.cookie.split(';');
-
-			for (let i = 0; i < cookiesList.length; i++) {
-				let cookie = cookiesList[i];
-
-				while (cookie.charAt(0) == ' ') {
-					cookie = cookie.substring(1);
-				}
-
-				if (cookie.indexOf(cookieName) == 0) {
-					return decodeURIComponent(cookie.substring(cookieName.length, cookie.length));
-				}
-			}
-			return '';
-		}
-		return '';
-	}
-
 	private setCookie(keyName: keyof typeof STORAGE_KEYS, value: string, samesite: string, expiration: number, domain?: string): void {
 		if (featureFlags.cookies) {
-			const keys = this.getKeysWrite(keyName);
+			const keys = getKeysWrite(keyName, this.globals.siteId);
 			keys.forEach((name) => {
 				try {
 					window.document.cookie = generateCookieString(name, value, samesite, expiration, domain);
-					if (this.getCookieRaw(name) == null || this.getCookieRaw(name) != value) {
+					if (getCookieRaw(name) == null || getCookieRaw(name) != value) {
 						const rootDomain = '.' + window.location.hostname;
 						window.document.cookie = generateCookieString(name, value, samesite, expiration, rootDomain);
 					}
@@ -266,7 +245,7 @@ export class Beacon {
 	}
 
 	private getLocalStorageItem<T = LocalStorageItem>(keyName: keyof typeof STORAGE_KEYS): T | undefined {
-		const keys = this.getKeysRead(keyName);
+		const keys = getKeysRead(keyName, this.globals.siteId);
 		if (typeof window !== 'undefined' && featureFlags.storage) {
 			let rawData = '';
 			for (const key of keys) {
@@ -292,24 +271,8 @@ export class Beacon {
 		}
 	}
 
-	private getKeysRead(keyName: keyof typeof STORAGE_KEYS): Array<string> {
-		const keys = STORAGE_KEYS[keyName];
-		if (this.globals.siteId.trim().toLowerCase().startsWith('at')) {
-			return [keys.primary, keys.legacy];
-		}
-		return [keys.legacy, keys.primary];
-	}
-
-	private getKeysWrite(keyName: keyof typeof STORAGE_KEYS): Array<string> {
-		const keys = STORAGE_KEYS[keyName];
-		if (this.globals.siteId.trim().toLowerCase().startsWith('at')) {
-			return [keys.primary];
-		}
-		return [keys.legacy];
-	}
-
 	private setLocalStorageItem(keyName: keyof typeof STORAGE_KEYS, value: LocalStorageItem): void {
-		const keys = this.getKeysWrite(keyName);
+		const keys = getKeysWrite(keyName, this.globals.siteId);
 		if (typeof window !== 'undefined' && featureFlags.storage) {
 			try {
 				const item = JSON.stringify({ value });
@@ -324,22 +287,14 @@ export class Beacon {
 	}
 
 	private getCookie(keyName: keyof typeof STORAGE_KEYS): string {
-		const keys = this.getKeysRead(keyName);
+		const keys = getKeysRead(keyName, this.globals.siteId);
 		for (const key of keys) {
-			const value = this.getCookieRaw(key);
+			const value = getCookieRaw(key);
 			if (value) {
 				return value;
 			}
 		}
 		return '';
-	}
-
-	private removeDualLocalStorageItem(keyName: keyof typeof STORAGE_KEYS): void {
-		const keys = STORAGE_KEYS[keyName];
-		if (typeof window !== 'undefined') {
-			window.localStorage?.removeItem(keys.primary);
-			window.localStorage?.removeItem(keys.legacy);
-		}
 	}
 
 	storage = {
@@ -354,7 +309,7 @@ export class Beacon {
 						}
 					} catch {
 						// corrupted - delete entry
-						this.removeDualLocalStorageItem(CART_PRODUCTS);
+						removeStorageItemsForKey(CART_PRODUCTS);
 
 						this.setCookie(CART_PRODUCTS, '', COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
 					}
@@ -455,7 +410,7 @@ export class Beacon {
 						}
 					} catch {
 						// corrupted - delete entry
-						this.removeDualLocalStorageItem(VIEWED_PRODUCTS);
+						removeStorageItemsForKey(VIEWED_PRODUCTS);
 
 						this.setCookie(VIEWED_PRODUCTS, '', COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
 					}
@@ -1378,6 +1333,51 @@ export function additionalRequestKeys(
 	}
 
 	return value;
+}
+
+export function getCookieRaw(name: string): string {
+	if (typeof window !== 'undefined' && featureFlags.cookies) {
+		const cookieName = name + '=';
+		const cookiesList = window.document.cookie.split(';');
+
+		for (let i = 0; i < cookiesList.length; i++) {
+			let cookie = cookiesList[i];
+
+			while (cookie.charAt(0) == ' ') {
+				cookie = cookie.substring(1);
+			}
+
+			if (cookie.indexOf(cookieName) == 0) {
+				return decodeURIComponent(cookie.substring(cookieName.length, cookie.length));
+			}
+		}
+		return '';
+	}
+	return '';
+}
+
+function getKeysRead(keyName: keyof typeof STORAGE_KEYS, siteId: string): Array<string> {
+	const keys = STORAGE_KEYS[keyName];
+	if (siteId.trim().toLowerCase().startsWith('at')) {
+		return [keys.primary, keys.legacy];
+	}
+	return [keys.legacy, keys.primary];
+}
+
+function getKeysWrite(keyName: keyof typeof STORAGE_KEYS, siteId: string): Array<string> {
+	const keys = STORAGE_KEYS[keyName];
+	if (siteId.trim().toLowerCase().startsWith('at')) {
+		return [keys.primary];
+	}
+	return [keys.legacy];
+}
+
+function removeStorageItemsForKey(keyName: keyof typeof STORAGE_KEYS): void {
+	const keys = STORAGE_KEYS[keyName];
+	if (typeof window !== 'undefined') {
+		window.localStorage?.removeItem(keys.primary);
+		window.localStorage?.removeItem(keys.legacy);
+	}
 }
 
 function sendStorageError(e: unknown, beacon: Beacon, keyName: keyof typeof STORAGE_KEYS, value: string) {
