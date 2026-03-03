@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/AthosCommerce/beacon.js/compare/v1.0.4...v1.1.0) (2026-03-03)
+
+
+### Features
+
+* initial refactor to athos storage key names ([1200059](https://github.com/AthosCommerce/beacon.js/commit/120005923435395f90383c8c037fff810df10296))
+
+
+### Bug Fixes
+
+* always set shopperId ([7d2ac6b](https://github.com/AthosCommerce/beacon.js/commit/7d2ac6b85a4bc16313f44ebd7d29265221d6db1c))
+
 ### [1.0.4](https://github.com/AthosCommerce/beacon.js/compare/v1.0.3...v1.0.4) (2026-02-25)
 
 
