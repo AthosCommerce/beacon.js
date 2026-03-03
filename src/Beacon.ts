@@ -477,7 +477,7 @@ export class Beacon {
 		shopper: {
 			login: (event: Payload<{ id: string }>) => {
 				const context = this.getContext() as ShopperContext;
-				if (!context.shopperId) {
+				if (!context.shopperId || context.shopperId !== event.data.id) {
 					this.setShopperId(event.data.id);
 					return;
 				}
@@ -1009,14 +1009,14 @@ export class Beacon {
 			return;
 		}
 		const existingShopperId = this.getShopperId();
+		this.shopperId = '' + shopperId; // ensure string
+		this.setCookie(SHOPPER_ID, this.shopperId, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
+		try {
+			this.setLocalStorageItem(SHOPPER_ID, this.shopperId);
+		} catch (e) {
+			sendStorageError(e, this, SHOPPER_ID, this.shopperId);
+		}
 		if (existingShopperId !== shopperId) {
-			this.shopperId = '' + shopperId; // ensure string
-			this.setCookie(SHOPPER_ID, this.shopperId, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
-			try {
-				this.setLocalStorageItem(SHOPPER_ID, this.shopperId);
-			} catch (e) {
-				sendStorageError(e, this, SHOPPER_ID, this.shopperId);
-			}
 			this.events.shopper.login({ data: { id: this.shopperId } });
 			this._sendPreflight();
 		}
