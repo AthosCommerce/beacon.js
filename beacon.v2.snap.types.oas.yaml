@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  version: 2.2.48
+  version: 2.2.52
   title: analytics.athoscommerce.net
   x-logo:
     url: ./images/athos_commerce_logo.png
@@ -13,10 +13,14 @@ servers:
 tags:
   - name: Autocomplete
     description: Autocomplete Module tracking events. Payload data sourced from the [Autocomplete API](https://docs.searchspring.com/reference/get-autocomplete) request parameters and response body.
+  - name: Bundles
+    description: Personalized bundles tracking events. Payload data sourced from the Personalized Bundles API response.
   - name: Cart
     description: Cart tracking events
   - name: Category
     description: Category results page tracking events. Payload data sourced from the [Search API](https://docs.searchspring.com/reference/get-search) request parameters and response body. **If you are not integrating Athos Commerce on category pages, omit the usage of these endpoints.**
+  - name: Chat
+    description: Chat tracking events. Payload data sourced from the [Chat API]() request parameters and response body.
   - name: Error Logs
     description: Error log events
   - name: Messaging Recommendations
@@ -50,7 +54,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Add to cart payload
         required: true
         content:
           text/plain:
@@ -100,7 +104,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Clickthrough payload
         required: true
         content:
           text/plain:
@@ -154,7 +158,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Impression payload
         required: true
         content:
           text/plain:
@@ -212,7 +216,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Redirect payload
         required: true
         content:
           text/plain:
@@ -262,7 +266,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Render payload
         required: true
         content:
           text/plain:
@@ -279,6 +283,218 @@ paths:
             examples:
               render example:
                 $ref: '#/components/examples/render'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          $ref: '#/components/responses/400-response'
+        '404':
+          $ref: '#/components/responses/404-response'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/bundles/addtocart:
+    post:
+      tags:
+        - Bundles
+      summary: addtocart
+      description: <i>/beacon/v2/{siteId}/bundles/addtocart</i><br><br>Shopper adds a Athos Commerce personalized bundle result to the cart via a `Quick Add to Cart` button in the rendered product card. **If frontend `Quick Add to Cart` is not implemented, omit usage of this endpoint.**
+      operationId: bundles-addtocart
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the Athos Console or Athos Management Console
+      requestBody:
+        description: Add to cart payload
+        required: true
+        content:
+          text/plain:
+            schema:
+              title: Bundles Addtocart Schema
+              $ref: '#/components/schemas/bundles.addtocartSchema'
+            examples:
+              render example:
+                $ref: '#/components/examples/bundles-addtocart'
+          application/json:
+            schema:
+              title: Bundles Addtocart Schema
+              $ref: '#/components/schemas/bundles.addtocartSchema'
+            examples:
+              render example:
+                $ref: '#/components/examples/bundles-addtocart'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          $ref: '#/components/responses/400-response'
+        '404':
+          $ref: '#/components/responses/404-response'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/bundles/clickthrough:
+    post:
+      tags:
+        - Bundles
+      summary: clickthrough
+      description: <i>/beacon/v2/{siteId}/bundles/clickthrough</i><br><br>Shopper clicks on a rendered Athos Commerce personalized bundle result, and is taken to the product detail page (PDP).
+      operationId: bundles-clickthrough
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the Athos Console or Athos Management Console
+      requestBody:
+        description: Clickthrough payload
+        required: true
+        content:
+          text/plain:
+            schema:
+              title: Bundles Clickthrough Schema
+              $ref: '#/components/schemas/bundles.clickthroughSchema'
+            examples:
+              results clickthrough example:
+                $ref: '#/components/examples/bundles-results-clickthrough'
+              banners clickthrough example:
+                $ref: '#/components/examples/bundles-banners-clickthrough'
+          application/json:
+            schema:
+              title: Bundles Clickthrough Schema
+              $ref: '#/components/schemas/bundles.clickthroughSchema'
+            examples:
+              results clickthrough example:
+                $ref: '#/components/examples/bundles-results-clickthrough'
+              banners clickthrough example:
+                $ref: '#/components/examples/bundles-banners-clickthrough'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          $ref: '#/components/responses/400-response'
+        '404':
+          $ref: '#/components/responses/404-response'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/bundles/impression:
+    post:
+      tags:
+        - Bundles
+      summary: impression
+      description: <i>/beacon/v2/{siteId}/bundles/impression</i><br><br>Shopper scrolls into view rendered Athos Commerce personalized bundle results. Results sent ***must*** only be results in the shoppers view at the time of the event.
+      operationId: bundles-impression
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the Athos Console or Athos Management Console
+      requestBody:
+        description: Impression payload
+        required: true
+        content:
+          text/plain:
+            schema:
+              title: Bundles Impression Schema
+              $ref: '#/components/schemas/bundles.impressionSchema'
+            examples:
+              results and banners impression example:
+                $ref: '#/components/examples/bundles-impression'
+              results impression example:
+                $ref: '#/components/examples/bundles-results-impression'
+              banners impression example:
+                $ref: '#/components/examples/bundles-banners-impression'
+          application/json:
+            schema:
+              title: Bundles Impression Schema
+              $ref: '#/components/schemas/bundles.impressionSchema'
+            examples:
+              results and banners impression example:
+                $ref: '#/components/examples/bundles-impression'
+              results impression example:
+                $ref: '#/components/examples/bundles-results-impression'
+              banners impression example:
+                $ref: '#/components/examples/bundles-banners-impression'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          $ref: '#/components/responses/400-response'
+        '404':
+          $ref: '#/components/responses/404-response'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/bundles/render:
+    post:
+      tags:
+        - Bundles
+      summary: render
+      description: <i>/beacon/v2/{siteId}/bundles/render</i><br><br>Shopper navigates to a page where Athos Commerce personalized bundles are requested from the [Personalized Bundles API endpoint](https://docs.searchspring.com/reference/get-bundles) and rendered on the page.
+      operationId: bundles-render
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the Athos Console or Athos Management Console
+      requestBody:
+        description: Render payload
+        required: true
+        content:
+          text/plain:
+            schema:
+              title: Bundles Render Schema
+              $ref: '#/components/schemas/bundles.renderSchema'
+            examples:
+              render example:
+                $ref: '#/components/examples/bundles-render'
+          application/json:
+            schema:
+              title: Bundles Render Schema
+              $ref: '#/components/schemas/bundles.renderSchema'
+            examples:
+              render example:
+                $ref: '#/components/examples/bundles-render'
       responses:
         '200':
           $ref: '#/components/responses/200-response'
@@ -408,7 +624,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Add to cart payload
         required: true
         content:
           text/plain:
@@ -458,7 +674,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Clickthrough payload
         required: true
         content:
           text/plain:
@@ -512,7 +728,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Impression payload
         required: true
         content:
           text/plain:
@@ -570,7 +786,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Render payload
         required: true
         content:
           text/plain:
@@ -587,6 +803,218 @@ paths:
             examples:
               render example:
                 $ref: '#/components/examples/examples-render'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          $ref: '#/components/responses/400-response'
+        '404':
+          $ref: '#/components/responses/404-response'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/chat/addtocart:
+    post:
+      tags:
+        - Chat
+      summary: addtocart
+      description: <i>/beacon/v2/{siteId}/chat/addtocart</i><br><br>This event should be triggered when a shopper interacts with Chat where Athos Commerce results are rendered, and adds a result to the cart via a `Quick Add to Cart` button.
+      operationId: chat-addtocart
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the Athos Console or Athos Management Console
+      requestBody:
+        description: Add to cart payload
+        required: true
+        content:
+          text/plain:
+            schema:
+              title: Chat Addtocart Schema
+              $ref: '#/components/schemas/chat.addtocartSchema'
+            examples:
+              addtocart example:
+                $ref: '#/components/examples/chat.addtocart'
+          application/json:
+            schema:
+              title: Chat Addtocart Schema
+              $ref: '#/components/schemas/chat.addtocartSchema'
+            examples:
+              addtocart example:
+                $ref: '#/components/examples/chat.addtocart'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          $ref: '#/components/responses/400-response'
+        '404':
+          $ref: '#/components/responses/404-response'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/chat/clickthrough:
+    post:
+      tags:
+        - Chat
+      summary: clickthrough
+      description: <i>/beacon/v2/{siteId}/chat/clickthrough</i><br><br>This event should be triggered when a shopper interacts with Chat, clicks on a Athos Commerce result, and will be taken to the product detail page (PDP).
+      operationId: chat-clickthrough
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the Athos Console or Athos Management Console
+      requestBody:
+        description: Clickthrough payload
+        required: true
+        content:
+          text/plain:
+            schema:
+              title: Chat Clickthrough Schema
+              $ref: '#/components/schemas/chat.clickthroughSchema'
+            examples:
+              results clickthrough example:
+                $ref: '#/components/examples/chat.results-clickthrough'
+              banners clickthrough example:
+                $ref: '#/components/examples/chat.banners-clickthrough'
+          application/json:
+            schema:
+              title: Chat Clickthrough Schema
+              $ref: '#/components/schemas/chat.clickthroughSchema'
+            examples:
+              results clickthrough example:
+                $ref: '#/components/examples/chat.results-clickthrough'
+              banners clickthrough example:
+                $ref: '#/components/examples/chat.banners-clickthrough'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          $ref: '#/components/responses/400-response'
+        '404':
+          $ref: '#/components/responses/404-response'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/chat/feedback:
+    post:
+      tags:
+        - Chat
+      summary: feedback
+      description: <i>/beacon/v2/{siteId}/chat/feedback</i><br><br>This event should be triggered when a shopper provides feedback to Chat.
+      operationId: chat-feedback
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the Athos Console or Athos Management Console
+      requestBody:
+        description: Feedback payload
+        required: true
+        content:
+          text/plain:
+            schema:
+              title: Chat Feedback Schema
+              $ref: '#/components/schemas/feedbackSchema'
+            examples:
+              feedback example:
+                $ref: '#/components/examples/chat.feedback'
+          application/json:
+            schema:
+              title: Chat Feedback Schema
+              $ref: '#/components/schemas/feedbackSchema'
+            examples:
+              feedback example:
+                $ref: '#/components/examples/chat.feedback'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-response'
+        '400':
+          $ref: '#/components/responses/400-response'
+        '404':
+          $ref: '#/components/responses/404-response'
+        '405':
+          $ref: '#/components/responses/405-response'
+        '413':
+          $ref: '#/components/responses/413-response'
+        '415':
+          $ref: '#/components/responses/415-response'
+        '500':
+          $ref: '#/components/responses/500-response'
+  /{siteId}/chat/impression:
+    post:
+      tags:
+        - Chat
+      summary: impression
+      description: <i>/beacon/v2/{siteId}/chat/impression</i><br><br>This event should be triggered when a shopper interacts with Chat and Athos Commerce results receive an impression.
+      operationId: chat-impression
+      security:
+        - {}
+      parameters:
+        - in: path
+          name: siteId
+          schema:
+            type: string
+            pattern: '[a-z0-9]{6}'
+          required: true
+          description: Customer siteId found in the Athos Console or Athos Management Console
+      requestBody:
+        description: Impression payload
+        required: true
+        content:
+          text/plain:
+            schema:
+              title: Chat Impression Schema
+              $ref: '#/components/schemas/chat.impressionSchema'
+            examples:
+              results and banners impression example:
+                $ref: '#/components/examples/chat.impression'
+              results impression example:
+                $ref: '#/components/examples/chat.results-impression'
+              banners impression example:
+                $ref: '#/components/examples/chat.banners-impression'
+          application/json:
+            schema:
+              title: Chat Impression Schema
+              $ref: '#/components/schemas/chat.impressionSchema'
+            examples:
+              results and banners impression example:
+                $ref: '#/components/examples/chat.impression'
+              results impression example:
+                $ref: '#/components/examples/chat.results-impression'
+              banners impression example:
+                $ref: '#/components/examples/chat.banners-impression'
       responses:
         '200':
           $ref: '#/components/responses/200-response'
@@ -1104,7 +1532,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Recommendations payload
+        description: Add to cart payload
         required: true
         content:
           text/plain:
@@ -1154,7 +1582,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Recommendations payload
+        description: Clickthrough payload
         required: true
         content:
           text/plain:
@@ -1208,7 +1636,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Recommendations payload
+        description: Impression payload
         required: true
         content:
           text/plain:
@@ -1266,7 +1694,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Recommendations payload
+        description: Render payload
         required: true
         content:
           text/plain:
@@ -1316,7 +1744,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Add to cart payload
         required: true
         content:
           text/plain:
@@ -1366,7 +1794,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Clickthrough payload
         required: true
         content:
           text/plain:
@@ -1420,7 +1848,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Impression payload
         required: true
         content:
           text/plain:
@@ -1478,7 +1906,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Redirect payload
         required: true
         content:
           text/plain:
@@ -1528,7 +1956,7 @@ paths:
           required: true
           description: Customer siteId found in the Athos Console or Athos Management Console
       requestBody:
-        description: Results payload
+        description: Render payload
         required: true
         content:
           text/plain:
@@ -1718,32 +2146,23 @@ paths:
           $ref: '#/components/responses/500-response'
 components:
   schemas:
-    IP:
-      description: Shoppers IP address. Accepts IPv4 and IPv6 formats. Recommended this is passed for accuracy. If not, will attempt to default to the "x-forwarded-for" or the Remote Address.
-      type: string
-    userAgent:
-      description: Shoppers UserAgent. Recommended this is passed for accuracy. If not, will attempt to default to "user-agent" request header.
-      type: string
-    timestamp:
-      description: RFC3339 formatted timestamp represents time of event
-      type: string
-    pageUrl:
-      description: Current page `window.location.href` value
-      type: string
-    userId:
-      description: Unique identifier for the customer (usually a UUID)
-      type: string
-    sessionId:
-      description: Unique identifier for the customer's current session - should expire after store visit (usually a UUID)
+    initiator:
+      description: Application identifier that initiated the event
       type: string
     pageLoadId:
       description: Unique identifier that represents a unique page load. Used to tie multiple events made on a single page together.
       type: string
-    shopperId:
-      description: Unique identifier for the customer's product personalization - it is typically a user id or email and should be sent if the user is authenticated on the storefront. If the shopper has already logged in this is required.
+    pageUrl:
+      description: Current page `window.location.href` value
       type: string
-    initiator:
-      description: Application identifier that initiated the event
+    sessionId:
+      description: Unique identifier for the customer's current session - should expire after store visit (usually a UUID)
+      type: string
+    timestamp:
+      description: RFC3339 formatted timestamp represents time of event
+      type: string
+    userId:
+      description: Unique identifier for the customer (usually a UUID)
       type: string
     attribution.type:
       type: string
@@ -1774,41 +2193,50 @@ components:
     dev:
       type: boolean
       description: Developer mode flag. If set to `true`, the event data will not populate in reporting
+    IP:
+      description: Shoppers IP address. Accepts IPv4 and IPv6 formats. Recommended this is passed for accuracy. If not, will attempt to default to the "x-forwarded-for" or the Remote Address.
+      type: string
+    shopperId:
+      description: Unique identifier for the customer's product personalization - it is typically a user id or email and should be sent if the user is authenticated on the storefront. If the shopper has already logged in this is required.
+      type: string
+    userAgent:
+      description: Shoppers UserAgent. Recommended this is passed for accuracy. If not, will attempt to default to "user-agent" request header.
+      type: string
     context:
       type: object
       description: Contextual data about the event
       required:
-        - timestamp
-        - pageUrl
-        - userId
-        - sessionId
-        - pageLoadId
         - initiator
+        - pageLoadId
+        - pageUrl
+        - sessionId
+        - timestamp
+        - userId
       properties:
-        IP:
-          $ref: '#/components/schemas/IP'
-        userAgent:
-          $ref: '#/components/schemas/userAgent'
-        timestamp:
-          $ref: '#/components/schemas/timestamp'
-        pageUrl:
-          $ref: '#/components/schemas/pageUrl'
-        userId:
-          $ref: '#/components/schemas/userId'
-        sessionId:
-          $ref: '#/components/schemas/sessionId'
-        pageLoadId:
-          $ref: '#/components/schemas/pageLoadId'
-        shopperId:
-          $ref: '#/components/schemas/shopperId'
         initiator:
           $ref: '#/components/schemas/initiator'
+        pageLoadId:
+          $ref: '#/components/schemas/pageLoadId'
+        pageUrl:
+          $ref: '#/components/schemas/pageUrl'
+        sessionId:
+          $ref: '#/components/schemas/sessionId'
+        timestamp:
+          $ref: '#/components/schemas/timestamp'
+        userId:
+          $ref: '#/components/schemas/userId'
         attribution:
           $ref: '#/components/schemas/attribution'
         currency:
           $ref: '#/components/schemas/currency'
         dev:
           $ref: '#/components/schemas/dev'
+        IP:
+          $ref: '#/components/schemas/IP'
+        shopperId:
+          $ref: '#/components/schemas/shopperId'
+        userAgent:
+          $ref: '#/components/schemas/userAgent'
     responseId:
       type: string
       description: Unique ID returned in each API response
@@ -1858,6 +2286,7 @@ components:
           $ref: '#/components/schemas/context'
         data:
           type: object
+          title: Addtocart Schema Data
           description: Event details
           required:
             - responseId
@@ -2049,6 +2478,118 @@ components:
           properties:
             responseId:
               $ref: '#/components/schemas/responseId'
+    profile.tag:
+      type: string
+      description: Tag of the personalized recommendation profile the shopper interacted with
+    bundles.addtocartSchema:
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          title: Bundles Addtocart Schema Data
+          description: Event details
+          required:
+            - responseId
+            - results
+            - tag
+          properties:
+            responseId:
+              $ref: '#/components/schemas/responseId'
+            tag:
+              $ref: '#/components/schemas/profile.tag'
+            results:
+              type: array
+              description: Products added to the cart
+              items:
+                $ref: '#/components/schemas/product'
+    bundles.clickthroughSchema:
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          title: Bundles Clickthrough Schema Data
+          description: Event details
+          oneOf:
+            - title: Clickthrough Results Schema
+              required:
+                - tag
+                - responseId
+                - results
+              properties:
+                tag:
+                  $ref: '#/components/schemas/profile.tag'
+                responseId:
+                  $ref: '#/components/schemas/responseId'
+                results:
+                  $ref: '#/components/schemas/clickthrough.results'
+            - title: Clickthrough Banners Schema
+              required:
+                - tag
+                - responseId
+                - banners
+              properties:
+                tag:
+                  $ref: '#/components/schemas/profile.tag'
+                responseId:
+                  $ref: '#/components/schemas/responseId'
+                banners:
+                  $ref: '#/components/schemas/clickthrough.banners'
+    bundles.impressionSchema:
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          title: Bundles Impression Schema Data
+          description: Event details
+          required:
+            - tag
+            - responseId
+            - banners
+          properties:
+            tag:
+              $ref: '#/components/schemas/profile.tag'
+            responseId:
+              $ref: '#/components/schemas/responseId'
+            results:
+              $ref: '#/components/schemas/results'
+            banners:
+              $ref: '#/components/schemas/banners'
+    bundles.renderSchema:
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          title: Bundles Render Schema Data
+          description: Event details
+          required:
+            - responseId
+            - tag
+          properties:
+            tag:
+              type: string
+              $ref: '#/components/schemas/profile.tag'
+            responseId:
+              $ref: '#/components/schemas/responseId'
     cartSchema:
       type: object
       required:
@@ -2075,6 +2616,136 @@ components:
               description: Updated current cart products
               items:
                 $ref: '#/components/schemas/product'
+    chatSessionId:
+      type: string
+      description: Unique ID for the chat session, used to associate events with a specific conversation. Should be generated at the start of a chat session and remain consistent across all events within that session.
+    chat.addtocartSchema:
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          title: Chat Addtocart Schema Data
+          description: Event details
+          required:
+            - chatSessionId
+            - responseId
+            - results
+          properties:
+            chatSessionId:
+              $ref: '#/components/schemas/chatSessionId'
+            responseId:
+              $ref: '#/components/schemas/responseId'
+            results:
+              type: array
+              description: Products added to the cart
+              items:
+                $ref: '#/components/schemas/product'
+    chat.result.product.type:
+      description: Defines the type of item tracked.
+      type: string
+      enum:
+        - product
+    chat.result.product:
+      title: Product Result
+      type: object
+      description: Describes a tracked result.
+      required:
+        - type
+        - parentId
+        - uid
+      properties:
+        type:
+          $ref: '#/components/schemas/chat.result.product.type'
+        parentId:
+          $ref: '#/components/schemas/parentId'
+        uid:
+          $ref: '#/components/schemas/uid'
+        sku:
+          $ref: '#/components/schemas/sku'
+    chat.clickthrough.results:
+      type: array
+      description: List of tracked result(s).
+      items:
+        minimum: 1
+        maximum: 1
+        $ref: '#/components/schemas/chat.result.product'
+    chat.clickthroughSchema:
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          title: Chat Clickthrough Schema Data
+          description: Event details
+          required:
+            - chatSessionId
+            - responseId
+            - results
+          properties:
+            chatSessionId:
+              $ref: '#/components/schemas/chatSessionId'
+            responseId:
+              $ref: '#/components/schemas/responseId'
+            results:
+              $ref: '#/components/schemas/chat.clickthrough.results'
+    feedbackSchema:
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          title: Feedback Schema Data
+          description: Event details
+          required:
+            - chatSessionId
+            - feedback
+          properties:
+            chatSessionId:
+              $ref: '#/components/schemas/chatSessionId'
+            feedback:
+              type: boolean
+              description: Indicates whether the feedback is positive (true) or negative (false)
+    chat.results:
+      type: array
+      description: List of tracked result(s). An empty array will indicate zero results were returned in the API response.
+      items:
+        $ref: '#/components/schemas/chat.result.product'
+    chat.impressionSchema:
+      type: object
+      required:
+        - context
+        - data
+      properties:
+        context:
+          $ref: '#/components/schemas/context'
+        data:
+          type: object
+          title: Chat Impression Schema Data
+          description: Event details
+          required:
+            - chatSessionId
+            - responseId
+            - results
+          properties:
+            chatSessionId:
+              $ref: '#/components/schemas/chatSessionId'
+            responseId:
+              $ref: '#/components/schemas/responseId'
+            results:
+              $ref: '#/components/schemas/chat.results'
     messaging.schema:
       title: Messaging Schema
       type: object
@@ -2167,9 +2838,6 @@ components:
               $ref: '#/components/schemas/stack'
             details:
               $ref: '#/components/schemas/details'
-    profile.tag:
-      type: string
-      description: Tag of the personalized recommendation profile the shopper interacted with
     recommendations.addtocartSchema:
       type: object
       required:
@@ -2180,6 +2848,7 @@ components:
           $ref: '#/components/schemas/context'
         data:
           type: object
+          title: Recommendations Addtocart Schema Data
           description: Event details
           required:
             - responseId
@@ -2205,6 +2874,7 @@ components:
           $ref: '#/components/schemas/context'
         data:
           type: object
+          title: Recommendations Clickthrough Schema Data
           description: Event details
           oneOf:
             - title: Clickthrough Results Schema
@@ -2241,6 +2911,7 @@ components:
           $ref: '#/components/schemas/context'
         data:
           type: object
+          title: Recommendations Impression Schema Data
           description: Event details
           required:
             - tag
@@ -2265,6 +2936,7 @@ components:
           $ref: '#/components/schemas/context'
         data:
           type: object
+          title: Recommendations Render Schema Data
           description: Event details
           required:
             - responseId
@@ -2279,38 +2951,38 @@ components:
       type: object
       description: Contextual data about the shopper event
       required:
-        - timestamp
-        - pageUrl
-        - userId
-        - sessionId
-        - pageLoadId
-        - shopperId
         - initiator
+        - pageLoadId
+        - pageUrl
+        - sessionId
+        - shopperId
+        - timestamp
+        - userId
       properties:
-        IP:
-          $ref: '#/components/schemas/IP'
-        userAgent:
-          $ref: '#/components/schemas/userAgent'
-        timestamp:
-          $ref: '#/components/schemas/timestamp'
-        pageUrl:
-          $ref: '#/components/schemas/pageUrl'
-        userId:
-          $ref: '#/components/schemas/userId'
-        sessionId:
-          $ref: '#/components/schemas/sessionId'
-        pageLoadId:
-          $ref: '#/components/schemas/pageLoadId'
-        shopperId:
-          $ref: '#/components/schemas/shopperId'
         initiator:
           $ref: '#/components/schemas/initiator'
+        pageLoadId:
+          $ref: '#/components/schemas/pageLoadId'
+        pageUrl:
+          $ref: '#/components/schemas/pageUrl'
+        sessionId:
+          $ref: '#/components/schemas/sessionId'
+        shopperId:
+          $ref: '#/components/schemas/shopperId'
+        timestamp:
+          $ref: '#/components/schemas/timestamp'
+        userId:
+          $ref: '#/components/schemas/userId'
         attribution:
           $ref: '#/components/schemas/attribution'
         currency:
           $ref: '#/components/schemas/currency'
         dev:
           $ref: '#/components/schemas/dev'
+        IP:
+          $ref: '#/components/schemas/IP'
+        userAgent:
+          $ref: '#/components/schemas/userAgent'
   examples:
     addtocart:
       value:
@@ -2484,6 +3156,195 @@ components:
             code: USD
         data:
           responseId: a907d0ad-720a-4666-b046-00c0c28fb78d
+    bundles-addtocart:
+      value:
+        context:
+          IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2024-06-11T17:47:04.075876Z'
+          pageUrl: https://bocachica.searchspring.com/collections/mens/products/adventure-shorts-pitch-black
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          attribution:
+            - type: email
+              id: '1234567890'
+          currency:
+            code: USD
+        data:
+          responseId: 42c2dc64-d203-4d74-8122-515f26afb253
+          tag: bundle
+          results:
+            - parentId: '8128331911111'
+              uid: '8128331907370'
+              qty: 1
+              price: 49.99
+    bundles-results-clickthrough:
+      value:
+        context:
+          IP: 89.76.6.25
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2006-01-02T15:04:05Z'
+          pageUrl: https://bocachica.searchspring.com/collections/shop?q=shirt&view=products
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          currency:
+            code: USD
+        data:
+          responseId: a907d0ad-720a-4666-b046-00c0c28fb78d
+          tag: bundle
+          results:
+            - type: product
+              parentId: '8128331911111'
+              uid: '8128331907370'
+    bundles-banners-clickthrough:
+      value:
+        context:
+          IP: 89.76.6.25
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2006-01-02T15:04:05Z'
+          pageUrl: https://bocachica.searchspring.com/collections/shop?q=shirt&view=products
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          currency:
+            code: USD
+        data:
+          responseId: a907d0ad-720a-4666-b046-00c0c28fb78d
+          tag: bundle
+          banners:
+            - uid: '8128168755498'
+    bundles-impression:
+      value:
+        context:
+          IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2024-06-11T17:47:04.075876Z'
+          pageUrl: https://bocachica.searchspring.com/collections/mens/products/adventure-shorts-pitch-black
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          attribution:
+            - type: email
+              id: '1234567890'
+          currency:
+            code: USD
+        data:
+          responseId: 42c2dc64-d203-4d74-8122-515f26afb253
+          tag: bundle
+          results:
+            - type: product
+              parentId: '8128331911111'
+              uid: '8128331907370'
+            - type: product
+              parentId: '8128331922222'
+              uid: '8128021070122'
+            - type: product
+              parentId: '8128331933333'
+              uid: '8127879741738'
+            - type: product
+              parentId: '8128331944444'
+              uid: '8128173736234'
+            - type: product
+              parentId: '8128331955555'
+              uid: '8128273711402'
+            - type: product
+              parentId: '8128331966666'
+              uid: '8128028737834'
+          banners:
+            - uid: '8128168755498'
+    bundles-results-impression:
+      value:
+        context:
+          IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2024-06-11T17:47:04.075876Z'
+          pageUrl: https://bocachica.searchspring.com/collections/mens/products/adventure-shorts-pitch-black
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          attribution:
+            - type: email
+              id: '1234567890'
+          currency:
+            code: USD
+        data:
+          responseId: 42c2dc64-d203-4d74-8122-515f26afb253
+          tag: bundle
+          results:
+            - type: product
+              parentId: '8128331911111'
+              uid: '8128331907370'
+            - type: product
+              parentId: '8128331922222'
+              uid: '8128021070122'
+            - type: product
+              parentId: '8128331933333'
+              uid: '8127879741738'
+            - type: product
+              parentId: '8128331944444'
+              uid: '8128173736234'
+            - type: product
+              parentId: '8128331955555'
+              uid: '8128273711402'
+            - type: product
+              parentId: '8128331966666'
+              uid: '8128028737834'
+          banners: []
+    bundles-banners-impression:
+      value:
+        context:
+          IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2024-06-11T17:47:04.075876Z'
+          pageUrl: https://bocachica.searchspring.com/collections/mens/products/adventure-shorts-pitch-black
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          attribution:
+            - type: email
+              id: '1234567890'
+          currency:
+            code: USD
+        data:
+          responseId: 42c2dc64-d203-4d74-8122-515f26afb253
+          tag: bundle
+          results: []
+          banners:
+            - uid: '8128168755498'
+    bundles-render:
+      value:
+        context:
+          IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2024-06-11T17:47:04.075876Z'
+          pageUrl: https://bocachica.searchspring.com/collections/mens/products/adventure-shorts-pitch-black
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          attribution:
+            - type: email
+              id: '1234567890'
+          currency:
+            code: USD
+        data:
+          tag: bundle
+          responseId: 42c2dc64-d203-4d74-8122-515f26afb253
     add:
       value:
         context:
@@ -2595,6 +3456,175 @@ components:
             code: USD
         data:
           responseId: 650f3e4e-1f4b-4c3a-8c3e-0d6f3e4e1f4b
+    chat.addtocart:
+      value:
+        context:
+          IP: 89.76.6.25
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2006-01-02T15:04:05Z'
+          pageUrl: https://bocachica.searchspring.com/collections/shop?q=shirt&view=products
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          chatId: chat123456
+          messageId: message123456
+          currency:
+            code: USD
+        data:
+          responseId: a907d0ad-720a-4666-b046-00c0c28fb78d
+          results:
+            - uid: '8128331907370'
+              parentId: '8128331900000'
+              qty: 1
+              price: 22
+    chat.results-clickthrough:
+      value:
+        context:
+          IP: 89.76.6.25
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2006-01-02T15:04:05Z'
+          pageUrl: https://bocachica.searchspring.com/collections/shop?q=shirt&view=products
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          chatId: chat123456
+          messageId: message123456
+          currency:
+            code: USD
+        data:
+          responseId: a907d0ad-720a-4666-b046-00c0c28fb78d
+          results:
+            - type: product
+              parentId: '8128331911111'
+              uid: '8128331907370'
+    chat.banners-clickthrough:
+      value:
+        context:
+          IP: 89.76.6.25
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2006-01-02T15:04:05Z'
+          pageUrl: https://bocachica.searchspring.com/collections/shop?q=shirt&view=products
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          chatId: chat123456
+          messageId: message123456
+          currency:
+            code: USD
+        data:
+          responseId: a907d0ad-720a-4666-b046-00c0c28fb78d
+          banners:
+            - uid: '8128168755498'
+    chat.feedback:
+      value:
+        context:
+          IP: 89.76.6.25
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2006-01-02T15:04:05Z'
+          pageUrl: https://bocachica.searchspring.com/collections/shop?q=shirt&view=products
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          chatId: chat123456
+          messageId: message123456
+          currency:
+            code: USD
+        data:
+          feedback: true
+    chat.impression:
+      value:
+        context:
+          IP: 89.76.6.25
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2006-01-02T15:04:05Z'
+          pageUrl: https://bocachica.searchspring.com/collections/shop?q=shirt&view=products
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          chatId: chat123456
+          messageId: message123456
+          currency:
+            code: USD
+        data:
+          responseId: a907d0ad-720a-4666-b046-00c0c28fb78d
+          results:
+            - type: product
+              parentId: '8128331911111'
+              uid: '8128331907370'
+            - type: product
+              parentId: '8128331922222'
+              uid: '8128021070122'
+            - type: product
+              parentId: '8128331933333'
+              uid: '8127879741738'
+            - type: product
+              parentId: '8128331944444'
+              uid: '8128173736234'
+          banners:
+            - uid: '8128168755498'
+    chat.results-impression:
+      value:
+        context:
+          IP: 89.76.6.25
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2006-01-02T15:04:05Z'
+          pageUrl: https://bocachica.searchspring.com/collections/shop?q=shirt&view=products
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          chatId: chat123456
+          messageId: message123456
+          currency:
+            code: USD
+        data:
+          responseId: a907d0ad-720a-4666-b046-00c0c28fb78d
+          results:
+            - type: product
+              parentId: '8128331911111'
+              uid: '8128331907370'
+            - type: product
+              parentId: '8128331922222'
+              uid: '8128021070122'
+            - type: product
+              parentId: '8128331933333'
+              uid: '8127879741738'
+            - type: product
+              parentId: '8128331944444'
+              uid: '8128173736234'
+          banners: []
+    chat.banners-impression:
+      value:
+        context:
+          IP: 89.76.6.25
+          userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
+          timestamp: '2006-01-02T15:04:05Z'
+          pageUrl: https://bocachica.searchspring.com/collections/shop?q=shirt&view=products
+          userId: 41f87850-65f5-4546-851c-f166109e57b9
+          sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
+          pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
+          shopperId: user123456
+          initiator: searchspring/snap/preact/0.49.1
+          chatId: chat123456
+          messageId: message123456
+          currency:
+            code: USD
+        data:
+          responseId: a907d0ad-720a-4666-b046-00c0c28fb78d
+          results: []
+          banners:
+            - uid: '8128168755498'
     messaging:
       value:
         context:

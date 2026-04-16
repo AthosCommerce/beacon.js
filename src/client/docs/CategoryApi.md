@@ -35,7 +35,7 @@ async function example() {
   const body = {
     // string | Customer siteId found in the Athos Console or Athos Management Console
     siteId: siteId_example,
-    // AddtocartSchema | Results payload
+    // AddtocartSchema | Add to cart payload
     addtocartSchema: ...,
   } satisfies CategoryAddtocartRequest;
 
@@ -57,7 +57,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **siteId** | `string` | Customer siteId found in the Athos Console or Athos Management Console | [Defaults to `undefined`] |
-| **addtocartSchema** | [AddtocartSchema](AddtocartSchema.md) | Results payload | |
+| **addtocartSchema** | [AddtocartSchema](AddtocartSchema.md) | Add to cart payload | |
 
 ### Return type
 
@@ -111,7 +111,7 @@ async function example() {
   const body = {
     // string | Customer siteId found in the Athos Console or Athos Management Console
     siteId: siteId_example,
-    // ClickthroughSchema | Results payload
+    // ClickthroughSchema | Clickthrough payload
     clickthroughSchema: ...,
   } satisfies CategoryClickthroughRequest;
 
@@ -133,7 +133,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **siteId** | `string` | Customer siteId found in the Athos Console or Athos Management Console | [Defaults to `undefined`] |
-| **clickthroughSchema** | [ClickthroughSchema](ClickthroughSchema.md) | Results payload | |
+| **clickthroughSchema** | [ClickthroughSchema](ClickthroughSchema.md) | Clickthrough payload | |
 
 ### Return type
 
@@ -187,7 +187,7 @@ async function example() {
   const body = {
     // string | Customer siteId found in the Athos Console or Athos Management Console
     siteId: siteId_example,
-    // ImpressionSchema | Results payload
+    // ImpressionSchema | Impression payload
     impressionSchema: ...,
   } satisfies CategoryImpressionRequest;
 
@@ -209,7 +209,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **siteId** | `string` | Customer siteId found in the Athos Console or Athos Management Console | [Defaults to `undefined`] |
-| **impressionSchema** | [ImpressionSchema](ImpressionSchema.md) | Results payload | |
+| **impressionSchema** | [ImpressionSchema](ImpressionSchema.md) | Impression payload | |
 
 ### Return type
 
@@ -263,7 +263,7 @@ async function example() {
   const body = {
     // string | Customer siteId found in the Athos Console or Athos Management Console
     siteId: siteId_example,
-    // RenderSchema | Results payload
+    // RenderSchema | Render payload
     renderSchema: ...,
   } satisfies CategoryRenderRequest;
 
@@ -285,7 +285,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **siteId** | `string` | Customer siteId found in the Athos Console or Athos Management Console | [Defaults to `undefined`] |
-| **renderSchema** | [RenderSchema](RenderSchema.md) | Results payload | |
+| **renderSchema** | [RenderSchema](RenderSchema.md) | Render payload | |
 
 ### Return type
 

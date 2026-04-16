@@ -48,6 +48,11 @@ import {
 	RecommendationsAddtocartSchema,
 	AddtocartSchema,
 	ShopperLoginSchema,
+	ChatApi,
+	ChatImpressionSchemaData,
+	ChatAddtocartSchemaData,
+	ChatClickthroughSchemaData,
+	FeedbackSchemaData,
 } from './client';
 import type {
 	AutocompleteAddtocartRequest,
@@ -67,6 +72,10 @@ import type {
 	SearchRenderRequest,
 	LogShopifypixelRequest,
 	LogSnapRequest,
+	ChatImpressionRequest,
+	ChatAddtocartRequest,
+	ChatClickthroughRequest,
+	ChatFeedbackRequest,
 } from './client/apis';
 
 declare global {
@@ -113,6 +122,7 @@ interface ApiMethodMap {
 	shopper: ShopperApi;
 	autocomplete: AutocompleteApi;
 	search: SearchApi;
+	chat: ChatApi;
 	category: CategoryApi;
 	recommendations: RecommendationsApi;
 	product: ProductApi;
@@ -209,6 +219,7 @@ export class Beacon {
 			search: new SearchApi(apiConfig),
 			category: new CategoryApi(apiConfig),
 			recommendations: new RecommendationsApi(apiConfig),
+			chat: new ChatApi(apiConfig),
 			product: new ProductApi(apiConfig),
 			cart: new CartApi(apiConfig),
 			order: new OrderApi(apiConfig),
@@ -558,6 +569,60 @@ export class Beacon {
 				};
 
 				const request = this.createRequest('autocomplete', 'autocompleteRedirect', payload);
+				this.sendRequests([request]);
+			},
+		},
+		chat: {
+			impression: (event: Payload<ChatImpressionSchemaData>) => {
+				const payload: ChatImpressionRequest = {
+					siteId: event?.siteId || this.globals.siteId,
+					chatImpressionSchema: {
+						context: this.getContext(),
+						data: event.data,
+					},
+				};
+
+				const request = this.createRequest('chat', 'chatImpression', payload);
+				this.queueRequest(request);
+			},
+			addToCart: (event: Payload<ChatAddtocartSchemaData>) => {
+				if (event.data.results) {
+					this.storage.cart.add(event.data.results);
+				}
+
+				const payload: ChatAddtocartRequest = {
+					siteId: event?.siteId || this.globals.siteId,
+					chatAddtocartSchema: {
+						context: this.getContext(),
+						data: event.data,
+					},
+				};
+
+				const request = this.createRequest('chat', 'chatAddtocart', payload);
+				this.queueRequest(request);
+			},
+			clickThrough: (event: Payload<ChatClickthroughSchemaData>) => {
+				const payload: ChatClickthroughRequest = {
+					siteId: event?.siteId || this.globals.siteId,
+					chatClickthroughSchema: {
+						context: this.getContext(),
+						data: event.data,
+					},
+				};
+
+				const request = this.createRequest('chat', 'chatClickthrough', payload);
+				this.sendRequests([request]);
+			},
+			feedback: (event: Payload<FeedbackSchemaData>) => {
+				const payload: ChatFeedbackRequest = {
+					siteId: event?.siteId || this.globals.siteId,
+					feedbackSchema: {
+						context: this.getContext(),
+						data: event.data,
+					},
+				};
+
+				const request = this.createRequest('chat', 'chatFeedback', payload);
 				this.sendRequests([request]);
 			},
 		},
