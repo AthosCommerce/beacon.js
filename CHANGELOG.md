@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/AthosCommerce/beacon.js/compare/v1.1.0...v1.1.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* add beacon cdn config to allow initiator ([c0e93d9](https://github.com/AthosCommerce/beacon.js/commit/c0e93d908e91e6293177250128e825aa36073653))
+
 ## [1.1.0](https://github.com/AthosCommerce/beacon.js/compare/v1.0.4...v1.1.0) (2026-03-03)
 
 
