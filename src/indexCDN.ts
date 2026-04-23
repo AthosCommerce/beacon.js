@@ -3,11 +3,17 @@ export const { version } = packageJSON;
 import { Beacon } from './Beacon';
 import { getContext } from './utils/getContext';
 
+type BeaconConfigCDN = {
+	initiator?: string;
+};
+
 const scriptEl = document.currentScript as HTMLScriptElement;
 if (scriptEl) {
 	try {
-		const context = getContext(['siteId', 'siteid'], scriptEl);
+		const context = getContext(['siteId', 'siteid', 'config'], scriptEl);
 		const siteId = `${context.siteId || context.siteid}`.trim().toLowerCase();
+		const config: BeaconConfigCDN = context.config || {};
+		const initiator = `${typeof config.initiator === 'string' ? config.initiator : ''}`.trim().toLowerCase();
 		let initializeBeacon = true;
 
 		if (typeof window !== 'undefined') {
@@ -25,7 +31,7 @@ if (scriptEl) {
 			if (initializeBeacon) {
 				const domain = siteId.startsWith('at') ? 'athos' : 'searchspring';
 				window.athos = window.athos || {};
-				window.athos.tracker = new Beacon({ siteId }, { initiator: `${domain}/cdn/beaconjs/${version}` });
+				window.athos.tracker = new Beacon({ siteId }, { initiator: `${domain}/${initiator ? initiator + '/' : ''}cdn/beaconjs/${version}` });
 			}
 		}
 	} catch (e) {
