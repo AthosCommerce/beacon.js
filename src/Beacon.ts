@@ -48,8 +48,21 @@ import {
 	RecommendationsAddtocartSchema,
 	AddtocartSchema,
 	ShopperLoginSchema,
+	ChatApi,
+	ChatImpressionSchemaData,
+	ChatAddtocartSchemaData,
+	ChatClickthroughSchemaData,
+	FeedbackSchemaData,
+	BundlesImpressionSchemaData,
+	BundlesRenderSchemaData,
+	BundlesAddtocartSchemaData,
+	BundlesClickthroughSchemaData,
+	BundlesImpressionSchema,
+	BundlesAddtocartSchema,
+	ChatImpressionSchema,
+	ChatAddtocartSchema,
 } from './client';
-import type {
+import {
 	AutocompleteAddtocartRequest,
 	AutocompleteRedirectRequest,
 	AutocompleteRenderRequest,
@@ -67,6 +80,15 @@ import type {
 	SearchRenderRequest,
 	LogShopifypixelRequest,
 	LogSnapRequest,
+	ChatImpressionRequest,
+	ChatAddtocartRequest,
+	ChatClickthroughRequest,
+	ChatFeedbackRequest,
+	BundlesImpressionRequest,
+	BundlesRenderRequest,
+	BundlesAddtocartRequest,
+	BundlesClickthroughRequest,
+	BundlesApi,
 } from './client/apis';
 
 declare global {
@@ -115,6 +137,8 @@ interface ApiMethodMap {
 	search: SearchApi;
 	category: CategoryApi;
 	recommendations: RecommendationsApi;
+	bundles: BundlesApi;
+	chat: ChatApi;
 	product: ProductApi;
 	cart: CartApi;
 	order: OrderApi;
@@ -209,6 +233,8 @@ export class Beacon {
 			search: new SearchApi(apiConfig),
 			category: new CategoryApi(apiConfig),
 			recommendations: new RecommendationsApi(apiConfig),
+			bundles: new BundlesApi(apiConfig),
+			chat: new ChatApi(apiConfig),
 			product: new ProductApi(apiConfig),
 			cart: new CartApi(apiConfig),
 			order: new OrderApi(apiConfig),
@@ -678,6 +704,114 @@ export class Beacon {
 				};
 
 				const request = this.createRequest('category', 'categoryClickthrough', payload);
+				this.sendRequests([request]);
+			},
+		},
+		bundles: {
+			render: (event: Payload<BundlesRenderSchemaData>) => {
+				const payload: BundlesRenderRequest = {
+					siteId: event?.siteId || this.globals.siteId,
+					bundlesRenderSchema: {
+						context: this.getContext(),
+						data: event.data,
+					},
+				};
+
+				const request = this.createRequest('bundles', 'bundlesRender', payload);
+				this.queueRequest(request);
+			},
+			impression: (event: Payload<BundlesImpressionSchemaData>) => {
+				const payload: BundlesImpressionRequest = {
+					siteId: event?.siteId || this.globals.siteId,
+					bundlesImpressionSchema: {
+						context: this.getContext(),
+						data: event.data,
+					},
+				};
+
+				const request = this.createRequest('bundles', 'bundlesImpression', payload);
+				this.queueRequest(request);
+			},
+			addToCart: (event: Payload<BundlesAddtocartSchemaData>) => {
+				if (event.data.results) {
+					this.storage.cart.add(event.data.results);
+				}
+
+				const payload: BundlesAddtocartRequest = {
+					siteId: event?.siteId || this.globals.siteId,
+					bundlesAddtocartSchema: {
+						context: this.getContext(),
+						data: event.data,
+					},
+				};
+
+				const request = this.createRequest('bundles', 'bundlesAddtocart', payload);
+				this.queueRequest(request);
+			},
+			clickThrough: (event: Payload<BundlesClickthroughSchemaData>) => {
+				const payload: BundlesClickthroughRequest = {
+					siteId: event?.siteId || this.globals.siteId,
+					bundlesClickthroughSchema: {
+						context: this.getContext(),
+						data: event.data,
+					},
+				};
+
+				const request = this.createRequest('bundles', 'bundlesClickthrough', payload);
+				this.sendRequests([request]);
+			},
+		},
+		chat: {
+			impression: (event: Payload<ChatImpressionSchemaData>) => {
+				const payload: ChatImpressionRequest = {
+					siteId: event?.siteId || this.globals.siteId,
+					chatImpressionSchema: {
+						context: this.getContext(),
+						data: event.data,
+					},
+				};
+
+				const request = this.createRequest('chat', 'chatImpression', payload);
+				this.queueRequest(request);
+			},
+			addToCart: (event: Payload<ChatAddtocartSchemaData>) => {
+				if (event.data.results) {
+					this.storage.cart.add(event.data.results);
+				}
+
+				const payload: ChatAddtocartRequest = {
+					siteId: event?.siteId || this.globals.siteId,
+					chatAddtocartSchema: {
+						context: this.getContext(),
+						data: event.data,
+					},
+				};
+
+				const request = this.createRequest('chat', 'chatAddtocart', payload);
+				this.queueRequest(request);
+			},
+			clickThrough: (event: Payload<ChatClickthroughSchemaData>) => {
+				const payload: ChatClickthroughRequest = {
+					siteId: event?.siteId || this.globals.siteId,
+					chatClickthroughSchema: {
+						context: this.getContext(),
+						data: event.data,
+					},
+				};
+
+				const request = this.createRequest('chat', 'chatClickthrough', payload);
+				this.sendRequests([request]);
+			},
+			feedback: (event: Payload<FeedbackSchemaData>) => {
+				const payload: ChatFeedbackRequest = {
+					siteId: event?.siteId || this.globals.siteId,
+					feedbackSchema: {
+						context: this.getContext(),
+						data: event.data,
+					},
+				};
+
+				const request = this.createRequest('chat', 'chatFeedback', payload);
 				this.sendRequests([request]);
 			},
 		},
@@ -1151,6 +1285,30 @@ export class Beacon {
 						appendResults(acc, key, 'recommendationsImpressionSchema', request);
 						break;
 					}
+					case 'bundlesAddtocart': {
+						const bundlesAddtocart = (request.payload as BundlesAddtocartRequest).bundlesAddtocartSchema;
+						key += additionalRequestKeys(key, 'bundle', bundlesAddtocart);
+						appendResults(acc, key, 'bundlesAddtocartSchema', request);
+						break;
+					}
+					case 'bundlesImpression': {
+						const bundlesImpression = (request.payload as BundlesImpressionRequest).bundlesImpressionSchema;
+						key += additionalRequestKeys(key, 'bundle', bundlesImpression);
+						appendResults(acc, key, 'bundlesImpressionSchema', request);
+						break;
+					}
+					case 'chatAddtocart': {
+						const chatAddtocart = (request.payload as ChatAddtocartRequest).chatAddtocartSchema;
+						key += additionalRequestKeys(key, 'chat', chatAddtocart);
+						appendResults(acc, key, 'chatAddtocartSchema', request);
+						break;
+					}
+					case 'chatImpression': {
+						const chatImpression = (request.payload as ChatImpressionRequest).chatImpressionSchema;
+						key += additionalRequestKeys(key, 'chat', chatImpression);
+						appendResults(acc, key, 'chatImpressionSchema', request);
+						break;
+					}
 					case 'searchAddtocart': {
 						const searchAddtocart = (request.payload as SearchAddtocartRequest).addtocartSchema;
 						key += additionalRequestKeys(key, 'search', searchAddtocart);
@@ -1315,21 +1473,42 @@ export function appendResults(
 
 export function additionalRequestKeys(
 	key: string,
-	type: 'search' | 'autocomplete' | 'category' | 'recommendation' | 'shopper',
-	schema: ImpressionSchema | RecommendationsImpressionSchema | RecommendationsAddtocartSchema | AddtocartSchema | ShopperLoginSchema
+	type: 'search' | 'autocomplete' | 'category' | 'recommendation' | 'bundle' | 'chat' | 'shopper',
+	schema:
+		| ImpressionSchema
+		| RecommendationsImpressionSchema
+		| RecommendationsAddtocartSchema
+		| BundlesImpressionSchema
+		| BundlesAddtocartSchema
+		| ChatImpressionSchema
+		| ChatAddtocartSchema
+		| AddtocartSchema
+		| ShopperLoginSchema
 ): string {
 	let value = key;
 	value += `||${schema.context.pageLoadId}`;
 	value += `||${schema.context.sessionId}`;
 
-	if ((schema as ImpressionSchema | RecommendationsImpressionSchema | RecommendationsAddtocartSchema | AddtocartSchema).data?.responseId) {
-		value += `||responseId=${(schema as ImpressionSchema | RecommendationsImpressionSchema | RecommendationsAddtocartSchema | AddtocartSchema).data.responseId}`;
+	if ((schema as ChatImpressionSchema | ChatAddtocartSchema).data?.chatSessionId) {
+		value += `||chatSessionId=${(schema as ChatImpressionSchema | ChatAddtocartSchema).data.chatSessionId}||responseId=${(schema as ImpressionSchema | RecommendationsImpressionSchema | RecommendationsAddtocartSchema | BundlesImpressionSchema | BundlesAddtocartSchema | AddtocartSchema).data.responseId}`;
+	} else if (
+		(
+			schema as
+				| ImpressionSchema
+				| RecommendationsImpressionSchema
+				| RecommendationsAddtocartSchema
+				| BundlesImpressionSchema
+				| BundlesAddtocartSchema
+				| AddtocartSchema
+		).data?.responseId
+	) {
+		value += `||responseId=${(schema as ImpressionSchema | RecommendationsImpressionSchema | RecommendationsAddtocartSchema | BundlesImpressionSchema | BundlesAddtocartSchema | AddtocartSchema).data.responseId}`;
 	} else if (type === 'shopper' && schema.context.shopperId) {
 		value += `||shopperId=${schema.context.shopperId}`;
 	}
 
-	if (type === 'recommendation') {
-		value += `||tag=${(schema as RecommendationsImpressionSchema).data.tag}`;
+	if (type === 'recommendation' || type === 'bundle') {
+		value += `||tag=${(schema as RecommendationsImpressionSchema | BundlesImpressionSchema).data.tag}`;
 	}
 
 	return value;

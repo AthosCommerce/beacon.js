@@ -447,6 +447,8 @@ for (const { isAthos, siteId } of [
 				expect(beacon['apis'].search['configuration'].basePath).toContain(basePath);
 				expect(beacon['apis'].category['configuration'].basePath).toContain(basePath);
 				expect(beacon['apis'].recommendations['configuration'].basePath).toContain(basePath);
+				expect(beacon['apis'].bundles['configuration'].basePath).toContain(basePath);
+				expect(beacon['apis'].chat['configuration'].basePath).toContain(basePath);
 				expect(beacon['apis'].product['configuration'].basePath).toContain(basePath);
 				expect(beacon['apis'].cart['configuration'].basePath).toContain(basePath);
 				expect(beacon['apis'].order['configuration'].basePath).toContain(basePath);
@@ -658,6 +660,127 @@ for (const { isAthos, siteId } of [
 					const spy = jest.spyOn(beacon['apis'].autocomplete, 'autocompleteRedirect');
 
 					beacon.events.autocomplete.redirect({ data });
+					await flushPromises();
+
+					expect(spy).toHaveBeenCalled();
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
+				});
+			});
+			describe('Chat', () => {
+				it('can process impression event', async () => {
+					const data = {
+						chatSessionId: 'test-chat-session-id',
+						responseId: 'test-response-id',
+						results: [
+							{ type: ResultProductType.Product, parentId: 'parentId1', uid: 'prodUid1', sku: 'prodSku1' },
+							{ type: ResultProductType.Product, parentId: 'parentId2', uid: 'prodUid2', sku: 'prodSku2' },
+						],
+					};
+
+					const fetchPayloadAssertion = {
+						...otherFetchParams,
+						body: {
+							data,
+							context: {
+								...beacon.getContext(),
+								timestamp: expect.any(String),
+							},
+						},
+					};
+
+					const spy = jest.spyOn(beacon['apis'].chat, 'chatImpression');
+
+					beacon.events.chat.impression({ data });
+					jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+					await flushPromises();
+
+					expect(spy).toHaveBeenCalled();
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
+				});
+				it('can process addToCart event', async () => {
+					beacon.storage.cart.clear();
+
+					const data = {
+						chatSessionId: 'test-chat-session-id',
+						responseId: 'test-response-id',
+						results: [
+							{ uid: 'prodUid1', parentId: 'prodparentId1', sku: 'prodSku1', qty: 1, price: 10.99 },
+							{ uid: 'prodUid2', parentId: 'prodparentId2', sku: 'prodSku2', qty: 1, price: 10.99 },
+						],
+					};
+
+					const fetchPayloadAssertion = {
+						...otherFetchParams,
+						body: {
+							data,
+							context: {
+								...beacon.getContext(),
+								timestamp: expect.any(String),
+							},
+						},
+					};
+
+					const spy = jest.spyOn(beacon['apis'].chat, 'chatAddtocart');
+
+					beacon.events.chat.addToCart({ data });
+					jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+					await flushPromises();
+
+					expect(spy).toHaveBeenCalled();
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
+
+					// validate cart storage data
+					const cartData = beacon.storage.cart.get();
+					expect(cartData).toEqual(data.results);
+				});
+				it('can process clickThrough event', async () => {
+					const data = {
+						chatSessionId: 'test-chat-session-id',
+						responseId: 'test-response-id',
+						results: [{ type: ResultProductType.Product, parentId: 'parentId1', uid: 'prodUid1', sku: 'prodSku1' }],
+					};
+
+					const fetchPayloadAssertion = {
+						...otherFetchParams,
+						body: {
+							data,
+							context: {
+								...beacon.getContext(),
+								timestamp: expect.any(String),
+							},
+						},
+					};
+
+					const spy = jest.spyOn(beacon['apis'].chat, 'chatClickthrough');
+
+					beacon.events.chat.clickThrough({ data });
+					await flushPromises();
+
+					expect(spy).toHaveBeenCalled();
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
+				});
+				it('can process feedback event', async () => {
+					const data = {
+						chatSessionId: 'test-chat-session-id',
+						feedback: true,
+					};
+
+					const fetchPayloadAssertion = {
+						...otherFetchParams,
+						body: {
+							data,
+							context: {
+								...beacon.getContext(),
+								timestamp: expect.any(String),
+							},
+						},
+					};
+
+					const spy = jest.spyOn(beacon['apis'].chat, 'chatFeedback');
+
+					beacon.events.chat.feedback({ data });
 					await flushPromises();
 
 					expect(spy).toHaveBeenCalled();
@@ -1088,6 +1211,133 @@ for (const { isAthos, siteId } of [
 					const spy = jest.spyOn(beacon['apis'].recommendations, 'recommendationsClickthrough');
 
 					beacon.events.recommendations.clickThrough({ data });
+					await flushPromises();
+
+					expect(spy).toHaveBeenCalled();
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
+				});
+			});
+			describe('Bundles', () => {
+				it('can process render event', async () => {
+					const data = {
+						tag: 'test-tag',
+						responseId: 'test-response-id',
+					};
+
+					const fetchPayloadAssertion = {
+						...otherFetchParams,
+						body: {
+							data,
+							context: {
+								...beacon.getContext(),
+								timestamp: expect.any(String),
+							},
+						},
+					};
+
+					const spy = jest.spyOn(beacon['apis'].bundles, 'bundlesRender');
+
+					beacon.events.bundles.render({ data });
+					jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+					await flushPromises();
+
+					expect(spy).toHaveBeenCalled();
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
+				});
+				it('can process impression event', async () => {
+					const data = {
+						responseId: 'test-response-id',
+						tag: 'test-tag',
+						results: [
+							{ type: ResultProductType.Product, parentId: 'parentId1', uid: 'prodUid1', sku: 'prodSku1' },
+							{ type: ResultProductType.Product, parentId: 'parentId2', uid: 'prodUid2', sku: 'prodSku2' },
+							{ type: ResultProductType.Product, parentId: 'parentId3', uid: 'prodUid3', sku: 'prodSku3' },
+							{ type: ResultProductType.Product, parentId: 'parentId4', uid: 'prodUid4', sku: 'prodSku4' },
+							{ type: ResultProductType.Banner, uid: 'inlinebanneruid' },
+						],
+						banners: [{ uid: 'merchandisingbanneruid' }],
+					};
+
+					const fetchPayloadAssertion = {
+						...otherFetchParams,
+						body: {
+							data,
+							context: {
+								...beacon.getContext(),
+								timestamp: expect.any(String),
+							},
+						},
+					};
+
+					const spy = jest.spyOn(beacon['apis'].bundles, 'bundlesImpression');
+
+					beacon.events.bundles.impression({ data });
+					jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+					await flushPromises();
+
+					expect(spy).toHaveBeenCalled();
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
+				});
+				it('can process addToCart event', async () => {
+					beacon.storage.cart.clear();
+
+					const data = {
+						responseId: 'test-response-id',
+						tag: 'test-tag',
+						results: [
+							{ uid: 'prodUid1', parentId: 'prodparentId1', sku: 'prodSku1', qty: 1, price: 10.99 },
+							{ uid: 'prodUid2', parentId: 'prodparentId2', sku: 'prodSku2', qty: 1, price: 10.99 },
+						],
+					};
+
+					const fetchPayloadAssertion = {
+						...otherFetchParams,
+						body: {
+							data,
+							context: {
+								...beacon.getContext(),
+								timestamp: expect.any(String),
+							},
+						},
+					};
+
+					const spy = jest.spyOn(beacon['apis'].bundles, 'bundlesAddtocart');
+
+					beacon.events.bundles.addToCart({ data });
+					jest.advanceTimersByTime(REQUEST_GROUPING_TIMEOUT);
+
+					await flushPromises();
+
+					expect(spy).toHaveBeenCalled();
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
+
+					// validate cart storage data
+					const cartData = beacon.storage.cart.get();
+					expect(cartData).toEqual(data.results);
+				});
+				it('can process clickThrough event', async () => {
+					const data = {
+						responseId: 'test-response-id',
+						tag: 'test-tag',
+						results: [{ type: ResultProductType.Product, parentId: 'parentId1', uid: 'prodUid1', sku: 'prodSku1' }],
+					};
+
+					const fetchPayloadAssertion = {
+						...otherFetchParams,
+						body: {
+							data,
+							context: {
+								...beacon.getContext(),
+								timestamp: expect.any(String),
+							},
+						},
+					};
+
+					const spy = jest.spyOn(beacon['apis'].bundles, 'bundlesClickthrough');
+
+					beacon.events.bundles.clickThrough({ data });
 					await flushPromises();
 
 					expect(spy).toHaveBeenCalled();

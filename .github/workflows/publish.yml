@@ -43,3 +43,23 @@ jobs:
 
       - name: Publish packages to npm
         run: npm publish --access public
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ATHOS_SNAPFU_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ATHOS_SNAPFU_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Copy Files to Athos S3
+        shell: bash
+        run: |
+          aws s3 sync --acl public-read dist/cdn s3://${{ secrets.ATHOS_SNAPFU_AWS_BUCKET }}/analytics
+
+      - name: Invalidate Athos CDN Files
+        shell: bash
+        env:
+          AWS_MAX_ATTEMPTS: 9
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.ATHOS_SNAPFU_AWS_DISTRIBUTION_ID }} --paths "/analytics/*"
+
