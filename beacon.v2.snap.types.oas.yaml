@@ -942,14 +942,14 @@ paths:
           text/plain:
             schema:
               title: Chat Feedback Schema
-              $ref: '#/components/schemas/feedbackSchema'
+              $ref: '#/components/schemas/chatFeedbackSchema'
             examples:
               feedback example:
                 $ref: '#/components/examples/chat.feedback'
           application/json:
             schema:
               title: Chat Feedback Schema
-              $ref: '#/components/schemas/feedbackSchema'
+              $ref: '#/components/schemas/chatFeedbackSchema'
             examples:
               feedback example:
                 $ref: '#/components/examples/chat.feedback'
@@ -2685,7 +2685,7 @@ components:
               $ref: '#/components/schemas/responseId'
             results:
               $ref: '#/components/schemas/chat.clickthrough.results'
-    feedbackSchema:
+    chatFeedbackSchema:
       type: object
       required:
         - context
@@ -2695,7 +2695,7 @@ components:
           $ref: '#/components/schemas/context'
         data:
           type: object
-          title: Feedback Schema Data
+          title: Chat Feedback Schema Data
           description: Event details
           required:
             - chatSessionId

@@ -165,7 +165,7 @@ No authorization required
 
 ## chatFeedback
 
-> InlineObject chatFeedback(siteId, feedbackSchema)
+> InlineObject chatFeedback(siteId, chatFeedbackSchema)
 
 feedback
 
@@ -187,8 +187,8 @@ async function example() {
   const body = {
     // string | Customer siteId found in the Athos Console or Athos Management Console
     siteId: siteId_example,
-    // FeedbackSchema | Feedback payload
-    feedbackSchema: ...,
+    // ChatFeedbackSchema | Feedback payload
+    chatFeedbackSchema: ...,
   } satisfies ChatFeedbackRequest;
 
   try {
@@ -209,7 +209,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **siteId** | `string` | Customer siteId found in the Athos Console or Athos Management Console | [Defaults to `undefined`] |
-| **feedbackSchema** | [FeedbackSchema](FeedbackSchema.md) | Feedback payload | |
+| **chatFeedbackSchema** | [ChatFeedbackSchema](ChatFeedbackSchema.md) | Feedback payload | |
 
 ### Return type
 

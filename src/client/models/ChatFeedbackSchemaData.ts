@@ -16,37 +16,37 @@ import { mapValues } from '../runtime';
 /**
  * Event details
  * @export
- * @interface FeedbackSchemaData
+ * @interface ChatFeedbackSchemaData
  */
-export interface FeedbackSchemaData {
+export interface ChatFeedbackSchemaData {
 	/**
 	 * Unique ID for the chat session, used to associate events with a specific conversation. Should be generated at the start of a chat session and remain consistent across all events within that session.
 	 * @type {string}
-	 * @memberof FeedbackSchemaData
+	 * @memberof ChatFeedbackSchemaData
 	 */
 	chatSessionId: string;
 	/**
 	 * Indicates whether the feedback is positive (true) or negative (false)
 	 * @type {boolean}
-	 * @memberof FeedbackSchemaData
+	 * @memberof ChatFeedbackSchemaData
 	 */
 	feedback: boolean;
 }
 
 /**
- * Check if a given object implements the FeedbackSchemaData interface.
+ * Check if a given object implements the ChatFeedbackSchemaData interface.
  */
-export function instanceOfFeedbackSchemaData(value: object): value is FeedbackSchemaData {
+export function instanceOfChatFeedbackSchemaData(value: object): value is ChatFeedbackSchemaData {
 	if (!('chatSessionId' in value) || value['chatSessionId'] === undefined) return false;
 	if (!('feedback' in value) || value['feedback'] === undefined) return false;
 	return true;
 }
 
-export function FeedbackSchemaDataFromJSON(json: any): FeedbackSchemaData {
-	return FeedbackSchemaDataFromJSONTyped(json, false);
+export function ChatFeedbackSchemaDataFromJSON(json: any): ChatFeedbackSchemaData {
+	return ChatFeedbackSchemaDataFromJSONTyped(json, false);
 }
 
-export function FeedbackSchemaDataFromJSONTyped(json: any, ignoreDiscriminator: boolean): FeedbackSchemaData {
+export function ChatFeedbackSchemaDataFromJSONTyped(json: any, ignoreDiscriminator: boolean): ChatFeedbackSchemaData {
 	if (json == null) {
 		return json;
 	}
@@ -56,11 +56,11 @@ export function FeedbackSchemaDataFromJSONTyped(json: any, ignoreDiscriminator: 
 	};
 }
 
-export function FeedbackSchemaDataToJSON(json: any): FeedbackSchemaData {
-	return FeedbackSchemaDataToJSONTyped(json, false);
+export function ChatFeedbackSchemaDataToJSON(json: any): ChatFeedbackSchemaData {
+	return ChatFeedbackSchemaDataToJSONTyped(json, false);
 }
 
-export function FeedbackSchemaDataToJSONTyped(value?: FeedbackSchemaData | null, ignoreDiscriminator: boolean = false): any {
+export function ChatFeedbackSchemaDataToJSONTyped(value?: ChatFeedbackSchemaData | null, ignoreDiscriminator: boolean = false): any {
 	if (value == null) {
 		return value;
 	}

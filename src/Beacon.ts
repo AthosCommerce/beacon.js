@@ -52,7 +52,7 @@ import {
 	ChatImpressionSchemaData,
 	ChatAddtocartSchemaData,
 	ChatClickthroughSchemaData,
-	FeedbackSchemaData,
+	ChatFeedbackSchemaData,
 	BundlesImpressionSchemaData,
 	BundlesRenderSchemaData,
 	BundlesAddtocartSchemaData,
@@ -802,10 +802,10 @@ export class Beacon {
 				const request = this.createRequest('chat', 'chatClickthrough', payload);
 				this.sendRequests([request]);
 			},
-			feedback: (event: Payload<FeedbackSchemaData>) => {
+			feedback: (event: Payload<ChatFeedbackSchemaData>) => {
 				const payload: ChatFeedbackRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					feedbackSchema: {
+					chatFeedbackSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -1485,12 +1485,12 @@ export function additionalRequestKeys(
 		| AddtocartSchema
 		| ShopperLoginSchema
 ): string {
-	let value = key;
+	let value = '';
 	value += `||${schema.context.pageLoadId}`;
 	value += `||${schema.context.sessionId}`;
 
 	if ((schema as ChatImpressionSchema | ChatAddtocartSchema).data?.chatSessionId) {
-		value += `||chatSessionId=${(schema as ChatImpressionSchema | ChatAddtocartSchema).data.chatSessionId}||responseId=${(schema as ImpressionSchema | RecommendationsImpressionSchema | RecommendationsAddtocartSchema | BundlesImpressionSchema | BundlesAddtocartSchema | AddtocartSchema).data.responseId}`;
+		value += `||chatSessionId=${(schema as ChatImpressionSchema | ChatAddtocartSchema).data.chatSessionId}||responseId=${(schema as ChatImpressionSchema | ChatAddtocartSchema).data.responseId}`;
 	} else if (
 		(
 			schema as
@@ -1508,7 +1508,7 @@ export function additionalRequestKeys(
 	}
 
 	if (type === 'recommendation' || type === 'bundle') {
-		value += `||tag=${(schema as RecommendationsImpressionSchema | BundlesImpressionSchema).data.tag}`;
+		value += `||tag=${(schema as RecommendationsImpressionSchema | RecommendationsAddtocartSchema | BundlesImpressionSchema | BundlesAddtocartSchema).data.tag}`;
 	}
 
 	return value;

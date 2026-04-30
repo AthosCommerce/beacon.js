@@ -16,9 +16,9 @@ import * as runtime from '../runtime';
 import type {
 	ChatAddtocartSchema,
 	ChatClickthroughSchema,
+	ChatFeedbackSchema,
 	ChatImpressionSchema,
 	ErrorResponseBody,
-	FeedbackSchema,
 	InlineObject,
 	InlineObject1,
 } from '../models/index';
@@ -27,12 +27,12 @@ import {
 	ChatAddtocartSchemaToJSON,
 	ChatClickthroughSchemaFromJSON,
 	ChatClickthroughSchemaToJSON,
+	ChatFeedbackSchemaFromJSON,
+	ChatFeedbackSchemaToJSON,
 	ChatImpressionSchemaFromJSON,
 	ChatImpressionSchemaToJSON,
 	ErrorResponseBodyFromJSON,
 	ErrorResponseBodyToJSON,
-	FeedbackSchemaFromJSON,
-	FeedbackSchemaToJSON,
 	InlineObjectFromJSON,
 	InlineObjectToJSON,
 	InlineObject1FromJSON,
@@ -51,7 +51,7 @@ export interface ChatClickthroughRequest {
 
 export interface ChatFeedbackRequest {
 	siteId: string;
-	feedbackSchema: FeedbackSchema;
+	chatFeedbackSchema: ChatFeedbackSchema;
 }
 
 export interface ChatImpressionRequest {
@@ -180,8 +180,11 @@ export class ChatApi extends runtime.BaseAPI {
 			throw new runtime.RequiredError('siteId', 'Required parameter "siteId" was null or undefined when calling chatFeedback().');
 		}
 
-		if (requestParameters['feedbackSchema'] == null) {
-			throw new runtime.RequiredError('feedbackSchema', 'Required parameter "feedbackSchema" was null or undefined when calling chatFeedback().');
+		if (requestParameters['chatFeedbackSchema'] == null) {
+			throw new runtime.RequiredError(
+				'chatFeedbackSchema',
+				'Required parameter "chatFeedbackSchema" was null or undefined when calling chatFeedback().'
+			);
 		}
 
 		const queryParameters: any = {};
@@ -199,7 +202,7 @@ export class ChatApi extends runtime.BaseAPI {
 				method: 'POST',
 				headers: headerParameters,
 				query: queryParameters,
-				body: FeedbackSchemaToJSON(requestParameters['feedbackSchema']),
+				body: ChatFeedbackSchemaToJSON(requestParameters['chatFeedbackSchema']),
 			},
 			initOverrides
 		);

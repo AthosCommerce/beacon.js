@@ -1603,7 +1603,7 @@ for (const { isAthos, siteId } of [
 
 					const baseKey = `${mockGlobals.siteId}||search`;
 					const key = additionalRequestKeys(baseKey, 'search', schema);
-					const expected = `${baseKey}||${pageLoadId}||${sessionId}||responseId=${responseId}`;
+					const expected = `||${pageLoadId}||${sessionId}||responseId=${responseId}`;
 					expect(key).toStrictEqual(expected);
 				});
 
@@ -1619,8 +1619,28 @@ for (const { isAthos, siteId } of [
 
 					const baseKey = `${mockGlobals.siteId}||recommendation`;
 					const key = additionalRequestKeys(baseKey, 'recommendation', schema);
-					const expected = `${baseKey}||${pageLoadId}||${sessionId}||responseId=${responseId}||tag=${tag}`;
+					const expected = `||${pageLoadId}||${sessionId}||responseId=${responseId}||tag=${tag}`;
 					expect(key).toStrictEqual(expected);
+				});
+
+				it('does not duplicate the base key when used with key += at call sites', () => {
+					const schema = {
+						context: mockContext,
+						data: mockData,
+					};
+					const { pageLoadId, sessionId } = schema.context;
+					const { responseId } = schema.data;
+
+					let key = `${mockGlobals.siteId}||searchImpression`;
+					key += additionalRequestKeys(key, 'search', schema);
+
+					const expected = `${mockGlobals.siteId}||searchImpression||${pageLoadId}||${sessionId}||responseId=${responseId}`;
+					expect(key).toStrictEqual(expected);
+
+					// ensure the base key appears exactly once
+					const baseKey = `${mockGlobals.siteId}||searchImpression`;
+					const occurrences = key.split(baseKey).length - 1;
+					expect(occurrences).toBe(1);
 				});
 			});
 

@@ -1,24 +1,25 @@
 
-# FeedbackSchema
+# ChatFeedbackSchemaData
 
+Event details
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`context` | [Context](Context.md)
-`data` | [FeedbackSchemaData](FeedbackSchemaData.md)
+`chatSessionId` | string
+`feedback` | boolean
 
 ## Example
 
 ```typescript
-import type { FeedbackSchema } from ''
+import type { ChatFeedbackSchemaData } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "context": null,
-  "data": null,
-} satisfies FeedbackSchema
+  "chatSessionId": null,
+  "feedback": null,
+} satisfies ChatFeedbackSchemaData
 
 console.log(example)
 
@@ -27,7 +28,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as FeedbackSchema
+const exampleParsed = JSON.parse(exampleJSON) as ChatFeedbackSchemaData
 console.log(exampleParsed)
 ```
 

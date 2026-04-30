@@ -35,6 +35,8 @@ docs/ChatAddtocartSchemaData.md
 docs/ChatApi.md
 docs/ChatClickthroughSchema.md
 docs/ChatClickthroughSchemaData.md
+docs/ChatFeedbackSchema.md
+docs/ChatFeedbackSchemaData.md
 docs/ChatImpressionSchema.md
 docs/ChatImpressionSchemaData.md
 docs/ChatResultProduct.md
@@ -51,8 +53,6 @@ docs/Context.md
 docs/Currency.md
 docs/ErrorLogsApi.md
 docs/ErrorResponseBody.md
-docs/FeedbackSchema.md
-docs/FeedbackSchemaData.md
 docs/ImpressionSchema.md
 docs/ImpressionSchemaData.md
 docs/InlineObject.md
@@ -115,6 +115,8 @@ models/ChatAddtocartSchema.ts
 models/ChatAddtocartSchemaData.ts
 models/ChatClickthroughSchema.ts
 models/ChatClickthroughSchemaData.ts
+models/ChatFeedbackSchema.ts
+models/ChatFeedbackSchemaData.ts
 models/ChatImpressionSchema.ts
 models/ChatImpressionSchemaData.ts
 models/ChatResultProduct.ts
@@ -130,8 +132,6 @@ models/ClickthroughSchemaData.ts
 models/Context.ts
 models/Currency.ts
 models/ErrorResponseBody.ts
-models/FeedbackSchema.ts
-models/FeedbackSchemaData.ts
 models/ImpressionSchema.ts
 models/ImpressionSchemaData.ts
 models/InlineObject.ts
