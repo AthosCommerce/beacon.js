@@ -35,7 +35,7 @@ async function example() {
   const body = {
     // string | Customer siteId found in the Athos Console or Athos Management Console
     siteId: siteId_example,
-    // RecommendationsAddtocartSchema | Recommendations payload
+    // RecommendationsAddtocartSchema | Add to cart payload
     recommendationsAddtocartSchema: ...,
   } satisfies RecommendationsAddtocartRequest;
 
@@ -57,7 +57,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **siteId** | `string` | Customer siteId found in the Athos Console or Athos Management Console | [Defaults to `undefined`] |
-| **recommendationsAddtocartSchema** | [RecommendationsAddtocartSchema](RecommendationsAddtocartSchema.md) | Recommendations payload | |
+| **recommendationsAddtocartSchema** | [RecommendationsAddtocartSchema](RecommendationsAddtocartSchema.md) | Add to cart payload | |
 
 ### Return type
 
@@ -111,7 +111,7 @@ async function example() {
   const body = {
     // string | Customer siteId found in the Athos Console or Athos Management Console
     siteId: siteId_example,
-    // RecommendationsClickthroughSchema | Recommendations payload
+    // RecommendationsClickthroughSchema | Clickthrough payload
     recommendationsClickthroughSchema: ...,
   } satisfies RecommendationsClickthroughRequest;
 
@@ -133,7 +133,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **siteId** | `string` | Customer siteId found in the Athos Console or Athos Management Console | [Defaults to `undefined`] |
-| **recommendationsClickthroughSchema** | [RecommendationsClickthroughSchema](RecommendationsClickthroughSchema.md) | Recommendations payload | |
+| **recommendationsClickthroughSchema** | [RecommendationsClickthroughSchema](RecommendationsClickthroughSchema.md) | Clickthrough payload | |
 
 ### Return type
 
@@ -187,7 +187,7 @@ async function example() {
   const body = {
     // string | Customer siteId found in the Athos Console or Athos Management Console
     siteId: siteId_example,
-    // RecommendationsImpressionSchema | Recommendations payload
+    // RecommendationsImpressionSchema | Impression payload
     recommendationsImpressionSchema: ...,
   } satisfies RecommendationsImpressionRequest;
 
@@ -209,7 +209,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **siteId** | `string` | Customer siteId found in the Athos Console or Athos Management Console | [Defaults to `undefined`] |
-| **recommendationsImpressionSchema** | [RecommendationsImpressionSchema](RecommendationsImpressionSchema.md) | Recommendations payload | |
+| **recommendationsImpressionSchema** | [RecommendationsImpressionSchema](RecommendationsImpressionSchema.md) | Impression payload | |
 
 ### Return type
 
@@ -263,7 +263,7 @@ async function example() {
   const body = {
     // string | Customer siteId found in the Athos Console or Athos Management Console
     siteId: siteId_example,
-    // RecommendationsRenderSchema | Recommendations payload
+    // RecommendationsRenderSchema | Render payload
     recommendationsRenderSchema: ...,
   } satisfies RecommendationsRenderRequest;
 
@@ -285,7 +285,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **siteId** | `string` | Customer siteId found in the Athos Console or Athos Management Console | [Defaults to `undefined`] |
-| **recommendationsRenderSchema** | [RecommendationsRenderSchema](RecommendationsRenderSchema.md) | Recommendations payload | |
+| **recommendationsRenderSchema** | [RecommendationsRenderSchema](RecommendationsRenderSchema.md) | Render payload | |
 
 ### Return type
 
