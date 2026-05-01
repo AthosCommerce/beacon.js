@@ -1275,79 +1275,79 @@ export class Beacon {
 				switch (request.endpoint) {
 					case 'recommendationsAddtocart': {
 						const recommendationsAddtocart = (request.payload as RecommendationsAddtocartRequest).recommendationsAddtocartSchema;
-						key += additionalRequestKeys(key, 'recommendation', recommendationsAddtocart);
+						key += additionalRequestKeys('recommendation', recommendationsAddtocart);
 						appendResults(acc, key, 'recommendationsAddtocartSchema', request);
 						break;
 					}
 					case 'recommendationsImpression': {
 						const recommendationsImpression = (request.payload as RecommendationsImpressionRequest).recommendationsImpressionSchema;
-						key += additionalRequestKeys(key, 'recommendation', recommendationsImpression);
+						key += additionalRequestKeys('recommendation', recommendationsImpression);
 						appendResults(acc, key, 'recommendationsImpressionSchema', request);
 						break;
 					}
 					case 'bundlesAddtocart': {
 						const bundlesAddtocart = (request.payload as BundlesAddtocartRequest).bundlesAddtocartSchema;
-						key += additionalRequestKeys(key, 'bundle', bundlesAddtocart);
+						key += additionalRequestKeys('bundle', bundlesAddtocart);
 						appendResults(acc, key, 'bundlesAddtocartSchema', request);
 						break;
 					}
 					case 'bundlesImpression': {
 						const bundlesImpression = (request.payload as BundlesImpressionRequest).bundlesImpressionSchema;
-						key += additionalRequestKeys(key, 'bundle', bundlesImpression);
+						key += additionalRequestKeys('bundle', bundlesImpression);
 						appendResults(acc, key, 'bundlesImpressionSchema', request);
 						break;
 					}
 					case 'chatAddtocart': {
 						const chatAddtocart = (request.payload as ChatAddtocartRequest).chatAddtocartSchema;
-						key += additionalRequestKeys(key, 'chat', chatAddtocart);
+						key += additionalRequestKeys('chat', chatAddtocart);
 						appendResults(acc, key, 'chatAddtocartSchema', request);
 						break;
 					}
 					case 'chatImpression': {
 						const chatImpression = (request.payload as ChatImpressionRequest).chatImpressionSchema;
-						key += additionalRequestKeys(key, 'chat', chatImpression);
+						key += additionalRequestKeys('chat', chatImpression);
 						appendResults(acc, key, 'chatImpressionSchema', request);
 						break;
 					}
 					case 'searchAddtocart': {
 						const searchAddtocart = (request.payload as SearchAddtocartRequest).addtocartSchema;
-						key += additionalRequestKeys(key, 'search', searchAddtocart);
+						key += additionalRequestKeys('search', searchAddtocart);
 						appendResults(acc, key, 'addtocartSchema', request);
 						break;
 					}
 					case 'searchImpression': {
 						const searchImpression = (request.payload as SearchImpressionRequest).impressionSchema;
-						key += additionalRequestKeys(key, 'search', searchImpression);
+						key += additionalRequestKeys('search', searchImpression);
 						appendResults(acc, key, 'impressionSchema', request);
 						break;
 					}
 					case 'autocompleteAddtocart': {
 						const autocompleteAddtocart = (request.payload as AutocompleteAddtocartRequest).addtocartSchema;
-						key += additionalRequestKeys(key, 'autocomplete', autocompleteAddtocart);
+						key += additionalRequestKeys('autocomplete', autocompleteAddtocart);
 						appendResults(acc, key, 'addtocartSchema', request);
 						break;
 					}
 					case 'autocompleteImpression': {
 						const autocompleteImpression = (request.payload as AutocompleteImpressionRequest).impressionSchema;
-						key += additionalRequestKeys(key, 'autocomplete', autocompleteImpression);
+						key += additionalRequestKeys('autocomplete', autocompleteImpression);
 						appendResults(acc, key, 'impressionSchema', request);
 						break;
 					}
 					case 'categoryAddtocart': {
 						const categoryAddtocart = (request.payload as CategoryAddtocartRequest).addtocartSchema;
-						key += additionalRequestKeys(key, 'category', categoryAddtocart);
+						key += additionalRequestKeys('category', categoryAddtocart);
 						appendResults(acc, key, 'addtocartSchema', request);
 						break;
 					}
 					case 'categoryImpression': {
 						const categoryImpression = (request.payload as CategoryImpressionRequest).impressionSchema;
-						key += additionalRequestKeys(key, 'category', categoryImpression);
+						key += additionalRequestKeys('category', categoryImpression);
 						appendResults(acc, key, 'impressionSchema', request);
 						break;
 					}
 					case 'login': {
 						const shopperLogin = (request.payload as LoginRequest).shopperLoginSchema;
-						key += additionalRequestKeys(key, 'shopper', shopperLogin);
+						key += additionalRequestKeys('shopper', shopperLogin);
 						appendResults(acc, key, 'shopperLoginSchema', request);
 						break;
 					}
@@ -1472,7 +1472,6 @@ export function appendResults(
 }
 
 export function additionalRequestKeys(
-	key: string,
 	type: 'search' | 'autocomplete' | 'category' | 'recommendation' | 'bundle' | 'chat' | 'shopper',
 	schema:
 		| ImpressionSchema

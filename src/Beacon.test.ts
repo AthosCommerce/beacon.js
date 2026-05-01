@@ -1601,8 +1601,7 @@ for (const { isAthos, siteId } of [
 					const { pageLoadId, sessionId } = context;
 					const { responseId } = data;
 
-					const baseKey = `${mockGlobals.siteId}||search`;
-					const key = additionalRequestKeys(baseKey, 'search', schema);
+					const key = additionalRequestKeys('search', schema);
 					const expected = `||${pageLoadId}||${sessionId}||responseId=${responseId}`;
 					expect(key).toStrictEqual(expected);
 				});
@@ -1617,8 +1616,7 @@ for (const { isAthos, siteId } of [
 					const { pageLoadId, sessionId } = context;
 					const { responseId, tag } = data;
 
-					const baseKey = `${mockGlobals.siteId}||recommendation`;
-					const key = additionalRequestKeys(baseKey, 'recommendation', schema);
+					const key = additionalRequestKeys('recommendation', schema);
 					const expected = `||${pageLoadId}||${sessionId}||responseId=${responseId}||tag=${tag}`;
 					expect(key).toStrictEqual(expected);
 				});
@@ -1632,7 +1630,7 @@ for (const { isAthos, siteId } of [
 					const { responseId } = schema.data;
 
 					let key = `${mockGlobals.siteId}||searchImpression`;
-					key += additionalRequestKeys(key, 'search', schema);
+					key += additionalRequestKeys('search', schema);
 
 					const expected = `${mockGlobals.siteId}||searchImpression||${pageLoadId}||${sessionId}||responseId=${responseId}`;
 					expect(key).toStrictEqual(expected);
