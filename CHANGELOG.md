@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.1](https://github.com/AthosCommerce/beacon.js/compare/v1.2.0...v1.2.1) (2026-05-01)
+
+
+### Bug Fixes
+
+* remove acl arg from s3 sync ([bfec7e6](https://github.com/AthosCommerce/beacon.js/commit/bfec7e65869821c63685a17b7b7feb02a98f36bf))
+
 ## [1.2.0](https://github.com/AthosCommerce/beacon.js/compare/v1.1.1...v1.2.0) (2026-05-01)
 
 
