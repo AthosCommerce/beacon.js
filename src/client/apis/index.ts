@@ -1,8 +1,10 @@
 /* tslint:disable */
 /* eslint-disable */
 export * from './AutocompleteApi';
+export * from './BundlesApi';
 export * from './CartApi';
 export * from './CategoryApi';
+export * from './ChatApi';
 export * from './ErrorLogsApi';
 export * from './MessagingRecommendationsApi';
 export * from './OrderApi';

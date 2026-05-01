@@ -8,7 +8,7 @@ This package can be used by both Athos Commerce and Searchspring accounts.
 
 ## Features
 
-- 🎯 **Multi-Channel Tracking**: Track events from search, autocomplete, recommendations, category pages, and product pages
+- 🎯 **Multi-Channel Tracking**: Track events from search, autocomplete, recommendations, bundles, chat, category pages, and product pages
 - 📦 **Smart Batching**: Automatically batches requests for optimal performance
 - 💾 **Local Storage Management**: Manages user IDs, session IDs, cart state, and viewed products
 - 🔍 **Attribution Tracking**: Built-in support for tracking attribution and campaign sources
@@ -525,6 +525,161 @@ window.athos.tracker.events.recommendations.clickThrough({
         sku: 'SKU-1'
       }
     ]
+  }
+});
+```
+
+### Bundles Events
+
+Bundles events track interactions with personalized product bundles.
+
+#### Render
+
+Track when a bundle set is rendered to the user.
+
+```typescript
+window.athos.tracker.events.bundles.render({ 
+  data: {
+    tag: 'pdp-bundles',
+    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a'
+  }
+});
+```
+
+#### Impression
+
+Track impressions of bundled products.
+
+```typescript
+window.athos.tracker.events.bundles.impression({ 
+  data: {
+    tag: 'pdp-bundles',
+    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    results: [
+      { type: 'product', uid: 'product-1', parentId: 'parent-1', sku: 'SKU-1' },
+      { type: 'product', uid: 'product-2', parentId: 'parent-2', sku: 'SKU-2' }
+    ],
+    banners: []
+  }
+});
+```
+
+#### Add to Cart
+
+Track when a user adds a bundled product to cart.
+
+```typescript
+window.athos.tracker.events.bundles.addToCart({ 
+  data: {
+    tag: 'pdp-bundles',
+    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    results: [
+      {
+        uid: 'product-1',
+        parentId: 'parent-1',
+        sku: 'SKU-1',
+        qty: 1,
+        price: 39.99
+      }
+    ]
+  }
+});
+```
+
+#### Click Through
+
+Track clicks on bundled products.
+
+```typescript
+window.athos.tracker.events.bundles.clickThrough({ 
+  data: {
+    tag: 'pdp-bundles',
+    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    results: [
+      {
+        type: 'product',
+        uid: 'product-1',
+        parentId: 'parent-1',
+        sku: 'SKU-1'
+      }
+    ]
+  }
+});
+```
+
+### Chat Events
+
+Chat events track interactions with products surfaced in a chat session. Each chat event requires a `chatSessionId` to associate the event with a specific shopper conversation.
+
+#### Impression
+
+Track impressions of products surfaced in chat results.
+
+```typescript
+window.athos.tracker.events.chat.impression({ 
+  data: {
+    chatSessionId: 'chat-session-12345',
+    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    results: [
+      { type: 'product', uid: 'product-1', parentId: 'parent-1', sku: 'SKU-1' },
+      { type: 'product', uid: 'product-2', parentId: 'parent-2', sku: 'SKU-2' }
+    ]
+  }
+});
+```
+
+#### Add to Cart
+
+Track when a user adds a product to cart from chat results.
+
+```typescript
+window.athos.tracker.events.chat.addToCart({ 
+  data: {
+    chatSessionId: 'chat-session-12345',
+    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    results: [
+      {
+        uid: 'product-1',
+        parentId: 'parent-1',
+        sku: 'SKU-1',
+        qty: 1,
+        price: 29.99
+      }
+    ]
+  }
+});
+```
+
+#### Click Through
+
+Track clicks on products surfaced in chat results.
+
+```typescript
+window.athos.tracker.events.chat.clickThrough({ 
+  data: {
+    chatSessionId: 'chat-session-12345',
+    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    results: [
+      {
+        type: 'product',
+        uid: 'product-1',
+        parentId: 'parent-1',
+        sku: 'SKU-1'
+      }
+    ]
+  }
+});
+```
+
+#### Feedback
+
+Track positive (true) or negative (false) shopper feedback on a chat session. 
+
+```typescript
+window.athos.tracker.events.chat.feedback({ 
+  data: {
+    chatSessionId: 'chat-session-12345',
+    feedback: true
   }
 });
 ```

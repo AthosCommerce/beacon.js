@@ -7,18 +7,18 @@ Contextual data about the event
 
 Name | Type
 ------------ | -------------
-`iP` | string
-`userAgent` | string
-`timestamp` | string
-`pageUrl` | string
-`userId` | string
-`sessionId` | string
-`pageLoadId` | string
-`shopperId` | string
 `initiator` | string
+`pageLoadId` | string
+`pageUrl` | string
+`sessionId` | string
+`timestamp` | string
+`userId` | string
 `attribution` | [Array&lt;AttributionInner&gt;](AttributionInner.md)
 `currency` | [Currency](Currency.md)
 `dev` | boolean
+`iP` | string
+`shopperId` | string
+`userAgent` | string
 
 ## Example
 
@@ -27,18 +27,18 @@ import type { Context } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "iP": null,
-  "userAgent": null,
-  "timestamp": null,
-  "pageUrl": null,
-  "userId": null,
-  "sessionId": null,
-  "pageLoadId": null,
-  "shopperId": null,
   "initiator": null,
+  "pageLoadId": null,
+  "pageUrl": null,
+  "sessionId": null,
+  "timestamp": null,
+  "userId": null,
   "attribution": null,
   "currency": null,
   "dev": null,
+  "iP": null,
+  "shopperId": null,
+  "userAgent": null,
 } satisfies Context
 
 console.log(example)
