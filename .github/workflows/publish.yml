@@ -54,7 +54,7 @@ jobs:
       - name: Copy Files to Athos S3
         shell: bash
         run: |
-          aws s3 sync --cache-control max-age=1800 --acl public-read dist/cdn s3://${{ secrets.ATHOS_SNAPFU_AWS_BUCKET }}/analytics
+          aws s3 sync --cache-control max-age=1800 dist/cdn s3://${{ secrets.ATHOS_SNAPFU_AWS_BUCKET }}/analytics
 
       - name: Invalidate Athos CDN Files
         shell: bash
