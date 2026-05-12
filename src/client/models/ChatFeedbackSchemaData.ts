@@ -26,12 +26,21 @@ export interface ChatFeedbackSchemaData {
 	 */
 	chatSessionId: string;
 	/**
-	 * Indicates whether the feedback is positive (true) or negative (false)
-	 * @type {boolean}
+	 * Indicates the feedback provided by the user
+	 * @type {string}
 	 * @memberof ChatFeedbackSchemaData
 	 */
-	feedback: boolean;
+	feedback: ChatFeedbackSchemaDataFeedbackEnum;
 }
+
+/**
+ * @export
+ */
+export const ChatFeedbackSchemaDataFeedbackEnum = {
+	Positive: 'positive',
+	Negative: 'negative',
+} as const;
+export type ChatFeedbackSchemaDataFeedbackEnum = (typeof ChatFeedbackSchemaDataFeedbackEnum)[keyof typeof ChatFeedbackSchemaDataFeedbackEnum];
 
 /**
  * Check if a given object implements the ChatFeedbackSchemaData interface.

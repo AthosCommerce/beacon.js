@@ -8,7 +8,7 @@ Event details
 Name | Type
 ------------ | -------------
 `chatSessionId` | string
-`feedback` | boolean
+`feedback` | string
 
 ## Example
 

@@ -10,7 +10,7 @@ import {
 	REQUEST_GROUPING_TIMEOUT,
 	USER_ID,
 } from './Beacon';
-import { Currency, ImpressionSchemaData, Product, ResultProductType } from './client';
+import { ChatFeedbackSchemaDataFeedbackEnum, Currency, ImpressionSchemaData, Product, ResultProductType } from './client';
 
 const resetAllCookies = () => {
 	const cookies = document.cookie.split(';');
@@ -761,10 +761,35 @@ for (const { isAthos, siteId } of [
 					expect(spy).toHaveBeenCalled();
 					expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 				});
-				it('can process feedback event', async () => {
+				it('can process positive feedback event', async () => {
 					const data = {
 						chatSessionId: 'test-chat-session-id',
-						feedback: true,
+						feedback: ChatFeedbackSchemaDataFeedbackEnum.Positive,
+					};
+
+					const fetchPayloadAssertion = {
+						...otherFetchParams,
+						body: {
+							data,
+							context: {
+								...beacon.getContext(),
+								timestamp: expect.any(String),
+							},
+						},
+					};
+
+					const spy = jest.spyOn(beacon['apis'].chat, 'chatFeedback');
+
+					beacon.events.chat.feedback({ data });
+					await flushPromises();
+
+					expect(spy).toHaveBeenCalled();
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
+				});
+				it('can process negative feedback event', async () => {
+					const data = {
+						chatSessionId: 'test-chat-session-id',
+						feedback: ChatFeedbackSchemaDataFeedbackEnum.Negative,
 					};
 
 					const fetchPayloadAssertion = {

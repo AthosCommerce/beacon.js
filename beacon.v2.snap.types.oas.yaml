@@ -2704,8 +2704,11 @@ components:
             chatSessionId:
               $ref: '#/components/schemas/chatSessionId'
             feedback:
-              type: boolean
-              description: Indicates whether the feedback is positive (true) or negative (false)
+              type: string
+              description: Indicates the feedback provided by the user
+              enum:
+                - positive
+                - negative
     chat.results:
       type: array
       description: List of tracked result(s). An empty array will indicate zero results were returned in the API response.
@@ -3502,7 +3505,7 @@ components:
           currency:
             code: USD
         data:
-          feedback: true
+          feedback: positive
           chatSessionId: 2b426n89-c33b-4222-952a-f17db745bh26
     chat.results-impression:
       value:
