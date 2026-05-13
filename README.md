@@ -673,13 +673,13 @@ window.athos.tracker.events.chat.clickThrough({
 
 #### Feedback
 
-Track positive (true) or negative (false) shopper feedback on a chat session. 
+Track 'positive' or 'negative' shopper feedback on a chat session. 
 
 ```typescript
 window.athos.tracker.events.chat.feedback({ 
   data: {
     chatSessionId: 'chat-session-12345',
-    feedback: true
+    feedback: ChatFeedbackSchemaDataFeedbackEnum.Positive, // 'positive',
   }
 });
 ```
