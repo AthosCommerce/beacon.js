@@ -16,50 +16,37 @@ This package can be used by both Athos Commerce and Searchspring accounts.
 - 🌍 **Multi-Currency**: Support for tracking transactions in different currencies
 - ⚡ **Production Ready**: Optimized for performance with features like keepalive requests and efficient batching
 
-## Installation
+## Usage Paths
 
-### CDN
+Beacon has two integration paths with the same tracking capabilities:
 
-To use the beacon via our CDN build, place the following script before the page's closing `</head>` tag:
+- CDN path: include the CDN script and call methods on the auto-created global `window.athos.tracker`.
+- NPM path: instantiate `Beacon` in your own application/runtime and call methods on your instance.
 
-```html
-<script siteId="[REPLACE WITH ATHOS OR SEARCHSPRING SITEID]" src="https://cdn.athoscommerce.net/analytics/beacon.js"></script>
-```
-
-The beacon will then be available for usage via `window.athos.tracker`
+### Quick Start: CDN
 
 ```html
+<script siteId="abc123" src="https://cdn.athoscommerce.net/analytics/beacon.js"></script>
 <script>
-  window.athos.tracker.events.search.render({ data: { responseId: '35e5ea31-a537-471b-ba2b-6eea9caebe62' }})
+  window.athos.tracker.setCurrency({ code: 'USD' });
+  window.athos.tracker.events.autocomplete.render({
+    data: {
+      responseId: '35e5ea31-a537-471b-ba2b-6eea9caebe62'
+    }
+  });
 </script>
 ```
 
-
-Utilizing this package via the CDN is preferred if you either:
-
-- plan on integrating Athos API and are not sending events directly to the beacon endpoint. 
-
-OR
-
-- You are actively developing an integration, however would like to start tracking events before going live with the integration. Note that after going live with a Snap integration, this beacon.js should be removed from the website, however the function calls can remain on the website. The Snap integration will publish an identical reference of this Beacon to the same path: `window.athos.tracker`.
-
-
-### NPM
-
-If you are integrating Athos via API instead of utilizing Snap, the `@athoscommerce/beacon` package is available to use for your convenience. 
-
-```bash
-npm install --save @athoscommerce/beacon
-```
+### Quick Start: NPM
 
 ```typescript
 import { Beacon } from '@athoscommerce/beacon';
 
 // Initialize Beacon with required siteId
-const beacon = new Beacon({ 
-  siteId: 'abc123',
-  currency: { code: 'USD' }
-});
+const beacon = new Beacon({ siteId: 'abc123' });
+
+// Optionally set currency for transaction tracking
+beacon.setCurrency({ code: 'USD' });
 
 // Track an autocomplete render event
 beacon.events.autocomplete.render({
@@ -72,19 +59,65 @@ beacon.events.autocomplete.render({
 beacon.events.product.pageView({
   data: {
     result: {
-      uid: 'product-123',
+      uid: 'variant-123',
       sku: 'SKU-123',
-      parentId: 'parent-123'
+      parentId: 'product-123'
     }
   }
 });
 ```
 
+Product events require `uid` and `parentId`; include `sku` when available from your API response. For parent/variant catalogs, use `parentId` as the parent product ID and `uid` as the variant ID. For simple products with no variants, set `uid` and `parentId` to the same value.
+
+## Installation
+
+### CDN
+
+To use the beacon via our CDN build, place the following script before the page's closing `</head>` tag:
+
+```html
+<script siteId="[REPLACE WITH ATHOS OR SEARCHSPRING SITEID]" src="https://cdn.athoscommerce.net/analytics/beacon.js"></script>
+```
+
+After this script executes successfully, `window.athos.tracker` is available for events and method calls.
+
+```html
+<script>
+  window.athos.tracker.events.search.render({ data: { responseId: '35e5ea31-a537-471b-ba2b-6eea9caebe62' } });
+</script>
+```
+
+The CDN install path is designed for platform template integrations (for example BigCommerce, Magento, or Shopify), where you add the script in storefront template/theme files.
+
+### NPM
+
+If you are integrating Athos via API, the `@athoscommerce/beacon` package is available to use for your convenience.
+
+```bash
+npm install --save @athoscommerce/beacon
+```
+
 ## Initialization
 
-### Beacon Globals
+### CDN Initialization
 
-The first parameter to the `Beacon` constructor contains required and optional global configuration that applies to all tracking events.
+When using the CDN script (`https://cdn.athoscommerce.net/analytics/beacon.js`), Beacon initializes automatically and assigns `window.athos.tracker`.
+
+Expected behavior:
+
+- Missing or unreadable `siteId` prevents initialization and logs an error.
+- If Snap tracking is already on the page, the script logs a warning and skips initialization.
+- If Beacon is included multiple times, the second initialization is ignored with a warning.
+
+Once initialized, use `window.athos.tracker` for all events and public methods.
+
+### NPM Initialization
+
+Use the `Beacon` constructor when integrating through the NPM package.
+
+#### Beacon Globals
+
+The first parameter to the `Beacon` constructor contains required global configuration that applies to all tracking events.
 
 ```typescript
 import { Beacon } from '@athoscommerce/beacon';
@@ -96,9 +129,9 @@ const beacon = new Beacon({ siteId: 'abc123' });
 |--------|------|-------------|----------|
 | `siteId` | `string` | Your Athos site ID | ✔️ |
 
-### Beacon Config
+#### Beacon Config
 
-The second parameter to the `Beacon` constructor provides optional configuration for API behavior and request handling.
+The second parameter to the `Beacon` constructor provides _optional_ configuration for API behavior and request handling.
 
 ```typescript
 const beacon = new Beacon(
@@ -128,11 +161,11 @@ const beacon = new Beacon(
 | Option | Type | Description | Default |
 |--------|------|-------------|---------|
 | `mode` | `'production' \| 'development'` | Application mode. In development mode, errors are logged to console | `'production'` |
-| `initiator` | `string` | Identifier for the beacon instance | `beaconjs/{version}` |
-| `apis.fetch` | `FetchAPI` | Custom fetch implementation | `window.fetch` |
-| `requesters.beacon.origin` | `string` | Custom beacon API endpoint | Auto-detected based on siteId |
+| `initiator` | `string` | Identifier for the beacon instance | `{athos\|searchspring}/beaconjs/{version}` |
+| `apis.fetch` | `FetchAPI` | Custom fetch implementation | Global `fetch` (if available) |
+| `requesters.beacon.origin` | `string` | Custom beacon API endpoint | Athos: `https://analytics.athoscommerce.net/beacon/v2`, Searchspring: `https://analytics.searchspring.net/beacon/v2` |
 | `requesters.beacon.headers` | `HTTPHeaders` | Custom headers for beacon API requests | `{ 'Content-Type': 'text/plain' }` |
-| `requesters.personalization.origin` | `string` | Custom personalization preflight endpoint | Auto-detected based on siteId |
+| `requesters.personalization.origin` | `string` | Custom personalization preflight origin (the SDK appends `/v1/preflight`) | `https://{siteId}.a.{athoscommerce.net\|searchspring.io}` |
 | `requesters.personalization.headers` | `HTTPHeaders` | Custom headers for personalization requests | |
 | `href` | `string` | Override page URL for tracking | `window.location.href` |
 | `userAgent` | `string` | Override user agent string | `navigator.userAgent` |
@@ -151,21 +184,21 @@ const response = {
   "merchandising": {...},
   "pagination": {...},
   "query": {...},
-  "responseId": "f70594d2-c360-4292-8711-b256567099d3"
+  "responseId": "f70594d2-c360-4292-8711-b256567099d3",
   "results": [...],
   "sorting": {...},
 }
 
-window.athos.tracker.events.search.render({ 
+beacon.events.search.render({ 
   data: {
     responseId: response.responseId,
   }
 });
 ```
 
-### Merchandising Banner uid
+### Merchandising Banner uid (Banner ID)
 
-When building the data payload for `banners`, the `uid` property is located within the Banner content. Here is an example of how you may choose to extract it.
+When building the data payload for `banners`, the `uid` property is the banner identifier from merchandising content (not a product `uid`). Here is an example of how you may choose to extract it.
 
 ```typescript
 // Search API Example Response
@@ -189,7 +222,7 @@ function getMerchandisingBannerUid(response, type) {
   const uid = match ? match[1] : '';
   return uid;
 }
-window.athos.tracker.events.search.impression({ 
+beacon.events.search.impression({ 
   data: {
     responseId: response.responseId,
     results: [],
@@ -203,7 +236,16 @@ window.athos.tracker.events.search.impression({
 
 ## Tracking Events
 
-The Beacon class provides a comprehensive event tracking system organized by feature area. Each event method accepts a payload object containing the event data. An optional `siteId` can be provided to override the global siteId for a specific event.
+Each event method accepts a payload object. An optional `siteId` can be provided to override the global siteId for a specific event.
+
+For product payloads, use `uid` as the variant/item identifier and `parentId` as the parent product identifier. For simple products with no variants, set `uid` and `parentId` to the same value. For banner payloads, `uid` refers to the banner identifier.
+
+Code samples below use a `beacon` variable — substitute the appropriate entrypoint:
+
+| Path | Entrypoint |
+|------|------------|
+| CDN | `const beacon = window.athos.tracker;` |
+| NPM | `const beacon = new Beacon({ siteId: 'abc123' });` |
 
 ### Shopper Events
 
@@ -212,7 +254,7 @@ The Beacon class provides a comprehensive event tracking system organized by fea
 Track when a user logs into their shopper account.
 
 ```typescript
-window.athos.tracker.events.shopper.login({ 
+beacon.events.shopper.login({ 
   data: { id: 'shopper-12345' }
 });
 ```
@@ -226,7 +268,7 @@ Autocomplete events track user interactions within the autocomplete/search sugge
 Track when autocomplete suggestions are rendered to the user.
 
 ```typescript
-window.athos.tracker.events.autocomplete.render({ 
+beacon.events.autocomplete.render({ 
   data: {
     responseId: response.responseId
   }
@@ -238,11 +280,11 @@ window.athos.tracker.events.autocomplete.render({
 Track impressions (visibility) of autocomplete suggestions.
 
 ```typescript
-window.athos.tracker.events.autocomplete.impression({ 
+beacon.events.autocomplete.impression({ 
   data: {
     responseId: response.responseId,
     results: [
-      { type: 'product', uid: 'product-1', parentId: 'parent-1', sku: 'SKU-1' },
+      { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1' },
       { type: 'banner', uid: 'banner-1' }
     ],
     banners: [
@@ -257,13 +299,13 @@ window.athos.tracker.events.autocomplete.impression({
 Track when a user adds a product to cart from autocomplete results.
 
 ```typescript
-window.athos.tracker.events.autocomplete.addToCart({ 
+beacon.events.autocomplete.addToCart({ 
   data: {
     responseId: response.responseId,
     results: [
       { 
-        uid: 'product-1', 
-        parentId: 'parent-1',
+        uid: 'variant-1', 
+        parentId: 'product-1',
         sku: 'SKU-1', 
         qty: 1, 
         price: 29.99 
@@ -280,14 +322,14 @@ This method automatically manages the stored cart state.
 Track when a user clicks on an autocomplete suggestion.
 
 ```typescript
-window.athos.tracker.events.autocomplete.clickThrough({ 
+beacon.events.autocomplete.clickThrough({ 
   data: {
     responseId: response.responseId,
     results: [
       { 
         type: 'product', 
-        uid: 'product-1', 
-        parentId: 'parent-1',
+        uid: 'variant-1', 
+        parentId: 'product-1',
         sku: 'SKU-1'
       }
     ]
@@ -301,7 +343,7 @@ Track when an autocomplete suggestion causes a page redirect.
 
 ```typescript
 const redirectUrl = response.merchandising?.redirect; // 'https://example.com/sale-page'
-window.athos.tracker.events.autocomplete.redirect({ 
+beacon.events.autocomplete.redirect({ 
   data: {
     redirect: redirectUrl,
     responseId: response.responseId
@@ -316,9 +358,9 @@ Search events track user interactions within search results pages.
 #### Render
 
 ```typescript
-window.athos.tracker.events.search.render({ 
+beacon.events.search.render({ 
   data: {
-    responseId: '607bafd1-f624-4e58-afa5-b8b8e90929f5'
+    responseId: response.responseId
   }
 });
 ```
@@ -326,12 +368,12 @@ window.athos.tracker.events.search.render({
 #### Impression
 
 ```typescript
-window.athos.tracker.events.search.impression({ 
+beacon.events.search.impression({ 
   data: {
-    responseId: '607bafd1-f624-4e58-afa5-b8b8e90929f5',
+    responseId: response.responseId,
     results: [
-      { type: 'product', uid: 'product-1', parentId: 'parent-1', sku: 'SKU-1' },
-      { type: 'product', uid: 'product-2', parentId: 'parent-2', sku: 'SKU-2' }
+      { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1' },
+      { type: 'product', uid: 'variant-2', parentId: 'product-2', sku: 'SKU-2' }
     ],
     banners: [{ uid: 'banner-1' }]
   }
@@ -341,13 +383,13 @@ window.athos.tracker.events.search.impression({
 #### Add to Cart
 
 ```typescript
-window.athos.tracker.events.search.addToCart({ 
+beacon.events.search.addToCart({ 
   data: {
-    responseId: '607bafd1-f624-4e58-afa5-b8b8e90929f5',
+    responseId: response.responseId,
     results: [
       { 
-        uid: 'product-1', 
-        parentId: 'parent-1',
+        uid: 'variant-1', 
+        parentId: 'product-1',
         sku: 'SKU-1', 
         qty: 1, 
         price: 29.99 
@@ -360,14 +402,14 @@ window.athos.tracker.events.search.addToCart({
 #### Click Through
 
 ```typescript
-window.athos.tracker.events.search.clickThrough({ 
+beacon.events.search.clickThrough({ 
   data: {
-    responseId: '607bafd1-f624-4e58-afa5-b8b8e90929f5',
+    responseId: response.responseId,
     results: [
       {
         type: 'product',
-        uid: 'product-1',
-        parentId: 'parent-1',
+        uid: 'variant-1',
+        parentId: 'product-1',
         sku: 'SKU-1'
       }
     ]
@@ -378,10 +420,10 @@ window.athos.tracker.events.search.clickThrough({
 #### Redirect
 
 ```typescript
-window.athos.tracker.events.search.redirect({ 
+beacon.events.search.redirect({ 
   data: {
     redirect: 'https://example.com/promo',
-    responseId: '607bafd1-f624-4e58-afa5-b8b8e90929f5'
+    responseId: response.responseId
   }
 });
 ```
@@ -393,9 +435,9 @@ Category events track user interactions on category/listing pages.
 #### Render
 
 ```typescript
-window.athos.tracker.events.category.render({ 
+beacon.events.category.render({ 
   data: {
-    responseId: '50c7aaf3-1909-43cd-8fff-a8e5c4452ddb'
+    responseId: response.responseId
   }
 });
 ```
@@ -403,11 +445,11 @@ window.athos.tracker.events.category.render({
 #### Impression
 
 ```typescript
-window.athos.tracker.events.category.impression({ 
+beacon.events.category.impression({ 
   data: {
-    responseId: '50c7aaf3-1909-43cd-8fff-a8e5c4452ddb',
+    responseId: response.responseId,
     results: [
-      { type: 'product', uid: 'product-1', parentId: 'parent-1', sku: 'SKU-1' }
+      { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1' }
     ],
     banners: []
   }
@@ -417,13 +459,13 @@ window.athos.tracker.events.category.impression({
 #### Add to Cart
 
 ```typescript
-window.athos.tracker.events.category.addToCart({ 
+beacon.events.category.addToCart({ 
   data: {
-    responseId: '50c7aaf3-1909-43cd-8fff-a8e5c4452ddb',
+    responseId: response.responseId,
     results: [
       {
-        uid: 'product-1',
-        parentId: 'parent-1',
+        uid: 'variant-1',
+        parentId: 'product-1',
         sku: 'SKU-1',
         qty: 1,
         price: 49.99
@@ -436,14 +478,14 @@ window.athos.tracker.events.category.addToCart({
 #### Click Through
 
 ```typescript
-window.athos.tracker.events.category.clickThrough({ 
+beacon.events.category.clickThrough({ 
   data: {
-    responseId: '50c7aaf3-1909-43cd-8fff-a8e5c4452ddb',
+    responseId: response.responseId,
     results: [
       {
         type: 'product',
-        uid: 'product-1',
-        parentId: 'parent-1',
+        uid: 'variant-1',
+        parentId: 'product-1',
         sku: 'SKU-1'
       }
     ]
@@ -460,10 +502,10 @@ Recommendations events track interactions with personalized product recommendati
 Track when a recommendation set is rendered to the user.
 
 ```typescript
-window.athos.tracker.events.recommendations.render({ 
+beacon.events.recommendations.render({ 
   data: {
     tag: 'homepage-recommendations',
-    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a'
+    responseId: response.responseId
   }
 });
 ```
@@ -473,13 +515,13 @@ window.athos.tracker.events.recommendations.render({
 Track impressions of recommended products.
 
 ```typescript
-window.athos.tracker.events.recommendations.impression({ 
+beacon.events.recommendations.impression({ 
   data: {
     tag: 'homepage-recommendations',
-    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    responseId: response.responseId,
     results: [
-      { type: 'product', uid: 'product-1', parentId: 'parent-1', sku: 'SKU-1' },
-      { type: 'product', uid: 'product-2', parentId: 'parent-2', sku: 'SKU-2' }
+      { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1' },
+      { type: 'product', uid: 'variant-2', parentId: 'product-2', sku: 'SKU-2' }
     ],
     banners: []
   }
@@ -491,14 +533,14 @@ window.athos.tracker.events.recommendations.impression({
 Track when a user adds a recommended product to cart.
 
 ```typescript
-window.athos.tracker.events.recommendations.addToCart({ 
+beacon.events.recommendations.addToCart({ 
   data: {
     tag: 'homepage-recommendations',
-    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    responseId: response.responseId,
     results: [
       {
-        uid: 'product-1',
-        parentId: 'parent-1',
+        uid: 'variant-1',
+        parentId: 'product-1',
         sku: 'SKU-1',
         qty: 1,
         price: 39.99
@@ -513,15 +555,15 @@ window.athos.tracker.events.recommendations.addToCart({
 Track clicks on recommended products.
 
 ```typescript
-window.athos.tracker.events.recommendations.clickThrough({ 
+beacon.events.recommendations.clickThrough({ 
   data: {
     tag: 'homepage-recommendations',
-    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    responseId: response.responseId,
     results: [
       {
         type: 'product',
-        uid: 'product-1',
-        parentId: 'parent-1',
+        uid: 'variant-1',
+        parentId: 'product-1',
         sku: 'SKU-1'
       }
     ]
@@ -538,10 +580,10 @@ Bundles events track interactions with personalized product bundles.
 Track when a bundle set is rendered to the user.
 
 ```typescript
-window.athos.tracker.events.bundles.render({ 
+beacon.events.bundles.render({ 
   data: {
     tag: 'pdp-bundles',
-    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a'
+    responseId: response.responseId
   }
 });
 ```
@@ -551,13 +593,13 @@ window.athos.tracker.events.bundles.render({
 Track impressions of bundled products.
 
 ```typescript
-window.athos.tracker.events.bundles.impression({ 
+beacon.events.bundles.impression({ 
   data: {
     tag: 'pdp-bundles',
-    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    responseId: response.responseId,
     results: [
-      { type: 'product', uid: 'product-1', parentId: 'parent-1', sku: 'SKU-1' },
-      { type: 'product', uid: 'product-2', parentId: 'parent-2', sku: 'SKU-2' }
+      { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1' },
+      { type: 'product', uid: 'variant-2', parentId: 'product-2', sku: 'SKU-2' }
     ],
     banners: []
   }
@@ -569,14 +611,14 @@ window.athos.tracker.events.bundles.impression({
 Track when a user adds a bundled product to cart.
 
 ```typescript
-window.athos.tracker.events.bundles.addToCart({ 
+beacon.events.bundles.addToCart({ 
   data: {
     tag: 'pdp-bundles',
-    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    responseId: response.responseId,
     results: [
       {
-        uid: 'product-1',
-        parentId: 'parent-1',
+        uid: 'variant-1',
+        parentId: 'product-1',
         sku: 'SKU-1',
         qty: 1,
         price: 39.99
@@ -591,15 +633,15 @@ window.athos.tracker.events.bundles.addToCart({
 Track clicks on bundled products.
 
 ```typescript
-window.athos.tracker.events.bundles.clickThrough({ 
+beacon.events.bundles.clickThrough({ 
   data: {
     tag: 'pdp-bundles',
-    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    responseId: response.responseId,
     results: [
       {
         type: 'product',
-        uid: 'product-1',
-        parentId: 'parent-1',
+        uid: 'variant-1',
+        parentId: 'product-1',
         sku: 'SKU-1'
       }
     ]
@@ -616,13 +658,13 @@ Chat events track interactions with products surfaced in a chat session. Each ch
 Track impressions of products surfaced in chat results.
 
 ```typescript
-window.athos.tracker.events.chat.impression({ 
+beacon.events.chat.impression({ 
   data: {
     chatSessionId: 'chat-session-12345',
-    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    responseId: response.responseId,
     results: [
-      { type: 'product', uid: 'product-1', parentId: 'parent-1', sku: 'SKU-1' },
-      { type: 'product', uid: 'product-2', parentId: 'parent-2', sku: 'SKU-2' }
+      { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1' },
+      { type: 'product', uid: 'variant-2', parentId: 'product-2', sku: 'SKU-2' }
     ]
   }
 });
@@ -633,14 +675,14 @@ window.athos.tracker.events.chat.impression({
 Track when a user adds a product to cart from chat results.
 
 ```typescript
-window.athos.tracker.events.chat.addToCart({ 
+beacon.events.chat.addToCart({ 
   data: {
     chatSessionId: 'chat-session-12345',
-    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    responseId: response.responseId,
     results: [
       {
-        uid: 'product-1',
-        parentId: 'parent-1',
+        uid: 'variant-1',
+        parentId: 'product-1',
         sku: 'SKU-1',
         qty: 1,
         price: 29.99
@@ -655,15 +697,15 @@ window.athos.tracker.events.chat.addToCart({
 Track clicks on products surfaced in chat results.
 
 ```typescript
-window.athos.tracker.events.chat.clickThrough({ 
+beacon.events.chat.clickThrough({ 
   data: {
     chatSessionId: 'chat-session-12345',
-    responseId: '1a304980-27d4-4f4b-96cc-758b280dfa7a',
+    responseId: response.responseId,
     results: [
       {
         type: 'product',
-        uid: 'product-1',
-        parentId: 'parent-1',
+        uid: 'variant-1',
+        parentId: 'product-1',
         sku: 'SKU-1'
       }
     ]
@@ -676,10 +718,10 @@ window.athos.tracker.events.chat.clickThrough({
 Track 'positive' or 'negative' shopper feedback on a chat session. 
 
 ```typescript
-window.athos.tracker.events.chat.feedback({ 
+beacon.events.chat.feedback({ 
   data: {
     chatSessionId: 'chat-session-12345',
-    feedback: ChatFeedbackSchemaDataFeedbackEnum.Positive, // 'positive',
+    feedback: 'positive' // or ChatFeedbackSchemaDataFeedbackEnum.Positive for TypeScript
   }
 });
 ```
@@ -691,11 +733,11 @@ window.athos.tracker.events.chat.feedback({
 Track product page views. This automatically updates the viewed products history.
 
 ```typescript
-window.athos.tracker.events.product.pageView({ 
+beacon.events.product.pageView({ 
   data: {
     result: {
-      uid: 'product-123',
-      parentId: 'parent-123',
+      uid: 'variant-123',
+      parentId: 'product-123',
       sku: 'SKU-123'
     }
   }
@@ -709,12 +751,12 @@ window.athos.tracker.events.product.pageView({
 Track when products are added to the cart.
 
 ```typescript
-window.athos.tracker.events.cart.add({ 
+beacon.events.cart.add({ 
   data: {
     results: [
       { 
-        uid: 'product-1', 
-        parentId: 'parent-1',
+        uid: 'variant-1', 
+        parentId: 'product-1',
         sku: 'SKU-1', 
         qty: 1, 
         price: 29.99 
@@ -722,15 +764,15 @@ window.athos.tracker.events.cart.add({
     ],
     cart: [
       { 
-        uid: 'product-1', 
-        parentId: 'parent-1',
+        uid: 'variant-1', 
+        parentId: 'product-1',
         sku: 'SKU-1', 
         qty: 1, 
         price: 29.99 
       },
       { 
-        uid: 'product-2', 
-        parentId: 'parent-2',
+        uid: 'variant-2', 
+        parentId: 'product-2',
         sku: 'SKU-2', 
         qty: 2, 
         price: 19.99 
@@ -747,15 +789,15 @@ The cart state is automatically managed and synchronized with storage.
 Track when products are removed from the cart.
 
 ```typescript
-window.athos.tracker.events.cart.remove({ 
+beacon.events.cart.remove({ 
   data: {
     results: [
-      { uid: 'product-1', parentId: 'parent-1', sku: 'SKU-1', qty: 1 }
+      { uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1', qty: 1, price: 29.99 }
     ],
     cart: [
       { 
-        uid: 'product-2', 
-        parentId: 'parent-2',
+        uid: 'variant-2', 
+        parentId: 'product-2',
         sku: 'SKU-2', 
         qty: 2, 
         price: 19.99 
@@ -772,7 +814,7 @@ window.athos.tracker.events.cart.remove({
 Track completed transactions/orders.
 
 ```typescript
-window.athos.tracker.events.order.transaction({ 
+beacon.events.order.transaction({ 
   data: {
     orderId: 'order-12345',
     transactionTotal: 119.97,
@@ -783,15 +825,15 @@ window.athos.tracker.events.order.transaction({
     country: 'US',
     results: [
       { 
-        uid: 'product-1', 
-        parentId: 'parent-1',
+        uid: 'variant-1', 
+        parentId: 'product-1',
         sku: 'SKU-1', 
         qty: 2, 
         price: 29.99 
       },
       { 
-        uid: 'product-2', 
-        parentId: 'parent-2',
+        uid: 'variant-2', 
+        parentId: 'product-2',
         sku: 'SKU-2', 
         qty: 1, 
         price: 60.00 
@@ -810,7 +852,7 @@ This method automatically clears the stored cart after tracking the transaction.
 Track errors from Shopify pixel implementations.
 
 ```typescript
-window.athos.tracker.events.error.shopifypixel({ 
+beacon.events.error.shopifypixel({ 
   data: {
     message: 'Product not found',
     stack: 'Error: Product not found\n  at fetchProduct (app.js:45)',
@@ -827,7 +869,7 @@ window.athos.tracker.events.error.shopifypixel({
 Track errors from SNAP implementations.
 
 ```typescript
-window.athos.tracker.events.error.snap({ 
+beacon.events.error.snap({ 
   data: {
     message: 'Failed to load recommendations',
     stack: 'Error: Network timeout\n  at loadRecs (snap.js:120)',
@@ -842,7 +884,7 @@ window.athos.tracker.events.error.snap({
 
 ## Storage Management
 
-Beacon automatically manages local storage and cookies to maintain user state across sessions. This includes:
+Beacon automatically manages local storage and cookies to maintain user state across sessions. The storage API is the same for both integration paths — `beacon` from your NPM instance or `window.athos.tracker` from CDN.
 
 - **User IDs**: Persisted for 18 months
 - **Session IDs**: Persisted for 30 minutes
@@ -860,17 +902,17 @@ const cartItems = beacon.storage.cart.get();
 
 // Set cart to specific items
 beacon.storage.cart.set([
-  { uid: 'p1', sku: 'SKU-1', qty: 2, price: 29.99 }
+  { uid: 'variant-1-blue-m', parentId: 'product-1', sku: 'SKU-1', qty: 2, price: 29.99 }
 ]);
 
 // Add items to cart
 beacon.storage.cart.add([
-  { uid: 'p2', sku: 'SKU-2', qty: 1, price: 19.99 }
+  { uid: 'variant-2-red-l', parentId: 'product-2', sku: 'SKU-2', qty: 1, price: 19.99 }
 ]);
 
 // Remove items from cart
 beacon.storage.cart.remove([
-  { uid: 'p1', sku: 'SKU-1', qty: 1 }
+  { uid: 'variant-1-blue-m', parentId: 'product-1', sku: 'SKU-1', qty: 1, price: 29.99 }
 ]);
 
 // Clear cart
@@ -887,25 +929,24 @@ const viewedItems = beacon.storage.viewed.get();
 
 // Set viewed products
 beacon.storage.viewed.set([
-  { uid: 'p1', sku: 'SKU-1' }
+  { uid: 'variant-1-blue-m', parentId: 'product-1', sku: 'SKU-1' }
 ]);
 
 // Add to viewed products
 beacon.storage.viewed.add([
-  { uid: 'p2', sku: 'SKU-2' }
+  { uid: 'variant-2-red-l', parentId: 'product-2', sku: 'SKU-2' }
 ]);
 ```
 
 ## Public API Methods
+
+The methods below are available on both integration paths. In these examples, `beacon` can be either your NPM instance or `window.athos.tracker` when using CDN.
 
 ### `setCurrency(currency: Currency)`
 
 Set or change the currency for tracking transactions.
 
 ```typescript
-const beacon = new Beacon({ siteId: 'abc123' });
-
-// Set currency if not provided in globals
 beacon.setCurrency({ code: 'EUR' });
 ```
 
@@ -968,7 +1009,7 @@ const shopperId = beacon.getShopperId();
 
 #### `setShopperId(shopperId: string): string | void`
 
-Set the shopper ID and triggers both a login event to the beacon and preflight request for personalization.
+Sets the shopper ID, triggers a login event to the beacon, and sends a preflight request for personalization.
 
 ```typescript
 const result = beacon.setShopperId('shopper-12345');
@@ -1017,40 +1058,13 @@ beacon.sendPreflight({
 
 ### `generateId(): string`
 
-Generate and returns a new UUID. 
+Generates and returns a new UUID.
 
 ```typescript
 const id = beacon.generateId();
 ```
 
 ## Advanced Usage
-
-### Custom Fetch Implementation
-
-For environments where the standard `fetch` API is unavailable or needs to be customized (e.g., adding authentication, request interception), provide a custom fetch implementation:
-
-```typescript
-// Custom fetch that adds authentication
-const customFetch = async (url, options) => {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...options.headers,
-      'Authorization': `Bearer ${token}`
-    }
-  });
-  return response;
-};
-
-const beacon = new Beacon(
-  { siteId: 'abc123' },
-  {
-    apis: {
-      fetch: customFetch
-    }
-  }
-);
-```
 
 ### Custom API Endpoints
 
@@ -1074,20 +1088,18 @@ const beacon = new Beacon(
 );
 ```
 
-
 ### Single Page Application (SPA) Support
 
 For single-page applications, generate a new page load ID when the page/view changes:
 
 ```typescript
 // On navigation
-const newPageLoadId = beacon.pageLoad();
-console.log('New page load:', newPageLoadId);
+beacon.pageLoad();
 
 // Track that we're now viewing a new product
-window.athos.tracker.events.product.pageView({ 
+beacon.events.product.pageView({ 
   data: { 
-    result: { uid: 'new-product', sku: 'SKU-123' }
+    result: { uid: 'variant-123', sku: 'SKU-123', parentId: 'product-123' }
   }
 });
 ```
@@ -1101,17 +1113,19 @@ Update tracking context dynamically as user behavior or application state change
 beacon.updateContext('pageUrl', window.location.href);
 ```
 
-
 ### Attribution Tracking
 
-Attribution is automatically captured from url parameters (ie. https://example.com/products?athos_attribution=email:campaign-123) and will be placed on the beacon context.
+Attribution data is automatically captured from the `athos_attribution` URL parameter and included in every tracking event's context. No manual configuration is required.
 
+```
+https://example.com/products?athos_attribution=email:campaign-123
+```
 
-## Error Handling
+The value format is `channel:campaign-id`. Use `beacon.getContext()` to inspect the current attribution state.
 
-### Development Mode
+## Development Mode
 
-Enabling development mode will prevent beacon events from appearing in reports in the Athos console.
+Enabling development mode prevents beacon events from appearing in reports in the Athos console.
 
 ```typescript
 const beacon = new Beacon(
