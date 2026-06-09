@@ -26,6 +26,7 @@ describe('CDN bootstrap', () => {
 	};
 
 	afterAll(() => {
+		delete (document as any).currentScript;
 		if (originalCurrentScriptDescriptor) {
 			Object.defineProperty(document, 'currentScript', originalCurrentScriptDescriptor);
 		}

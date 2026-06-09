@@ -11,8 +11,10 @@ const scriptEl = document.currentScript as HTMLScriptElement;
 if (scriptEl) {
 	try {
 		const context = getContext(['siteId', 'siteid', 'config'], scriptEl);
-		const rawSiteId = context.siteId ?? context.siteid;
-		const siteId = typeof rawSiteId === 'string' ? rawSiteId.trim().toLowerCase() : '';
+		const rawSiteId = [context.siteId, context.siteid].find(
+			(value) => typeof value === 'string' && value.trim().length > 0
+		);
+		const siteId = rawSiteId ? rawSiteId.trim().toLowerCase() : '';
 		const config: BeaconConfigCDN = context.config || {};
 		const initiator = `${typeof config.initiator === 'string' ? config.initiator : ''}`.trim().toLowerCase();
 		let initializeBeacon = true;
