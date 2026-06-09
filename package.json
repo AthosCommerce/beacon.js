@@ -1,6 +1,6 @@
 {
   "name": "@athoscommerce/beacon",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "author": "athoscommerce",
   "license": "MIT",
   "description": "Javascript library for utilizing Athos Commerce beacon tracking.",
