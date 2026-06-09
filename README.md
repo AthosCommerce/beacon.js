@@ -91,7 +91,7 @@ The CDN install path is designed for platform template integrations (for example
 
 ### NPM
 
-If you are integrating Athos via API, the `@athoscommerce/beacon` package is available to use for your convenience.
+If you are integrating Athos or Searchspring via API, the `@athoscommerce/beacon` package is available to use for your convenience.
 
 ```bash
 npm install --save @athoscommerce/beacon
