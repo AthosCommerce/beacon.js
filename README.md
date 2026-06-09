@@ -18,7 +18,7 @@ This package can be used by both Athos Commerce and Searchspring accounts.
 
 ## Usage Paths
 
-Beacon has two integration paths with the same tracking capabilities:
+Beacon.js has two integration paths with the same tracking capabilities:
 
 - CDN path: include the CDN script and call methods on the auto-created global `window.athos.tracker`.
 - NPM path: instantiate `Beacon` in your own application/runtime and call methods on your instance.
@@ -26,7 +26,7 @@ Beacon has two integration paths with the same tracking capabilities:
 ### Quick Start: CDN
 
 ```html
-<script siteId="abc123" src="https://cdn.athoscommerce.net/analytics/beacon.js"></script>
+<script siteId="[REPLACE WITH ACCOUNT SITEID]" src="https://cdn.athoscommerce.net/analytics/beacon.js"></script>
 <script>
   window.athos.tracker.setCurrency({ code: 'USD' });
   window.athos.tracker.events.autocomplete.render({
@@ -37,13 +37,15 @@ Beacon has two integration paths with the same tracking capabilities:
 </script>
 ```
 
+Replace `siteId` with your Athos or Searchspring site ID before deploying.
+
 ### Quick Start: NPM
 
 ```typescript
 import { Beacon } from '@athoscommerce/beacon';
 
 // Initialize Beacon with required siteId
-const beacon = new Beacon({ siteId: 'abc123' });
+const beacon = new Beacon({ siteId: '[REPLACE WITH ACCOUNT SITEID]' });
 
 // Optionally set currency for transaction tracking
 beacon.setCurrency({ code: 'USD' });
@@ -66,6 +68,8 @@ beacon.events.product.pageView({
   }
 });
 ```
+
+Replace `siteId` with your Athos or Searchspring site ID before deploying.
 
 Product events require `uid` and `parentId`; include `sku` when available from your API response. For parent/variant catalogs, use `parentId` as the parent product ID and `uid` as the variant ID. For simple products with no variants, set `uid` and `parentId` to the same value.
 
@@ -91,7 +95,7 @@ The CDN install path is designed for platform template integrations (for example
 
 ### NPM
 
-If you are integrating Athos or Searchspring via API, the `@athoscommerce/beacon` package is available to use for your convenience.
+Use the NPM package when your integration runs in a JavaScript/TypeScript application and you want Beacon imported directly into your codebase. This path gives you typed imports, versioned dependency management, and build-time integration with your existing tooling.
 
 ```bash
 npm install --save @athoscommerce/beacon
