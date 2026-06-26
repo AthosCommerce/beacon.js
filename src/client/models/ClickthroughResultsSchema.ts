@@ -39,6 +39,12 @@ export interface ClickthroughResultsSchema {
 	 * @memberof ClickthroughResultsSchema
 	 */
 	results: Array<ClickthroughResultsInner>;
+	/**
+	 * Indicates whether the event originated from a quick view popup or a regular page
+	 * @type {boolean}
+	 * @memberof ClickthroughResultsSchema
+	 */
+	quickView?: boolean;
 }
 
 /**
@@ -61,6 +67,7 @@ export function ClickthroughResultsSchemaFromJSONTyped(json: any, ignoreDiscrimi
 	return {
 		responseId: json['responseId'],
 		results: (json['results'] as Array<any>).map(ClickthroughResultsInnerFromJSON),
+		quickView: json['quickView'] == null ? undefined : json['quickView'],
 	};
 }
 
@@ -76,5 +83,6 @@ export function ClickthroughResultsSchemaToJSONTyped(value?: ClickthroughResults
 	return {
 		responseId: value['responseId'],
 		results: (value['results'] as Array<any>).map(ClickthroughResultsInnerToJSON),
+		quickView: value['quickView'],
 	};
 }

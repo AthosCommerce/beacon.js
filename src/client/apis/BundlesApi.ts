@@ -226,7 +226,7 @@ export class BundlesApi extends runtime.BaseAPI {
 	}
 
 	/**
-	 * <i>/beacon/v2/{siteId}/bundles/render</i><br><br>Shopper navigates to a page where Athos Commerce personalized bundles are requested from the [Personalized Bundles API endpoint](https://docs.searchspring.com/reference/get-bundles) and rendered on the page.
+	 * <i>/beacon/v2/{siteId}/bundles/render</i><br><br>Shopper navigates to a page where Athos Commerce personalized bundles are requested from Personalized Bundles API endpoint and rendered on the page.
 	 * render
 	 */
 	async bundlesRenderRaw(
@@ -268,7 +268,7 @@ export class BundlesApi extends runtime.BaseAPI {
 	}
 
 	/**
-	 * <i>/beacon/v2/{siteId}/bundles/render</i><br><br>Shopper navigates to a page where Athos Commerce personalized bundles are requested from the [Personalized Bundles API endpoint](https://docs.searchspring.com/reference/get-bundles) and rendered on the page.
+	 * <i>/beacon/v2/{siteId}/bundles/render</i><br><br>Shopper navigates to a page where Athos Commerce personalized bundles are requested from Personalized Bundles API endpoint and rendered on the page.
 	 * render
 	 */
 	async bundlesRender(requestParameters: BundlesRenderRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InlineObject> {

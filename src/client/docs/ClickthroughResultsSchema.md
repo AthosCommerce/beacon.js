@@ -8,6 +8,7 @@ Name | Type
 ------------ | -------------
 `responseId` | string
 `results` | [Array&lt;ClickthroughResultsInner&gt;](ClickthroughResultsInner.md)
+`quickView` | boolean
 
 ## Example
 
@@ -18,6 +19,7 @@ import type { ClickthroughResultsSchema } from ''
 const example = {
   "responseId": null,
   "results": null,
+  "quickView": null,
 } satisfies ClickthroughResultsSchema
 
 console.log(example)

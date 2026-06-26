@@ -13,95 +13,97 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ResultProductType } from './ResultProductType';
-import {
-	ResultProductTypeFromJSON,
-	ResultProductTypeFromJSONTyped,
-	ResultProductTypeToJSON,
-	ResultProductTypeToJSONTyped,
-} from './ResultProductType';
 import type { SearchType } from './SearchType';
 import { SearchTypeFromJSON, SearchTypeFromJSONTyped, SearchTypeToJSON, SearchTypeToJSONTyped } from './SearchType';
 
 /**
- * Describes a tracked result.
+ * Product details
  * @export
- * @interface ResultProduct
+ * @interface SearchAddtocartProduct
  */
-export interface ResultProduct {
-	/**
-	 *
-	 * @type {ResultProductType}
-	 * @memberof ResultProduct
-	 */
-	type: ResultProductType;
+export interface SearchAddtocartProduct {
 	/**
 	 * Unique product identifier of the parent product interacted with
 	 * @type {string}
-	 * @memberof ResultProduct
+	 * @memberof SearchAddtocartProduct
 	 */
 	parentId: string;
 	/**
 	 * Unique product identifier of the product interacted with
 	 * @type {string}
-	 * @memberof ResultProduct
+	 * @memberof SearchAddtocartProduct
 	 */
 	uid: string;
 	/**
 	 * SKU of the product interacted with
 	 * @type {string}
-	 * @memberof ResultProduct
+	 * @memberof SearchAddtocartProduct
 	 */
 	sku?: string;
 	/**
+	 * Quantity of the item
+	 * @type {number}
+	 * @memberof SearchAddtocartProduct
+	 */
+	qty: number;
+	/**
+	 * Price of individual item
+	 * @type {number}
+	 * @memberof SearchAddtocartProduct
+	 */
+	price: number;
+	/**
 	 *
 	 * @type {SearchType}
-	 * @memberof ResultProduct
+	 * @memberof SearchAddtocartProduct
 	 */
 	searchType?: SearchType;
 }
 
 /**
- * Check if a given object implements the ResultProduct interface.
+ * Check if a given object implements the SearchAddtocartProduct interface.
  */
-export function instanceOfResultProduct(value: object): value is ResultProduct {
-	if (!('type' in value) || value['type'] === undefined) return false;
+export function instanceOfSearchAddtocartProduct(value: object): value is SearchAddtocartProduct {
 	if (!('parentId' in value) || value['parentId'] === undefined) return false;
 	if (!('uid' in value) || value['uid'] === undefined) return false;
+	if (!('qty' in value) || value['qty'] === undefined) return false;
+	if (!('price' in value) || value['price'] === undefined) return false;
 	return true;
 }
 
-export function ResultProductFromJSON(json: any): ResultProduct {
-	return ResultProductFromJSONTyped(json, false);
+export function SearchAddtocartProductFromJSON(json: any): SearchAddtocartProduct {
+	return SearchAddtocartProductFromJSONTyped(json, false);
 }
 
-export function ResultProductFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResultProduct {
+export function SearchAddtocartProductFromJSONTyped(json: any, ignoreDiscriminator: boolean): SearchAddtocartProduct {
 	if (json == null) {
 		return json;
 	}
 	return {
-		type: ResultProductTypeFromJSON(json['type']),
 		parentId: json['parentId'],
 		uid: json['uid'],
 		sku: json['sku'] == null ? undefined : json['sku'],
+		qty: json['qty'],
+		price: json['price'],
 		searchType: json['searchType'] == null ? undefined : SearchTypeFromJSON(json['searchType']),
 	};
 }
 
-export function ResultProductToJSON(json: any): ResultProduct {
-	return ResultProductToJSONTyped(json, false);
+export function SearchAddtocartProductToJSON(json: any): SearchAddtocartProduct {
+	return SearchAddtocartProductToJSONTyped(json, false);
 }
 
-export function ResultProductToJSONTyped(value?: ResultProduct | null, ignoreDiscriminator: boolean = false): any {
+export function SearchAddtocartProductToJSONTyped(value?: SearchAddtocartProduct | null, ignoreDiscriminator: boolean = false): any {
 	if (value == null) {
 		return value;
 	}
 
 	return {
-		type: ResultProductTypeToJSON(value['type']),
 		parentId: value['parentId'],
 		uid: value['uid'],
 		sku: value['sku'],
+		qty: value['qty'],
+		price: value['price'],
 		searchType: SearchTypeToJSON(value['searchType']),
 	};
 }

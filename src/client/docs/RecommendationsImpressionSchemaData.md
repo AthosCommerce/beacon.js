@@ -11,6 +11,7 @@ Name | Type
 `responseId` | string
 `results` | [Array&lt;ResultsInner&gt;](ResultsInner.md)
 `banners` | [Array&lt;BannersInner&gt;](BannersInner.md)
+`quickView` | boolean
 
 ## Example
 
@@ -23,6 +24,7 @@ const example = {
   "responseId": null,
   "results": null,
   "banners": null,
+  "quickView": null,
 } satisfies RecommendationsImpressionSchemaData
 
 console.log(example)

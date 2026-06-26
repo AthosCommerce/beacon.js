@@ -237,6 +237,59 @@ beacon.events.search.impression({
 });
 ```
 
+### quickView
+
+A quick view is a popup or modal that previews a product without navigating away to its full product page. Set the optional `quickView` flag to `true` on an event's `data` payload when the interaction happened inside a quick view popup, so reporting can attribute it separately from regular page interactions.
+
+The flag is supported on the `impression`, `addToCart`, and `clickThrough` events of the `autocomplete`, `search`, `category`, `recommendations`, and `bundles` channels. It is optional — omit it (or set it to `false`) for interactions that occur on a regular page.
+
+```typescript
+// Example: a click on a product surfaced inside a search quick view popup
+beacon.events.search.clickThrough({ 
+  data: {
+    responseId: response.responseId,
+    quickView: true,
+    results: [
+      {
+        type: 'product',
+        uid: 'variant-1',
+        parentId: 'product-1',
+        sku: 'SKU-1'
+      }
+    ]
+  }
+});
+```
+
+### searchType
+
+`searchType` is an optional, per-product field that records which search method produced a result. Add it to individual product results when tracking search events so reporting can attribute interactions to the underlying search type. The value typically comes from the Search API response.
+
+| Value | Description |
+|-----------|-------------|
+| `keyword` | Traditional keyword/text search |
+| `vector` | Vector (semantic) search |
+| `hybrid` | Combined keyword and vector search |
+
+It is supported on the product results of the `search` `impression`, `clickThrough`, and `addToCart` events.
+
+```typescript
+beacon.events.search.clickThrough({ 
+  data: {
+    responseId: response.responseId,
+    results: [
+      {
+        type: 'product',
+        uid: 'variant-1',
+        parentId: 'product-1',
+        sku: 'SKU-1',
+        searchType: 'hybrid' // or SearchType.Hybrid for TypeScript
+      }
+    ]
+  }
+});
+```
+
 
 ## Tracking Events
 

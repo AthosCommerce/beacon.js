@@ -1,29 +1,24 @@
 
-# ClickthroughSchemaData
+# SearchAddtocartSchema
 
-Event details
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`responseId` | string
-`results` | [Array&lt;ClickthroughResultsInner&gt;](ClickthroughResultsInner.md)
-`quickView` | boolean
-`banners` | [Array&lt;ClickthroughBannersInner&gt;](ClickthroughBannersInner.md)
+`context` | [Context](Context.md)
+`data` | [SearchAddtocartSchemaData](SearchAddtocartSchemaData.md)
 
 ## Example
 
 ```typescript
-import type { ClickthroughSchemaData } from ''
+import type { SearchAddtocartSchema } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "responseId": null,
-  "results": null,
-  "quickView": null,
-  "banners": null,
-} satisfies ClickthroughSchemaData
+  "context": null,
+  "data": null,
+} satisfies SearchAddtocartSchema
 
 console.log(example)
 
@@ -32,7 +27,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as ClickthroughSchemaData
+const exampleParsed = JSON.parse(exampleJSON) as SearchAddtocartSchema
 console.log(exampleParsed)
 ```
 

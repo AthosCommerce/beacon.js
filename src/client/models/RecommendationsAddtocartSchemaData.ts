@@ -40,6 +40,12 @@ export interface RecommendationsAddtocartSchemaData {
 	 * @memberof RecommendationsAddtocartSchemaData
 	 */
 	results: Array<Product>;
+	/**
+	 * Indicates whether the event originated from a quick view popup or a regular page
+	 * @type {boolean}
+	 * @memberof RecommendationsAddtocartSchemaData
+	 */
+	quickView?: boolean;
 }
 
 /**
@@ -64,6 +70,7 @@ export function RecommendationsAddtocartSchemaDataFromJSONTyped(json: any, ignor
 		responseId: json['responseId'],
 		tag: json['tag'],
 		results: (json['results'] as Array<any>).map(ProductFromJSON),
+		quickView: json['quickView'] == null ? undefined : json['quickView'],
 	};
 }
 
@@ -83,5 +90,6 @@ export function RecommendationsAddtocartSchemaDataToJSONTyped(
 		responseId: value['responseId'],
 		tag: value['tag'],
 		results: (value['results'] as Array<any>).map(ProductToJSON),
+		quickView: value['quickView'],
 	};
 }

@@ -40,6 +40,12 @@ export interface BundlesAddtocartSchemaData {
 	 * @memberof BundlesAddtocartSchemaData
 	 */
 	results: Array<Product>;
+	/**
+	 * Indicates whether the event originated from a quick view popup or a regular page
+	 * @type {boolean}
+	 * @memberof BundlesAddtocartSchemaData
+	 */
+	quickView?: boolean;
 }
 
 /**
@@ -64,6 +70,7 @@ export function BundlesAddtocartSchemaDataFromJSONTyped(json: any, ignoreDiscrim
 		responseId: json['responseId'],
 		tag: json['tag'],
 		results: (json['results'] as Array<any>).map(ProductFromJSON),
+		quickView: json['quickView'] == null ? undefined : json['quickView'],
 	};
 }
 
@@ -80,5 +87,6 @@ export function BundlesAddtocartSchemaDataToJSONTyped(value?: BundlesAddtocartSc
 		responseId: value['responseId'],
 		tag: value['tag'],
 		results: (value['results'] as Array<any>).map(ProductToJSON),
+		quickView: value['quickView'],
 	};
 }

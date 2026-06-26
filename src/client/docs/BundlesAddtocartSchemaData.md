@@ -10,6 +10,7 @@ Name | Type
 `responseId` | string
 `tag` | string
 `results` | [Array&lt;Product&gt;](Product.md)
+`quickView` | boolean
 
 ## Example
 
@@ -21,6 +22,7 @@ const example = {
   "responseId": null,
   "tag": null,
   "results": null,
+  "quickView": null,
 } satisfies BundlesAddtocartSchemaData
 
 console.log(example)
