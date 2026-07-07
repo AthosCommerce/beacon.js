@@ -12,7 +12,6 @@ Name | Type
 `sku` | string
 `qty` | number
 `price` | number
-`searchType` | [SearchType](SearchType.md)
 
 ## Example
 
@@ -26,7 +25,6 @@ const example = {
   "sku": null,
   "qty": null,
   "price": null,
-  "searchType": null,
 } satisfies SearchAddtocartProduct
 
 console.log(example)

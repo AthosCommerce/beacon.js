@@ -2312,13 +2312,6 @@ components:
       enum:
         - product
         - banner
-    searchType:
-      type: string
-      description: Search type of the search performed
-      enum:
-        - hybrid
-        - keyword
-        - vector
     result.product:
       title: Product Result
       type: object
@@ -2336,8 +2329,6 @@ components:
           $ref: '#/components/schemas/uid'
         sku:
           $ref: '#/components/schemas/sku'
-        searchType:
-          $ref: '#/components/schemas/searchType'
     result.resultBanner:
       title: Product Result Banner
       type: object
@@ -2987,8 +2978,6 @@ components:
           $ref: '#/components/schemas/qty'
         price:
           $ref: '#/components/schemas/price'
-        searchType:
-          $ref: '#/components/schemas/searchType'
     search.addtocartSchema:
       type: object
       required:

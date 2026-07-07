@@ -13,9 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { SearchType } from './SearchType';
-import { SearchTypeFromJSON, SearchTypeFromJSONTyped, SearchTypeToJSON, SearchTypeToJSONTyped } from './SearchType';
-
 /**
  * Product details
  * @export
@@ -52,12 +49,6 @@ export interface SearchAddtocartProduct {
 	 * @memberof SearchAddtocartProduct
 	 */
 	price: number;
-	/**
-	 *
-	 * @type {SearchType}
-	 * @memberof SearchAddtocartProduct
-	 */
-	searchType?: SearchType;
 }
 
 /**
@@ -85,7 +76,6 @@ export function SearchAddtocartProductFromJSONTyped(json: any, ignoreDiscriminat
 		sku: json['sku'] == null ? undefined : json['sku'],
 		qty: json['qty'],
 		price: json['price'],
-		searchType: json['searchType'] == null ? undefined : SearchTypeFromJSON(json['searchType']),
 	};
 }
 
@@ -104,6 +94,5 @@ export function SearchAddtocartProductToJSONTyped(value?: SearchAddtocartProduct
 		sku: value['sku'],
 		qty: value['qty'],
 		price: value['price'],
-		searchType: SearchTypeToJSON(value['searchType']),
 	};
 }

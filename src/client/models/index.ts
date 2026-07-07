@@ -72,7 +72,6 @@ export * from './ResultsInner';
 export * from './SearchAddtocartProduct';
 export * from './SearchAddtocartSchema';
 export * from './SearchAddtocartSchemaData';
-export * from './SearchType';
 export * from './ShopperContext';
 export * from './ShopperLoginSchema';
 export * from './ValidationErrorWithDataField';

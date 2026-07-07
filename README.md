@@ -261,36 +261,6 @@ beacon.events.search.clickThrough({
 });
 ```
 
-### searchType
-
-`searchType` is an optional, per-product field that records which search method produced a result. Add it to individual product results when tracking search events so reporting can attribute interactions to the underlying search type. The value typically comes from the Search API response.
-
-| Value | Description |
-|-----------|-------------|
-| `keyword` | Traditional keyword/text search |
-| `vector` | Vector (semantic) search |
-| `hybrid` | Combined keyword and vector search |
-
-It is supported on the product results of the `search` `impression`, `clickThrough`, and `addToCart` events.
-
-```typescript
-beacon.events.search.clickThrough({ 
-  data: {
-    responseId: response.responseId,
-    results: [
-      {
-        type: 'product',
-        uid: 'variant-1',
-        parentId: 'product-1',
-        sku: 'SKU-1',
-        searchType: 'hybrid' // or SearchType.Hybrid for TypeScript
-      }
-    ]
-  }
-});
-```
-
-
 ## Tracking Events
 
 Each event method accepts a payload object. An optional `siteId` can be provided to override the global siteId for a specific event.

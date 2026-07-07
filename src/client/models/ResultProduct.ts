@@ -20,8 +20,6 @@ import {
 	ResultProductTypeToJSON,
 	ResultProductTypeToJSONTyped,
 } from './ResultProductType';
-import type { SearchType } from './SearchType';
-import { SearchTypeFromJSON, SearchTypeFromJSONTyped, SearchTypeToJSON, SearchTypeToJSONTyped } from './SearchType';
 
 /**
  * Describes a tracked result.
@@ -53,12 +51,6 @@ export interface ResultProduct {
 	 * @memberof ResultProduct
 	 */
 	sku?: string;
-	/**
-	 *
-	 * @type {SearchType}
-	 * @memberof ResultProduct
-	 */
-	searchType?: SearchType;
 }
 
 /**
@@ -84,7 +76,6 @@ export function ResultProductFromJSONTyped(json: any, ignoreDiscriminator: boole
 		parentId: json['parentId'],
 		uid: json['uid'],
 		sku: json['sku'] == null ? undefined : json['sku'],
-		searchType: json['searchType'] == null ? undefined : SearchTypeFromJSON(json['searchType']),
 	};
 }
 
@@ -102,6 +93,5 @@ export function ResultProductToJSONTyped(value?: ResultProduct | null, ignoreDis
 		parentId: value['parentId'],
 		uid: value['uid'],
 		sku: value['sku'],
-		searchType: SearchTypeToJSON(value['searchType']),
 	};
 }
