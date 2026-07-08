@@ -3002,12 +3002,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3024,12 +3024,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3044,12 +3044,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3062,12 +3062,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3093,12 +3093,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3123,12 +3123,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3142,16 +3142,16 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
-          redirect: https://bocachica.com/collections/all-shirts
+          redirect: https://versawearco.myshopify.com/collections/all-shirts
           responseId: a907d0ad-720a-4666-b046-00c0c28fb78d
     render:
       value:
@@ -3159,12 +3159,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3175,12 +3175,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://versawearco.myshopify.com/collections/mens/products/adventure-shorts-pitch-black
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           attribution:
             - type: email
               id: '1234567890'
@@ -3201,12 +3201,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3222,12 +3222,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3241,12 +3241,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://versawearco.myshopify.com/collections/mens/products/adventure-shorts-pitch-black
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           attribution:
             - type: email
               id: '1234567890'
@@ -3282,12 +3282,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://versawearco.myshopify.com/collections/mens/products/adventure-shorts-pitch-black
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           attribution:
             - type: email
               id: '1234567890'
@@ -3322,12 +3322,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://versawearco.myshopify.com/collections/mens/products/adventure-shorts-pitch-black
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           attribution:
             - type: email
               id: '1234567890'
@@ -3345,12 +3345,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://versawearco.myshopify.com/collections/mens/products/adventure-shorts-pitch-black
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           attribution:
             - type: email
               id: '1234567890'
@@ -3365,12 +3365,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/cart
+          pageUrl: https://versawearco.myshopify.com/cart
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 41f87850-c33b-4222-952a-f17db729ea31
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3394,12 +3394,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/cart
+          pageUrl: https://versawearco.myshopify.com/cart
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 41f87850-c33b-4222-952a-f17db729ea31
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3419,12 +3419,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3440,12 +3440,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3460,12 +3460,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/womens
+          pageUrl: https://versawearco.myshopify.com/collections/womens
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3476,12 +3476,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3498,12 +3498,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3519,12 +3519,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3536,12 +3536,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3594,12 +3594,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://www.bocachica.com/login
+          pageUrl: https://versawearco.myshopify.com/login
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 41f87850-c33b-4222-952a-f17db729ea31
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           attribution:
             - type: test
               id: '1234567890'
@@ -3625,12 +3625,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://www.bocachica.com/login
+          pageUrl: https://versawearco.myshopify.com/login
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 41f87850-c33b-4222-952a-f17db729ea31
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           attribution:
             - type: test
               id: '1234567890'
@@ -3656,12 +3656,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/order/confirmation
+          pageUrl: https://versawearco.myshopify.com/order/confirmation
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 41f87850-c33b-4222-952a-f17db729ea31
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3687,12 +3687,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://versawearco.myshopify.com/collections/mens/products/adventure-shorts-pitch-black
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 41f87850-c33b-4222-952a-f17db729ea31
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3705,12 +3705,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://versawearco.myshopify.com/collections/mens/products/adventure-shorts-pitch-black
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           attribution:
             - type: email
               id: '1234567890'
@@ -3730,12 +3730,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3751,12 +3751,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3770,12 +3770,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://versawearco.myshopify.com/collections/mens/products/adventure-shorts-pitch-black
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           attribution:
             - type: email
               id: '1234567890'
@@ -3811,12 +3811,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://versawearco.myshopify.com/collections/mens/products/adventure-shorts-pitch-black
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           attribution:
             - type: email
               id: '1234567890'
@@ -3851,12 +3851,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://versawearco.myshopify.com/collections/mens/products/adventure-shorts-pitch-black
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           attribution:
             - type: email
               id: '1234567890'
@@ -3874,12 +3874,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/collections/mens/products/adventure-shorts-pitch-black
+          pageUrl: https://versawearco.myshopify.com/collections/mens/products/adventure-shorts-pitch-black
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           attribution:
             - type: email
               id: '1234567890'
@@ -3894,12 +3894,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3915,16 +3915,16 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
-          redirect: https://bocachica.com/collections/all-shirts
+          redirect: https://versawearco.myshopify.com/collections/all-shirts
           responseId: 0217acd9-540c-48f3-bd6d-e23128e99fa8
     examples_components-examples-render:
       value:
@@ -3932,12 +3932,12 @@ components:
           IP: 89.76.6.25
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2006-01-02T15:04:05Z'
-          pageUrl: https://bocachica.com/collections/shop?q=shirt&view=products
+          pageUrl: https://versawearco.myshopify.com/collections/shop?q=shirt&view=products
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
         data:
@@ -3948,12 +3948,12 @@ components:
           IP: 7309:1fdb:e0d5:7632:7f2a:c269:7519:991b
           userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36
           timestamp: '2024-06-11T17:47:04.075876Z'
-          pageUrl: https://bocachica.com/login
+          pageUrl: https://versawearco.myshopify.com/login
           userId: 41f87850-65f5-4546-851c-f166109e57b9
           sessionId: 1c311c14-c33b-4222-952a-f17db729ea31
           pageLoadId: 080d179f-0034-4278-8d3c-dfba71c9b897
           shopperId: user123456
-          initiator: athoscommerce/snap/preact/0.49.1
+          initiator: athos/snap/preact/1.7.0
           currency:
             code: USD
   responses:
