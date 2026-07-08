@@ -14,7 +14,7 @@ All URIs are relative to *https://analytics.athoscommerce.net/beacon/v2*
 
 ## searchAddtocart
 
-> InlineObject searchAddtocart(siteId, searchAddtocartSchema)
+> InlineObject searchAddtocart(siteId, addtocartSchema)
 
 addtocart
 
@@ -36,8 +36,8 @@ async function example() {
   const body = {
     // string | Customer siteId found in the Athos Console or Athos Management Console
     siteId: siteId_example,
-    // SearchAddtocartSchema | Add to cart payload
-    searchAddtocartSchema: ...,
+    // AddtocartSchema | Add to cart payload
+    addtocartSchema: ...,
   } satisfies SearchAddtocartRequest;
 
   try {
@@ -58,7 +58,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **siteId** | `string` | Customer siteId found in the Athos Console or Athos Management Console | [Defaults to `undefined`] |
-| **searchAddtocartSchema** | [SearchAddtocartSchema](SearchAddtocartSchema.md) | Add to cart payload | |
+| **addtocartSchema** | [AddtocartSchema](AddtocartSchema.md) | Add to cart payload | |
 
 ### Return type
 

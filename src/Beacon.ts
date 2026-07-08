@@ -61,7 +61,6 @@ import {
 	BundlesAddtocartSchema,
 	ChatImpressionSchema,
 	ChatAddtocartSchema,
-	SearchAddtocartSchemaData,
 } from './client';
 import {
 	AutocompleteAddtocartRequest,
@@ -613,14 +612,14 @@ export class Beacon {
 				const request = this.createRequest('search', 'searchImpression', payload);
 				this.queueRequest(request);
 			},
-			addToCart: (event: Payload<SearchAddtocartSchemaData>) => {
+			addToCart: (event: Payload<AddtocartSchemaData>) => {
 				if (event.data.results) {
 					this.storage.cart.add(event.data.results);
 				}
 
 				const payload: SearchAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					searchAddtocartSchema: {
+					addtocartSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -1311,9 +1310,9 @@ export class Beacon {
 						break;
 					}
 					case 'searchAddtocart': {
-						const searchAddtocart = (request.payload as SearchAddtocartRequest).searchAddtocartSchema;
+						const searchAddtocart = (request.payload as SearchAddtocartRequest).addtocartSchema;
 						key += additionalRequestKeys('search', searchAddtocart);
-						appendResults(acc, key, 'searchAddtocartSchema', request);
+						appendResults(acc, key, 'addtocartSchema', request);
 						break;
 					}
 					case 'searchImpression': {

@@ -1738,14 +1738,14 @@ paths:
           text/plain:
             schema:
               title: Search Addtocart Schema
-              $ref: '#/components/schemas/search.addtocartSchema'
+              $ref: '#/components/schemas/addtocartSchema'
             examples:
               addtocart example:
                 $ref: '#/components/examples/examples_components-examples-addtocart'
           application/json:
             schema:
               title: Search Addtocart Schema
-              $ref: '#/components/schemas/search.addtocartSchema'
+              $ref: '#/components/schemas/addtocartSchema'
             examples:
               addtocart example:
                 $ref: '#/components/examples/examples_components-examples-addtocart'
@@ -2959,50 +2959,6 @@ components:
               $ref: '#/components/schemas/profile.tag'
             responseId:
               $ref: '#/components/schemas/responseId'
-    search.addtocart.product:
-      type: object
-      description: Product details
-      required:
-        - parentId
-        - uid
-        - qty
-        - price
-      properties:
-        parentId:
-          $ref: '#/components/schemas/parentId'
-        uid:
-          $ref: '#/components/schemas/uid'
-        sku:
-          $ref: '#/components/schemas/sku'
-        qty:
-          $ref: '#/components/schemas/qty'
-        price:
-          $ref: '#/components/schemas/price'
-    search.addtocartSchema:
-      type: object
-      required:
-        - context
-        - data
-      properties:
-        context:
-          $ref: '#/components/schemas/context'
-        data:
-          type: object
-          title: Search Addtocart Schema Data
-          description: Event details
-          required:
-            - responseId
-            - results
-          properties:
-            responseId:
-              $ref: '#/components/schemas/responseId'
-            results:
-              type: array
-              description: Products added to the cart
-              items:
-                $ref: '#/components/schemas/search.addtocart.product'
-            quickView:
-              $ref: '#/components/schemas/quickView'
     shopper.context:
       type: object
       description: Contextual data about the shopper event
