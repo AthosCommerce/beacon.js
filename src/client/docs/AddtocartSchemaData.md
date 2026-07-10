@@ -9,6 +9,7 @@ Name | Type
 ------------ | -------------
 `responseId` | string
 `results` | [Array&lt;Product&gt;](Product.md)
+`quickView` | boolean
 
 ## Example
 
@@ -19,6 +20,7 @@ import type { AddtocartSchemaData } from ''
 const example = {
   "responseId": null,
   "results": null,
+  "quickView": null,
 } satisfies AddtocartSchemaData
 
 console.log(example)

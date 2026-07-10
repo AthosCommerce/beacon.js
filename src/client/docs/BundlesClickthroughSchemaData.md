@@ -10,6 +10,7 @@ Name | Type
 `tag` | string
 `responseId` | string
 `results` | [Array&lt;ClickthroughResultsInner&gt;](ClickthroughResultsInner.md)
+`quickView` | boolean
 `banners` | [Array&lt;ClickthroughBannersInner&gt;](ClickthroughBannersInner.md)
 
 ## Example
@@ -22,6 +23,7 @@ const example = {
   "tag": null,
   "responseId": null,
   "results": null,
+  "quickView": null,
   "banners": null,
 } satisfies BundlesClickthroughSchemaData
 

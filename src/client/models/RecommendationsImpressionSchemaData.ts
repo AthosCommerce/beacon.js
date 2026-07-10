@@ -48,6 +48,12 @@ export interface RecommendationsImpressionSchemaData {
 	 * @memberof RecommendationsImpressionSchemaData
 	 */
 	banners: Array<BannersInner>;
+	/**
+	 * Indicates whether the event originated from a quick view popup or a regular page
+	 * @type {boolean}
+	 * @memberof RecommendationsImpressionSchemaData
+	 */
+	quickView?: boolean;
 }
 
 /**
@@ -73,6 +79,7 @@ export function RecommendationsImpressionSchemaDataFromJSONTyped(json: any, igno
 		responseId: json['responseId'],
 		results: json['results'] == null ? undefined : (json['results'] as Array<any>).map(ResultsInnerFromJSON),
 		banners: (json['banners'] as Array<any>).map(BannersInnerFromJSON),
+		quickView: json['quickView'] == null ? undefined : json['quickView'],
 	};
 }
 
@@ -93,5 +100,6 @@ export function RecommendationsImpressionSchemaDataToJSONTyped(
 		responseId: value['responseId'],
 		results: value['results'] == null ? undefined : (value['results'] as Array<any>).map(ResultsInnerToJSON),
 		banners: (value['banners'] as Array<any>).map(BannersInnerToJSON),
+		quickView: value['quickView'],
 	};
 }
