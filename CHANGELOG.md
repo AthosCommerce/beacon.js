@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/AthosCommerce/beacon.js/compare/v1.2.3...v1.3.0) (2026-07-10)
+
+
+### Features
+
+* update to latest spec to include quickview and searchType ([bcf664d](https://github.com/AthosCommerce/beacon.js/commit/bcf664db5036cdb808afe891762d7d6df4b1b56f))
+
 ### [1.2.3](https://github.com/AthosCommerce/beacon.js/compare/v1.2.2...v1.2.3) (2026-06-09)
 
 
