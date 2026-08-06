@@ -1,31 +1,21 @@
 
-# ResultProduct
+# SearchType
 
-Describes a tracked result.
+Search type of the search performed
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`type` | [ResultProductType](ResultProductType.md)
-`parentId` | string
-`uid` | string
-`sku` | string
-`searchType` | [SearchType](SearchType.md)
 
 ## Example
 
 ```typescript
-import type { ResultProduct } from ''
+import type { SearchType } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "type": null,
-  "parentId": null,
-  "uid": null,
-  "sku": null,
-  "searchType": null,
-} satisfies ResultProduct
+} satisfies SearchType
 
 console.log(example)
 
@@ -34,7 +24,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as ResultProduct
+const exampleParsed = JSON.parse(exampleJSON) as SearchType
 console.log(exampleParsed)
 ```
 

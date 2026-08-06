@@ -1,31 +1,33 @@
 
-# ResultProduct
+# SearchAddtocartProduct
 
-Describes a tracked result.
+Product details
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`type` | [ResultProductType](ResultProductType.md)
 `parentId` | string
 `uid` | string
 `sku` | string
+`qty` | number
+`price` | number
 `searchType` | [SearchType](SearchType.md)
 
 ## Example
 
 ```typescript
-import type { ResultProduct } from ''
+import type { SearchAddtocartProduct } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "type": null,
   "parentId": null,
   "uid": null,
   "sku": null,
+  "qty": null,
+  "price": null,
   "searchType": null,
-} satisfies ResultProduct
+} satisfies SearchAddtocartProduct
 
 console.log(example)
 
@@ -34,7 +36,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as ResultProduct
+const exampleParsed = JSON.parse(exampleJSON) as SearchAddtocartProduct
 console.log(exampleParsed)
 ```
 

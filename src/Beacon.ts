@@ -20,6 +20,8 @@ import {
 	RecommendationsApi,
 	RecommendationsClickthroughRequest,
 	RecommendationsImpressionRequest,
+	SearchAddtocartSchema,
+	SearchAddtocartSchemaData,
 	SearchApi,
 	SearchClickthroughRequest,
 	SearchImpressionRequest,
@@ -612,14 +614,14 @@ export class Beacon {
 				const request = this.createRequest('search', 'searchImpression', payload);
 				this.queueRequest(request);
 			},
-			addToCart: (event: Payload<AddtocartSchemaData>) => {
+			addToCart: (event: Payload<SearchAddtocartSchemaData>) => {
 				if (event.data.results) {
 					this.storage.cart.add(event.data.results);
 				}
 
 				const payload: SearchAddtocartRequest = {
 					siteId: event?.siteId || this.globals.siteId,
-					addtocartSchema: {
+					searchAddtocartSchema: {
 						context: this.getContext(),
 						data: event.data,
 					},
@@ -1310,9 +1312,9 @@ export class Beacon {
 						break;
 					}
 					case 'searchAddtocart': {
-						const searchAddtocart = (request.payload as SearchAddtocartRequest).addtocartSchema;
+						const searchAddtocart = (request.payload as SearchAddtocartRequest).searchAddtocartSchema;
 						key += additionalRequestKeys('search', searchAddtocart);
-						appendResults(acc, key, 'addtocartSchema', request);
+						appendResults(acc, key, 'searchAddtocartSchema', request);
 						break;
 					}
 					case 'searchImpression': {
@@ -1482,6 +1484,7 @@ export function additionalRequestKeys(
 		| ChatImpressionSchema
 		| ChatAddtocartSchema
 		| AddtocartSchema
+		| SearchAddtocartSchema
 		| ShopperLoginSchema
 ): string {
 	let value = '';
@@ -1499,9 +1502,10 @@ export function additionalRequestKeys(
 				| BundlesImpressionSchema
 				| BundlesAddtocartSchema
 				| AddtocartSchema
+				| SearchAddtocartSchema
 		).data?.responseId
 	) {
-		value += `||responseId=${(schema as ImpressionSchema | RecommendationsImpressionSchema | RecommendationsAddtocartSchema | BundlesImpressionSchema | BundlesAddtocartSchema | AddtocartSchema).data.responseId}`;
+		value += `||responseId=${(schema as ImpressionSchema | RecommendationsImpressionSchema | RecommendationsAddtocartSchema | BundlesImpressionSchema | BundlesAddtocartSchema | AddtocartSchema | SearchAddtocartSchema).data.responseId}`;
 	} else if (type === 'shopper' && schema.context.shopperId) {
 		value += `||shopperId=${schema.context.shopperId}`;
 	}

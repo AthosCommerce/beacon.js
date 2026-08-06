@@ -237,6 +237,35 @@ beacon.events.search.impression({
 });
 ```
 
+### searchType
+
+`searchType` is an optional, per-product field that records which search method produced a result. Add it to individual product results when tracking search events so reporting can attribute interactions to the underlying search type. The value typically comes from the Search API response.
+
+| Value | Description |
+|-----------|-------------|
+| `hybrid` | Combined keyword and vector search |
+| `keyword` | Traditional keyword/text search |
+| `vector` | Vector (semantic) search |
+
+It is supported on the product results of the `impression` and `clickThrough` events of the `search`, `autocomplete`, and `category` channels, and on the products of the `search` `addToCart` event.
+
+```typescript
+beacon.events.search.clickThrough({
+  data: {
+    responseId: response.responseId,
+    results: [
+      {
+        type: 'product',
+        uid: 'variant-1',
+        parentId: 'product-1',
+        sku: 'SKU-1',
+        searchType: 'hybrid' // or SearchType.Hybrid for TypeScript
+      }
+    ]
+  }
+});
+```
+
 ### quickView
 
 A quick view is a popup or modal that previews a product without navigating away to its full product page. Set the optional `quickView` flag to `true` on an event's `data` payload when the interaction happened inside a quick view popup, so reporting can attribute it separately from regular page interactions.
@@ -311,12 +340,13 @@ beacon.events.autocomplete.impression({
   data: {
     responseId: response.responseId,
     results: [
-      { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1' },
+      { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1', searchType: 'keyword' },
       { type: 'banner', uid: 'banner-1' }
     ],
     banners: [
       { uid: 'banner-1' }
-    ]
+    ],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -337,7 +367,8 @@ beacon.events.autocomplete.addToCart({
         qty: 1, 
         price: 29.99 
       }
-    ]
+    ],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -357,9 +388,11 @@ beacon.events.autocomplete.clickThrough({
         type: 'product', 
         uid: 'variant-1', 
         parentId: 'product-1',
-        sku: 'SKU-1'
+        sku: 'SKU-1',
+        searchType: 'keyword' // optional, see Common properties
       }
-    ]
+    ],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -399,10 +432,11 @@ beacon.events.search.impression({
   data: {
     responseId: response.responseId,
     results: [
-      { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1' },
-      { type: 'product', uid: 'variant-2', parentId: 'product-2', sku: 'SKU-2' }
+      { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1', searchType: 'keyword' },
+      { type: 'product', uid: 'variant-2', parentId: 'product-2', sku: 'SKU-2', searchType: 'vector' }
     ],
-    banners: [{ uid: 'banner-1' }]
+    banners: [{ uid: 'banner-1' }],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -419,9 +453,11 @@ beacon.events.search.addToCart({
         parentId: 'product-1',
         sku: 'SKU-1', 
         qty: 1, 
-        price: 29.99 
+        price: 29.99,
+        searchType: 'keyword' // optional, see Common properties
       }
-    ]
+    ],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -437,9 +473,11 @@ beacon.events.search.clickThrough({
         type: 'product',
         uid: 'variant-1',
         parentId: 'product-1',
-        sku: 'SKU-1'
+        sku: 'SKU-1',
+        searchType: 'hybrid' // optional, see Common properties
       }
-    ]
+    ],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -476,9 +514,10 @@ beacon.events.category.impression({
   data: {
     responseId: response.responseId,
     results: [
-      { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1' }
+      { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1', searchType: 'keyword' }
     ],
-    banners: []
+    banners: [],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -497,7 +536,8 @@ beacon.events.category.addToCart({
         qty: 1,
         price: 49.99
       }
-    ]
+    ],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -513,9 +553,11 @@ beacon.events.category.clickThrough({
         type: 'product',
         uid: 'variant-1',
         parentId: 'product-1',
-        sku: 'SKU-1'
+        sku: 'SKU-1',
+        searchType: 'keyword' // optional, see Common properties
       }
-    ]
+    ],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -550,7 +592,8 @@ beacon.events.recommendations.impression({
       { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1' },
       { type: 'product', uid: 'variant-2', parentId: 'product-2', sku: 'SKU-2' }
     ],
-    banners: []
+    banners: [],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -572,7 +615,8 @@ beacon.events.recommendations.addToCart({
         qty: 1,
         price: 39.99
       }
-    ]
+    ],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -593,7 +637,8 @@ beacon.events.recommendations.clickThrough({
         parentId: 'product-1',
         sku: 'SKU-1'
       }
-    ]
+    ],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -628,7 +673,8 @@ beacon.events.bundles.impression({
       { type: 'product', uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1' },
       { type: 'product', uid: 'variant-2', parentId: 'product-2', sku: 'SKU-2' }
     ],
-    banners: []
+    banners: [],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -650,7 +696,8 @@ beacon.events.bundles.addToCart({
         qty: 1,
         price: 39.99
       }
-    ]
+    ],
+    quickView: true // optional, see Common properties
   }
 });
 ```
@@ -671,7 +718,8 @@ beacon.events.bundles.clickThrough({
         parentId: 'product-1',
         sku: 'SKU-1'
       }
-    ]
+    ],
+    quickView: true // optional, see Common properties
   }
 });
 ```

@@ -1,31 +1,27 @@
 
-# ResultProduct
+# SearchAddtocartSchemaData
 
-Describes a tracked result.
+Event details
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`type` | [ResultProductType](ResultProductType.md)
-`parentId` | string
-`uid` | string
-`sku` | string
-`searchType` | [SearchType](SearchType.md)
+`responseId` | string
+`results` | [Array&lt;SearchAddtocartProduct&gt;](SearchAddtocartProduct.md)
+`quickView` | boolean
 
 ## Example
 
 ```typescript
-import type { ResultProduct } from ''
+import type { SearchAddtocartSchemaData } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "type": null,
-  "parentId": null,
-  "uid": null,
-  "sku": null,
-  "searchType": null,
-} satisfies ResultProduct
+  "responseId": null,
+  "results": null,
+  "quickView": null,
+} satisfies SearchAddtocartSchemaData
 
 console.log(example)
 
@@ -34,7 +30,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as ResultProduct
+const exampleParsed = JSON.parse(exampleJSON) as SearchAddtocartSchemaData
 console.log(exampleParsed)
 ```
 
