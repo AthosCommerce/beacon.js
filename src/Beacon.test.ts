@@ -920,6 +920,7 @@ for (const { isAthos, siteId } of [
 						results: [
 							{ uid: 'prodUid1', parentId: 'prodparentId1', sku: 'prodSku1', qty: 1, price: 10.99, searchType: SearchType.Keyword },
 							{ uid: 'prodUid2', parentId: 'prodparentId2', sku: 'prodSku2', qty: 1, price: 10.99, searchType: SearchType.Hybrid },
+							{ uid: 'prodUid3', parentId: 'prodparentId3', sku: 'prodSku3', qty: 2, price: 5.99 },
 						],
 						quickView: true,
 					};
