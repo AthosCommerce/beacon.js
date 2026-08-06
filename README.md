@@ -268,22 +268,24 @@ beacon.events.search.clickThrough({
 
 ### quickView
 
-`quickView` is an optional boolean on the event `data` payload indicating whether the event originated from a quick view popup rather than a regular page. It is supported on the `impression`, `clickThrough`, and `addToCart` events of the `search`, `autocomplete`, `category`, `recommendations`, and `bundles` modules.
+A quick view is a popup or modal that previews a product without navigating away to its full product page. Set the optional `quickView` flag to `true` on an event's `data` payload when the interaction happened inside a quick view popup, so reporting can attribute it separately from regular page interactions.
+
+The flag is supported on the `impression`, `addToCart`, and `clickThrough` events of the `autocomplete`, `search`, `category`, `recommendations`, and `bundles` channels. It is optional — omit it (or set it to `false`) for interactions that occur on a regular page.
 
 ```typescript
-beacon.events.search.addToCart({ 
+// Example: a click on a product surfaced inside a search quick view popup
+beacon.events.search.clickThrough({ 
   data: {
     responseId: response.responseId,
+    quickView: true,
     results: [
-      { 
-        uid: 'variant-1', 
+      {
+        type: 'product',
+        uid: 'variant-1',
         parentId: 'product-1',
-        sku: 'SKU-1', 
-        qty: 1, 
-        price: 29.99 
+        sku: 'SKU-1'
       }
-    ],
-    quickView: true
+    ]
   }
 });
 ```
