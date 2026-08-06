@@ -245,7 +245,7 @@ No authorization required
 
 render
 
-&lt;i&gt;/beacon/v2/{siteId}/recommendations/render&lt;/i&gt;&lt;br&gt;&lt;br&gt;Shopper navigates to a page where Athos Commerce personalized recommendations are requested from the [Personalized Recommendations API endpoint](https://docs.searchspring.com/reference/get-recommendations) and rendered on the page.
+&lt;i&gt;/beacon/v2/{siteId}/recommendations/render&lt;/i&gt;&lt;br&gt;&lt;br&gt;Shopper navigates to a page where Athos Commerce personalized recommendations are requested from Personalized Recommendations API endpoint and rendered on the page.
 
 ### Example
 

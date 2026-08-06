@@ -11,6 +11,7 @@ Name | Type
 `parentId` | string
 `uid` | string
 `sku` | string
+`searchType` | [SearchType](SearchType.md)
 
 ## Example
 
@@ -23,6 +24,7 @@ const example = {
   "parentId": null,
   "uid": null,
   "sku": null,
+  "searchType": null,
 } satisfies ResultProduct
 
 console.log(example)

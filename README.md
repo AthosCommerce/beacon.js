@@ -237,6 +237,56 @@ beacon.events.search.impression({
 });
 ```
 
+### searchType
+
+`searchType` is an optional, per-product field that records which search method produced a result. Add it to individual product results when tracking search events so reporting can attribute interactions to the underlying search type. The value typically comes from the Search API response.
+
+| Value | Description |
+|-----------|-------------|
+| `keyword` | Traditional keyword/text search |
+| `vector` | Vector (semantic) search |
+| `hybrid` | Combined keyword and vector search |
+
+It is supported on the product results of the `search` `impression`, `clickThrough`, and `addToCart` events.
+
+```typescript
+beacon.events.search.clickThrough({ 
+  data: {
+    responseId: response.responseId,
+    results: [
+      {
+        type: 'product',
+        uid: 'variant-1',
+        parentId: 'product-1',
+        sku: 'SKU-1',
+        searchType: 'hybrid' // or SearchType.Hybrid for TypeScript
+      }
+    ]
+  }
+});
+```
+
+### quickView
+
+`quickView` is an optional boolean on the event `data` payload indicating whether the event originated from a quick view popup rather than a regular page. It is supported on the `impression`, `clickThrough`, and `addToCart` events of the `search`, `autocomplete`, `category`, `recommendations`, and `bundles` modules.
+
+```typescript
+beacon.events.search.addToCart({ 
+  data: {
+    responseId: response.responseId,
+    results: [
+      { 
+        uid: 'variant-1', 
+        parentId: 'product-1',
+        sku: 'SKU-1', 
+        qty: 1, 
+        price: 29.99 
+      }
+    ],
+    quickView: true
+  }
+});
+```
 
 ## Tracking Events
 
@@ -396,9 +446,11 @@ beacon.events.search.addToCart({
         parentId: 'product-1',
         sku: 'SKU-1', 
         qty: 1, 
-        price: 29.99 
+        price: 29.99,
+        searchType: 'keyword' // optional, see Common properties
       }
-    ]
+    ],
+    quickView: true // optional, see Common properties
   }
 });
 ```

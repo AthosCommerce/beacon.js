@@ -9,6 +9,7 @@ Name | Type
 `tag` | string
 `responseId` | string
 `results` | [Array&lt;ClickthroughResultsInner&gt;](ClickthroughResultsInner.md)
+`quickView` | boolean
 
 ## Example
 
@@ -20,6 +21,7 @@ const example = {
   "tag": null,
   "responseId": null,
   "results": null,
+  "quickView": null,
 } satisfies ClickthroughResultsSchema1
 
 console.log(example)

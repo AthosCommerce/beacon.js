@@ -10,7 +10,7 @@ import {
 	REQUEST_GROUPING_TIMEOUT,
 	USER_ID,
 } from './Beacon';
-import { ChatFeedbackSchemaDataFeedbackEnum, Currency, ImpressionSchemaData, Product, ResultProductType } from './client';
+import { ChatFeedbackSchemaDataFeedbackEnum, Currency, ImpressionSchemaData, Product, ResultProductType, SearchType } from './client';
 
 const resetAllCookies = () => {
 	const cookies = document.cookie.split(';');
@@ -852,6 +852,7 @@ for (const { isAthos, siteId } of [
 						responseId: 'test-response-id',
 						results: [],
 						banners: [],
+						quickView: true,
 					};
 
 					const fetchPayloadAssertion = {
@@ -859,7 +860,10 @@ for (const { isAthos, siteId } of [
 						body: {
 							data: {
 								...data,
-								results: [{ type: ResultProductType.Product, parentId: 'parentId0', uid: 'prodUid0', sku: 'prodSku0' }, ...results],
+								results: [
+									{ type: ResultProductType.Product, parentId: 'parentId0', uid: 'prodUid0', sku: 'prodSku0', searchType: SearchType.Keyword },
+									...results,
+								],
 								banners: [{ uid: 'merchandisingbanneruid0' }, { uid: 'merchandisingbanneruid1' }, ...banners],
 							},
 							context: {
@@ -876,7 +880,10 @@ for (const { isAthos, siteId } of [
 							beacon.events.search.impression({
 								data: {
 									...data,
-									results: [{ type: ResultProductType.Product, parentId: 'parentId0', uid: 'prodUid0', sku: 'prodSku0' }, result],
+									results: [
+										{ type: ResultProductType.Product, parentId: 'parentId0', uid: 'prodUid0', sku: 'prodSku0', searchType: SearchType.Keyword },
+										result,
+									],
 									banners: [{ uid: 'merchandisingbanneruid0' }, { uid: 'merchandisingbanneruid1' }],
 								},
 							});
@@ -911,9 +918,10 @@ for (const { isAthos, siteId } of [
 					const data = {
 						responseId: 'test-response-id',
 						results: [
-							{ uid: 'prodUid1', parentId: 'prodparentId1', sku: 'prodSku1', qty: 1, price: 10.99 },
-							{ uid: 'prodUid2', parentId: 'prodparentId2', sku: 'prodSku2', qty: 1, price: 10.99 },
+							{ uid: 'prodUid1', parentId: 'prodparentId1', sku: 'prodSku1', qty: 1, price: 10.99, searchType: SearchType.Keyword },
+							{ uid: 'prodUid2', parentId: 'prodparentId2', sku: 'prodSku2', qty: 1, price: 10.99, searchType: SearchType.Hybrid },
 						],
+						quickView: true,
 					};
 
 					const fetchPayloadAssertion = {
@@ -944,7 +952,8 @@ for (const { isAthos, siteId } of [
 				it('can process clickThrough event', async () => {
 					const data = {
 						responseId: 'test-response-id',
-						results: [{ type: ResultProductType.Product, parentId: 'parentId1', uid: 'prodUid1', sku: 'prodSku1' }],
+						results: [{ type: ResultProductType.Product, parentId: 'parentId1', uid: 'prodUid1', sku: 'prodSku1', searchType: SearchType.Vector }],
+						quickView: false,
 					};
 
 					const fetchPayloadAssertion = {

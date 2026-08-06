@@ -14,7 +14,6 @@
 
 import * as runtime from '../runtime';
 import type {
-	AddtocartSchema,
 	ClickthroughSchema,
 	ErrorResponseBody,
 	ImpressionSchema,
@@ -22,10 +21,9 @@ import type {
 	InlineObject1,
 	RedirectSchema,
 	RenderSchema,
+	SearchAddtocartSchema,
 } from '../models/index';
 import {
-	AddtocartSchemaFromJSON,
-	AddtocartSchemaToJSON,
 	ClickthroughSchemaFromJSON,
 	ClickthroughSchemaToJSON,
 	ErrorResponseBodyFromJSON,
@@ -40,11 +38,13 @@ import {
 	RedirectSchemaToJSON,
 	RenderSchemaFromJSON,
 	RenderSchemaToJSON,
+	SearchAddtocartSchemaFromJSON,
+	SearchAddtocartSchemaToJSON,
 } from '../models/index';
 
 export interface SearchAddtocartRequest {
 	siteId: string;
-	addtocartSchema: AddtocartSchema;
+	searchAddtocartSchema: SearchAddtocartSchema;
 }
 
 export interface SearchClickthroughRequest {
@@ -83,10 +83,10 @@ export class SearchApi extends runtime.BaseAPI {
 			throw new runtime.RequiredError('siteId', 'Required parameter "siteId" was null or undefined when calling searchAddtocart().');
 		}
 
-		if (requestParameters['addtocartSchema'] == null) {
+		if (requestParameters['searchAddtocartSchema'] == null) {
 			throw new runtime.RequiredError(
-				'addtocartSchema',
-				'Required parameter "addtocartSchema" was null or undefined when calling searchAddtocart().'
+				'searchAddtocartSchema',
+				'Required parameter "searchAddtocartSchema" was null or undefined when calling searchAddtocart().'
 			);
 		}
 
@@ -105,7 +105,7 @@ export class SearchApi extends runtime.BaseAPI {
 				method: 'POST',
 				headers: headerParameters,
 				query: queryParameters,
-				body: AddtocartSchemaToJSON(requestParameters['addtocartSchema']),
+				body: SearchAddtocartSchemaToJSON(requestParameters['searchAddtocartSchema']),
 			},
 			initOverrides
 		);

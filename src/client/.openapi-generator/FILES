@@ -91,7 +91,11 @@ docs/ResultProduct.md
 docs/ResultProductType.md
 docs/ResultResultBanner.md
 docs/ResultsInner.md
+docs/SearchAddtocartProduct.md
+docs/SearchAddtocartSchema.md
+docs/SearchAddtocartSchemaData.md
 docs/SearchApi.md
+docs/SearchType.md
 docs/ShopperApi.md
 docs/ShopperContext.md
 docs/ShopperLoginSchema.md
@@ -166,6 +170,10 @@ models/ResultProduct.ts
 models/ResultProductType.ts
 models/ResultResultBanner.ts
 models/ResultsInner.ts
+models/SearchAddtocartProduct.ts
+models/SearchAddtocartSchema.ts
+models/SearchAddtocartSchemaData.ts
+models/SearchType.ts
 models/ShopperContext.ts
 models/ShopperLoginSchema.ts
 models/ValidationErrorWithDataField.ts

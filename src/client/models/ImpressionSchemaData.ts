@@ -42,6 +42,12 @@ export interface ImpressionSchemaData {
 	 * @memberof ImpressionSchemaData
 	 */
 	banners: Array<BannersInner>;
+	/**
+	 * Indicates whether the event originated from a quick view popup or a regular page
+	 * @type {boolean}
+	 * @memberof ImpressionSchemaData
+	 */
+	quickView?: boolean;
 }
 
 /**
@@ -66,6 +72,7 @@ export function ImpressionSchemaDataFromJSONTyped(json: any, ignoreDiscriminator
 		responseId: json['responseId'],
 		results: (json['results'] as Array<any>).map(ResultsInnerFromJSON),
 		banners: (json['banners'] as Array<any>).map(BannersInnerFromJSON),
+		quickView: json['quickView'] == null ? undefined : json['quickView'],
 	};
 }
 
@@ -82,5 +89,6 @@ export function ImpressionSchemaDataToJSONTyped(value?: ImpressionSchemaData | n
 		responseId: value['responseId'],
 		results: (value['results'] as Array<any>).map(ResultsInnerToJSON),
 		banners: (value['banners'] as Array<any>).map(BannersInnerToJSON),
+		quickView: value['quickView'],
 	};
 }

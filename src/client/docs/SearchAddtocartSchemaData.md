@@ -1,5 +1,5 @@
 
-# ClickthroughSchemaData
+# SearchAddtocartSchemaData
 
 Event details
 
@@ -8,22 +8,20 @@ Event details
 Name | Type
 ------------ | -------------
 `responseId` | string
-`results` | [Array&lt;ClickthroughResultsInner&gt;](ClickthroughResultsInner.md)
+`results` | [Array&lt;SearchAddtocartProduct&gt;](SearchAddtocartProduct.md)
 `quickView` | boolean
-`banners` | [Array&lt;ClickthroughBannersInner&gt;](ClickthroughBannersInner.md)
 
 ## Example
 
 ```typescript
-import type { ClickthroughSchemaData } from ''
+import type { SearchAddtocartSchemaData } from ''
 
 // TODO: Update the object below with actual values
 const example = {
   "responseId": null,
   "results": null,
   "quickView": null,
-  "banners": null,
-} satisfies ClickthroughSchemaData
+} satisfies SearchAddtocartSchemaData
 
 console.log(example)
 
@@ -32,7 +30,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as ClickthroughSchemaData
+const exampleParsed = JSON.parse(exampleJSON) as SearchAddtocartSchemaData
 console.log(exampleParsed)
 ```
 

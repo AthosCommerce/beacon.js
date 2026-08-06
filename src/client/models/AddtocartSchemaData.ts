@@ -34,6 +34,12 @@ export interface AddtocartSchemaData {
 	 * @memberof AddtocartSchemaData
 	 */
 	results: Array<Product>;
+	/**
+	 * Indicates whether the event originated from a quick view popup or a regular page
+	 * @type {boolean}
+	 * @memberof AddtocartSchemaData
+	 */
+	quickView?: boolean;
 }
 
 /**
@@ -56,6 +62,7 @@ export function AddtocartSchemaDataFromJSONTyped(json: any, ignoreDiscriminator:
 	return {
 		responseId: json['responseId'],
 		results: (json['results'] as Array<any>).map(ProductFromJSON),
+		quickView: json['quickView'] == null ? undefined : json['quickView'],
 	};
 }
 
@@ -71,5 +78,6 @@ export function AddtocartSchemaDataToJSONTyped(value?: AddtocartSchemaData | nul
 	return {
 		responseId: value['responseId'],
 		results: (value['results'] as Array<any>).map(ProductToJSON),
+		quickView: value['quickView'],
 	};
 }

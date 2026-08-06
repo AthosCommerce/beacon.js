@@ -1,29 +1,21 @@
 
-# ClickthroughSchemaData
+# SearchType
 
-Event details
+Search type of the search performed
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`responseId` | string
-`results` | [Array&lt;ClickthroughResultsInner&gt;](ClickthroughResultsInner.md)
-`quickView` | boolean
-`banners` | [Array&lt;ClickthroughBannersInner&gt;](ClickthroughBannersInner.md)
 
 ## Example
 
 ```typescript
-import type { ClickthroughSchemaData } from ''
+import type { SearchType } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "responseId": null,
-  "results": null,
-  "quickView": null,
-  "banners": null,
-} satisfies ClickthroughSchemaData
+} satisfies SearchType
 
 console.log(example)
 
@@ -32,7 +24,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as ClickthroughSchemaData
+const exampleParsed = JSON.parse(exampleJSON) as SearchType
 console.log(exampleParsed)
 ```
 

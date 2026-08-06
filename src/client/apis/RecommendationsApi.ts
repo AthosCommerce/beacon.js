@@ -226,7 +226,7 @@ export class RecommendationsApi extends runtime.BaseAPI {
 	}
 
 	/**
-	 * <i>/beacon/v2/{siteId}/recommendations/render</i><br><br>Shopper navigates to a page where Athos Commerce personalized recommendations are requested from the [Personalized Recommendations API endpoint](https://docs.searchspring.com/reference/get-recommendations) and rendered on the page.
+	 * <i>/beacon/v2/{siteId}/recommendations/render</i><br><br>Shopper navigates to a page where Athos Commerce personalized recommendations are requested from Personalized Recommendations API endpoint and rendered on the page.
 	 * render
 	 */
 	async recommendationsRenderRaw(
@@ -268,7 +268,7 @@ export class RecommendationsApi extends runtime.BaseAPI {
 	}
 
 	/**
-	 * <i>/beacon/v2/{siteId}/recommendations/render</i><br><br>Shopper navigates to a page where Athos Commerce personalized recommendations are requested from the [Personalized Recommendations API endpoint](https://docs.searchspring.com/reference/get-recommendations) and rendered on the page.
+	 * <i>/beacon/v2/{siteId}/recommendations/render</i><br><br>Shopper navigates to a page where Athos Commerce personalized recommendations are requested from Personalized Recommendations API endpoint and rendered on the page.
 	 * render
 	 */
 	async recommendationsRender(

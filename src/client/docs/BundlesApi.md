@@ -245,7 +245,7 @@ No authorization required
 
 render
 
-&lt;i&gt;/beacon/v2/{siteId}/bundles/render&lt;/i&gt;&lt;br&gt;&lt;br&gt;Shopper navigates to a page where Athos Commerce personalized bundles are requested from the [Personalized Bundles API endpoint](https://docs.searchspring.com/reference/get-bundles) and rendered on the page.
+&lt;i&gt;/beacon/v2/{siteId}/bundles/render&lt;/i&gt;&lt;br&gt;&lt;br&gt;Shopper navigates to a page where Athos Commerce personalized bundles are requested from Personalized Bundles API endpoint and rendered on the page.
 
 ### Example
 
