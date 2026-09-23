@@ -919,6 +919,8 @@ Beacon automatically manages local storage and cookies to maintain user state ac
 - **Viewed Products**: Recently viewed products (up to 20 items)
 - **Attribution**: Campaign/attribution source tracking
 
+Beacon also stores **Searched Queries** (recent search queries per siteId, up to 10 items, most recent first), but search events do not carry the query, so beacon does not add them itself. The integration must call `storage.searched.add` with the query on each search (Snap does this automatically); otherwise `lastSearches` is never sent. See the [Searched Queries Storage API](#searched-queries-storage-api).
+
 ### Cart Storage API
 
 Access and manipulate the stored cart through the `storage.cart` API:
@@ -963,6 +965,37 @@ beacon.storage.viewed.set([
 beacon.storage.viewed.add([
   { uid: 'variant-2-red-l', parentId: 'product-2', sku: 'SKU-2' }
 ]);
+```
+
+### Searched Queries Storage API
+
+Access and manipulate the recent search query history. Each query is stored as a `SearchedQuery` (`{ query, timestamp }`) where `timestamp` is an ISO string of when it was searched. Queries are kept most recent first, de-duplicated (case insensitive) and limited to the 10 most recent. Storage does not expire queries by age; consumers decide which queries to use. For example, [`getLastSearches`](#getlastsearchessiteid-string-string) only returns queries from the past 2 weeks.
+
+Queries are stored separately for each siteId under `athosSearchedQueries-<siteId>` (`ssSearchedQueries-<siteId>` for siteIds not starting with `at`). Every method accepts an optional `siteId` as its last parameter and defaults to the siteId the beacon was created with. When the `lastSearches` of the beacon siteId change, a preflight request is sent; queries stored for other siteIds are not sent in preflight requests unless `sendPreflight` is called with that `siteId`.
+
+```typescript
+// Get searched queries
+const searchedQueries = beacon.storage.searched.get();
+// Returns: [{ query: 'boots', timestamp: '2026-09-23T14:00:00.000Z' }, ...]
+
+// Add searched queries (most recent first; a query already present is moved to the front with a new timestamp)
+beacon.storage.searched.add(['boots']);
+beacon.storage.searched.add(['hats', 'gloves']);
+// get() now returns the queries: 'hats', 'gloves', 'boots'
+
+// Set searched queries directly (most recent first)
+beacon.storage.searched.set([
+  { query: 'boots', timestamp: '2026-09-23T14:00:00.000Z' },
+  { query: 'shoes', timestamp: '2026-09-22T14:00:00.000Z' },
+]);
+
+// Clear searched queries
+beacon.storage.searched.clear();
+
+// Use the queries of another siteId
+beacon.storage.searched.add(['bottes'], 'at1234');
+beacon.storage.searched.get('at1234');
+// Returns: [{ query: 'bottes', timestamp: '...' }]
 ```
 
 ## Public API Methods
@@ -1066,9 +1099,18 @@ Get the current timestamp in ISO 8601 format.
 const timestamp = beacon.getTimestamp();
 ```
 
-### `sendPreflight(overrides?: PreflightRequestModel): void`
+### `getLastSearches(siteId?: string): string[]`
 
-Send preflight data to the personalization API. This is automatically called when cart or shopper state changes, but can be manually triggered if needed.
+Get the searched queries (most recent first) from the past 2 weeks for a siteId, defaulting to the beacon siteId. This is what is sent as `lastSearches` in preflight requests.
+
+```typescript
+const lastSearches = beacon.getLastSearches();
+// Returns: ['boots', 'shoes', ...]
+```
+
+### `sendPreflight(overrides?: PreflightOverrides): void`
+
+Send preflight data to the personalization API. This is automatically called when cart, viewed products, `lastSearches` (of the beacon siteId) or shopper state changes, but can be manually triggered if needed. Every override is optional and falls back to the stored value: `userId`, `siteId` and `shopper` are strings, `cart` is a `Product[]`, `lastViewed` is a `ProductPageviewSchemaDataResult[]` and `lastSearches` is a `string[]`. When `lastSearches` is not provided, `getLastSearches` is used for the preflight `siteId`.
 
 ```typescript
 beacon.sendPreflight();
@@ -1078,8 +1120,9 @@ beacon.sendPreflight({
   userId: 'custom-user-id',
   siteId: 'custom-site-id',
   shopper: 'shopper-123',
-  cart: [/* products */],
-  lastViewed: [/* products */]
+  cart: [{ uid: 'variant-1', parentId: 'product-1', sku: 'SKU-1', qty: 1, price: 29.99 }],
+  lastViewed: [{ uid: 'variant-2', parentId: 'product-2', sku: 'SKU-2' }],
+  lastSearches: ['boots', 'shoes']
 });
 ```
 

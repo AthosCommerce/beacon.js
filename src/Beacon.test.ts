@@ -199,6 +199,316 @@ for (const { isAthos, siteId } of [
 					expect(localStorageMock.getItem(STORAGE_KEYS.cartProducts[storageArea])).toBe(JSON.stringify({ value: [] }));
 				});
 			});
+
+			describe('Searched', () => {
+				const timestamp = '2026-09-23T14:00:00.000Z';
+				const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+				const searchedQueriesKey = isAthos ? 'athosSearchedQueries-athos0' : 'ssSearchedQueries-abc123';
+				const readStored = () => JSON.parse(localStorageMock.getItem(searchedQueriesKey) || '{}').value;
+				const getQueries = (siteId?: string) => beacon.storage.searched.get(siteId).map((item) => item.query);
+
+				beforeEach(() => {
+					jest.setSystemTime(new Date(timestamp));
+				});
+
+				it('returns an empty array when nothing has been searched', () => {
+					expect(beacon.storage.searched.get()).toEqual([]);
+				});
+
+				it('can add searched queries and returns them most recent first with their timestamp', () => {
+					beacon.storage.searched.add(['shoes']);
+					beacon.storage.searched.add(['boots']);
+
+					expect(beacon.storage.searched.get()).toEqual([
+						{ query: 'boots', timestamp },
+						{ query: 'shoes', timestamp },
+					]);
+				});
+
+				it('adds several queries keeping the first as the most recent', () => {
+					beacon.storage.searched.add(['boots']);
+					beacon.storage.searched.add(['hats', 'gloves']);
+
+					expect(getQueries()).toEqual(['hats', 'gloves', 'boots']);
+				});
+
+				it('stores each query with an ISO timestamp', () => {
+					beacon.storage.searched.add(['shoes']);
+
+					expect(localStorageMock.getItem(searchedQueriesKey)).toBe(JSON.stringify({ value: [{ query: 'shoes', timestamp }] }));
+				});
+
+				it('stores and returns queries containing special characters unchanged', () => {
+					const query = 'red & blue, 50% off / "sale"';
+					beacon.storage.searched.add([query]);
+
+					expect(readStored()[0].query).toBe(query);
+					expect(getQueries()).toEqual([query]);
+				});
+
+				it('moves an existing query to the front with a new timestamp when searched again (case insensitive)', () => {
+					beacon.storage.searched.add(['shoes']);
+					beacon.storage.searched.add(['boots']);
+					const laterTimestamp = '2026-09-24T14:00:00.000Z';
+					jest.setSystemTime(new Date(laterTimestamp));
+					beacon.storage.searched.add(['Shoes']);
+
+					expect(beacon.storage.searched.get()).toEqual([
+						{ query: 'Shoes', timestamp: laterTimestamp },
+						{ query: 'boots', timestamp },
+					]);
+				});
+
+				it('trims queries and ignores empty queries', () => {
+					beacon.storage.searched.add(['  shoes  ', '', '   ']);
+
+					expect(getQueries()).toEqual(['shoes']);
+				});
+
+				it('limits stored queries to the 10 most recent', () => {
+					for (let i = 1; i <= 12; i++) {
+						beacon.storage.searched.add([`query${i}`]);
+					}
+
+					const searched = getQueries();
+					expect(searched).toHaveLength(10);
+					expect(searched[0]).toBe('query12');
+					expect(searched[9]).toBe('query3');
+				});
+
+				it('can set searched queries directly', () => {
+					const items = [
+						{ query: 'hats', timestamp },
+						{ query: 'gloves', timestamp: daysAgo(3) },
+					];
+					beacon.storage.searched.set(items);
+
+					expect(beacon.storage.searched.get()).toEqual(items);
+					expect(readStored()).toEqual(items);
+				});
+
+				it('de-duplicates queries (case insensitive) keeping the first occurrence when set directly', () => {
+					beacon.storage.searched.set(['Boots', ' boots ', 'shoes', 'SHOES', 'hats'].map((query) => ({ query, timestamp })));
+
+					expect(getQueries()).toEqual(['Boots', 'shoes', 'hats']);
+				});
+
+				it('can clear searched queries', () => {
+					beacon.storage.searched.add(['shoes']);
+					beacon.storage.searched.clear();
+
+					expect(beacon.storage.searched.get()).toEqual([]);
+					expect(localStorageMock.getItem(searchedQueriesKey)).toBe(JSON.stringify({ value: [] }));
+				});
+
+				it('keeps queries older than 2 weeks in storage', () => {
+					const expired = { query: 'boots', timestamp: daysAgo(15) };
+					localStorageMock.setItem(searchedQueriesKey, JSON.stringify({ value: [expired] }));
+
+					beacon.storage.searched.add(['shoes']);
+
+					expect(beacon.storage.searched.get()).toEqual([{ query: 'shoes', timestamp }, expired]);
+				});
+
+				it('keeps the original timestamp of existing queries when another query is added', () => {
+					const existing = { query: 'boots', timestamp: daysAgo(3) };
+					localStorageMock.setItem(searchedQueriesKey, JSON.stringify({ value: [existing] }));
+
+					beacon.storage.searched.add(['shoes']);
+
+					expect(readStored()).toEqual([{ query: 'shoes', timestamp }, existing]);
+				});
+
+				it('ignores malformed stored entries', () => {
+					const valid = { query: 'shoes', timestamp };
+					localStorageMock.setItem(
+						searchedQueriesKey,
+						JSON.stringify({
+							value: [valid, { query: 123, timestamp }, { query: 'gloves' }, { value: 'hats', timestamp }, 'boots', null],
+						})
+					);
+
+					expect(beacon.storage.searched.get()).toEqual([valid]);
+				});
+
+				it('sends a preflight request when searched queries change', async () => {
+					beacon.storage.searched.add(['shoes']);
+
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
+				});
+
+				it('does not send a preflight request when searched queries are unchanged', async () => {
+					beacon.storage.searched.add(['shoes']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+					mockFetchApi.mockClear();
+
+					beacon.storage.searched.set(beacon.storage.searched.get());
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).not.toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
+				});
+
+				it('does not send a preflight request when the most recent query is searched again', async () => {
+					beacon.storage.searched.add(['shoes']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+					mockFetchApi.mockClear();
+
+					jest.setSystemTime(new Date('2026-09-24T14:00:00.000Z'));
+					beacon.storage.searched.add(['shoes']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).not.toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
+				});
+
+				it('sends a preflight request when a query older than 2 weeks is searched again', async () => {
+					localStorageMock.setItem(searchedQueriesKey, JSON.stringify({ value: [{ query: 'shoes', timestamp: daysAgo(15) }] }));
+
+					beacon.storage.searched.add(['shoes']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
+				});
+
+				it('does not send a preflight request when storing the queries fails', async () => {
+					const quotaError = new Error('quota exceeded');
+					quotaError.name = 'QuotaExceededError';
+					localStorageMock.setItem.mockImplementationOnce(() => {
+						throw quotaError;
+					});
+					const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+					beacon.storage.searched.add(['shoes']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(beacon.storage.searched.get()).toEqual([]);
+					expect(mockFetchApi).not.toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
+					warnSpy.mockRestore();
+				});
+
+				it('stores queries under a key namespaced by the beacon siteId', () => {
+					beacon.storage.searched.add(['shoes']);
+
+					expect(readStored()).toEqual([{ query: 'shoes', timestamp }]);
+					expect(localStorageMock.getItem(STORAGE_KEYS.searchedQueries.primary)).toBeNull();
+					expect(localStorageMock.getItem(STORAGE_KEYS.searchedQueries.legacy)).toBeNull();
+				});
+
+				it('keeps queries for each siteId separate', () => {
+					beacon.storage.searched.add(['boots'], 'other1');
+					beacon.storage.searched.add(['shoes']);
+
+					expect(getQueries()).toEqual(['shoes']);
+					expect(getQueries('other1')).toEqual(['boots']);
+				});
+
+				it('normalizes the siteId used to namespace queries', () => {
+					beacon.storage.searched.add(['boots'], ' OTHER1 ');
+
+					expect(getQueries('other1')).toEqual(['boots']);
+					expect(localStorageMock.getItem('ssSearchedQueries-other1')).not.toBeNull();
+				});
+
+				it('picks the athos or legacy key from the namespaced siteId', () => {
+					beacon.storage.searched.add(['boots'], 'atother');
+					beacon.storage.searched.add(['shoes'], 'ssother');
+
+					expect(JSON.parse(localStorageMock.getItem('athosSearchedQueries-atother') || '{}').value[0].query).toBe('boots');
+					expect(JSON.parse(localStorageMock.getItem('ssSearchedQueries-ssother') || '{}').value[0].query).toBe('shoes');
+				});
+
+				it('only sets and clears queries for the given siteId', () => {
+					beacon.storage.searched.set(
+						['boots', 'hats'].map((query) => ({ query, timestamp })),
+						'other1'
+					);
+					beacon.storage.searched.add(['shoes']);
+
+					beacon.storage.searched.clear('other1');
+
+					expect(getQueries('other1')).toEqual([]);
+					expect(getQueries()).toEqual(['shoes']);
+				});
+
+				it('does not send a preflight request when queries change for another siteId', async () => {
+					beacon.storage.searched.add(['boots'], 'other1');
+
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).not.toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
+				});
+
+				it('reports the namespaced key when storage quota is exceeded', () => {
+					const quotaError = new Error('quota exceeded');
+					quotaError.name = 'QuotaExceededError';
+					localStorageMock.setItem.mockImplementationOnce(() => {
+						throw quotaError;
+					});
+					const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+					const errorSpy = jest.spyOn(beacon.events.error, 'snap');
+
+					beacon.storage.searched.add(['boots'], 'other1');
+
+					expect(errorSpy).toHaveBeenCalledWith({
+						data: {
+							message: 'QuotaExceededError',
+							details: {
+								key: 'ssSearchedQueries-other1',
+								keyPrimary: 'athosSearchedQueries-other1',
+								value: expect.stringContaining('boots'),
+							},
+						},
+					});
+					warnSpy.mockRestore();
+				});
+
+				describe('getLastSearches', () => {
+					it('returns the queries searched within the past 2 weeks, most recent first', () => {
+						localStorageMock.setItem(
+							searchedQueriesKey,
+							JSON.stringify({
+								value: [
+									{ query: 'shoes', timestamp: daysAgo(1) },
+									{ query: 'hats', timestamp: daysAgo(13) },
+									{ query: 'boots', timestamp: daysAgo(15) },
+								],
+							})
+						);
+
+						expect(beacon.getLastSearches()).toEqual(['shoes', 'hats']);
+					});
+
+					it('ignores queries with an invalid timestamp', () => {
+						localStorageMock.setItem(
+							searchedQueriesKey,
+							JSON.stringify({
+								value: [
+									{ query: 'shoes', timestamp },
+									{ query: 'hats', timestamp: 'not-a-date' },
+								],
+							})
+						);
+
+						expect(beacon.getLastSearches()).toEqual(['shoes']);
+					});
+
+					it('returns the queries of the given siteId', () => {
+						beacon.storage.searched.add(['boots'], 'other1');
+						beacon.storage.searched.add(['shoes']);
+
+						expect(beacon.getLastSearches('other1')).toEqual(['boots']);
+					});
+				});
+			});
 			describe('Methods', () => {
 				it('can getStoredId', async () => {
 					// must use real timers with cookie expiration
@@ -1885,6 +2195,111 @@ for (const { isAthos, siteId } of [
 					}),
 					keepalive: true,
 				});
+			});
+
+			it('includes the lastSearches of the siteId the preflight is sent for', async () => {
+				beacon.storage.searched.add(['boots'], 'other1');
+				beacon.storage.searched.add(['shoes']);
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+				mockFetchApi.mockClear();
+
+				const userId = beacon.getUserId();
+				beacon.sendPreflight({ userId, siteId: 'other1', shopper: '', cart: [], lastViewed: [] });
+
+				expect(mockFetchApi).toHaveBeenCalledWith('https://other1.a.searchspring.io/v1/preflight', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'text/plain',
+					},
+					body: JSON.stringify({ userId, siteId: 'other1', lastSearches: ['boots'] }),
+					keepalive: true,
+				});
+			});
+
+			it('includes lastSearches (most recent first) in the preflight request', async () => {
+				beacon.storage.searched.add(['shoes']);
+				beacon.storage.searched.add(['boots & sandals']);
+
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+
+				expect(mockFetchApi).toHaveBeenCalledWith(`https://${mockGlobals.siteId}.a.${preflightDomain}/v1/preflight`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'text/plain',
+					},
+					body: JSON.stringify({
+						userId: beacon.getUserId(),
+						// @ts-ignore - accessing protected property
+						siteId: beacon.globals.siteId,
+						lastSearches: ['boots & sandals', 'shoes'],
+					}),
+					keepalive: true,
+				});
+			});
+
+			it('only includes lastSearches searched within the past 2 weeks in the preflight request', async () => {
+				const searchedQueriesKey = isAthos ? 'athosSearchedQueries-athos0' : 'ssSearchedQueries-abc123';
+				const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+				localStorageMock.setItem(searchedQueriesKey, JSON.stringify({ value: [{ query: 'boots', timestamp: daysAgo(15) }] }));
+
+				beacon.storage.searched.add(['shoes']);
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+
+				expect(mockFetchApi).toHaveBeenCalledWith(
+					expect.stringContaining('/v1/preflight'),
+					expect.objectContaining({
+						body: JSON.stringify({
+							userId: beacon.getUserId(),
+							// @ts-ignore - accessing protected property
+							siteId: beacon.globals.siteId,
+							lastSearches: ['shoes'],
+						}),
+					})
+				);
+			});
+
+			it('uses the lastSearches override instead of the stored queries', async () => {
+				beacon.storage.searched.add(['shoes']);
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+				mockFetchApi.mockClear();
+
+				beacon.sendPreflight({ lastSearches: ['boots', 'hats'] });
+
+				expect(mockFetchApi).toHaveBeenCalledWith(
+					expect.stringContaining('/v1/preflight'),
+					expect.objectContaining({
+						body: JSON.stringify({
+							userId: beacon.getUserId(),
+							// @ts-ignore - accessing protected property
+							siteId: beacon.globals.siteId,
+							lastSearches: ['boots', 'hats'],
+						}),
+					})
+				);
+			});
+
+			it('does not send lastSearches when the override is an empty array', async () => {
+				beacon.storage.searched.add(['shoes']);
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+				mockFetchApi.mockClear();
+
+				beacon.sendPreflight({ lastSearches: [] });
+
+				expect(mockFetchApi).toHaveBeenCalledWith(
+					expect.stringContaining('/v1/preflight'),
+					expect.objectContaining({
+						body: JSON.stringify({
+							userId: beacon.getUserId(),
+							// @ts-ignore - accessing protected property
+							siteId: beacon.globals.siteId,
+						}),
+					})
+				);
 			});
 		});
 	});
