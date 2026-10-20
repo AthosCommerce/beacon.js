@@ -206,6 +206,7 @@ export class Beacon {
 	private apis: ApiMethodMap;
 
 	private requests: PayloadRequest[] = [];
+	private sentPageViews: { pageLoadId: string; keys: Set<string> } = { pageLoadId: '', keys: new Set() };
 
 	constructor(globals: BeaconGlobals, config?: BeaconConfig) {
 		if (typeof globals != 'object' || typeof globals.siteId != 'string') {
@@ -477,19 +478,18 @@ export class Beacon {
 			add: (products: ProductPageviewSchemaDataResult[]): void => {
 				// the order of the stored items matters - most recently viewed should be in front of array?
 				if (products.length) {
-					const viewedProducts = this.storage.viewed.get();
+					let viewedProducts = this.storage.viewed.get();
 					products.forEach((product) => {
 						const item: ProductPageviewSchemaDataResult = {
 							sku: product.sku,
 							parentId: product.parentId,
 							uid: product.uid,
 						};
-						const isItemAlreadyViewed = viewedProducts.find((viewedProduct) => viewedProduct.uid === item.uid);
-						if (isItemAlreadyViewed) {
-							// item has been viewed remove it from array
-							const index = viewedProducts.indexOf(isItemAlreadyViewed);
-							viewedProducts.splice(index, 1);
-						}
+						const productId = this.getProductId(item);
+						// remove any variant of this parent and any entry for the same product (e.g. legacy cookie entries) so only the latest is kept
+						viewedProducts = viewedProducts.filter(
+							(viewedProduct) => viewedProduct.parentId !== item.parentId && this.getProductId(viewedProduct) !== productId
+						);
 						// add item to front of array
 						viewedProducts.unshift(item);
 					});
@@ -871,18 +871,31 @@ export class Beacon {
 		},
 		product: {
 			pageView: (event: Payload<ProductPageviewSchemaData>) => {
-				const payload: ProductPageviewRequest = {
-					siteId: event?.siteId || this.globals.siteId,
-					productPageviewSchema: {
-						context: this.getContext(),
-						data: event.data,
-					},
-				};
-
-				const request = this.createRequest('product', 'productPageview', payload);
-				this.sendRequests([request]);
-
+				const siteId = event?.siteId || this.globals.siteId;
+				const context = this.getContext();
 				const item = event.data.result;
+
+				if (this.sentPageViews.pageLoadId !== context.pageLoadId) {
+					this.sentPageViews = { pageLoadId: context.pageLoadId, keys: new Set() };
+				}
+
+				// only send one pageView per unique variant per page load
+				const pageViewKey = `${siteId}||${item.parentId}||${item.uid}||${item.sku || ''}`;
+				if (!this.sentPageViews.keys.has(pageViewKey)) {
+					this.sentPageViews.keys.add(pageViewKey);
+
+					const payload: ProductPageviewRequest = {
+						siteId,
+						productPageviewSchema: {
+							context,
+							data: event.data,
+						},
+					};
+
+					const request = this.createRequest('product', 'productPageview', payload);
+					this.sendRequests([request]);
+				}
+
 				this.storage.viewed.add([item]);
 			},
 		},

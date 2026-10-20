@@ -759,6 +759,8 @@ beacon.events.chat.feedback({
 
 Track product page views. This automatically updates the viewed products history.
 
+Page views are sent once per unique variant (`parentId`, `uid`, `sku`) per page load. Calling `pageView` again with a variant that was already tracked for the current `pageLoadId` (e.g. toggling between variants) will not send a duplicate event. Calling `pageLoad()` starts a new page load and resets this tracking.
+
 ```typescript
 beacon.events.product.pageView({ 
   data: {
@@ -916,7 +918,7 @@ Beacon automatically manages local storage and cookies to maintain user state ac
 - **User IDs**: Persisted for 18 months
 - **Session IDs**: Persisted for 30 minutes
 - **Cart**: Current items in the user's cart
-- **Viewed Products**: Recently viewed products (up to 20 items)
+- **Viewed Products**: Recently viewed products (up to 20 items, one per parent product — the most recently viewed variant is kept)
 - **Attribution**: Campaign/attribution source tracking
 
 ### Cart Storage API
