@@ -759,7 +759,7 @@ beacon.events.chat.feedback({
 
 Track product page views. This automatically updates the viewed products history.
 
-Page views are sent once per unique variant (`parentId`, `uid`, `sku`) per page load. Calling `pageView` again with a variant that was already tracked for the current `pageLoadId` (e.g. toggling between variants) will not send a duplicate event. Calling `pageLoad()` starts a new page load and resets this tracking.
+Page views are sent once per unique variant (`parentId`, `uid`, `sku`) per page load and URL path. Calling `pageView` again with a variant that was already tracked for the current `pageLoadId` and path (e.g. toggling between variants, even if the variant is in the query string or hash) will not send a duplicate event. Navigating to a new path or calling `pageLoad()` resets this tracking. Single-page applications should call `pageLoad()` on navigation (see [Single Page Application (SPA) Support](#single-page-application-spa-support)), especially when using hash-based routing.
 
 ```typescript
 beacon.events.product.pageView({ 
@@ -918,7 +918,7 @@ Beacon automatically manages local storage and cookies to maintain user state ac
 - **User IDs**: Persisted for 18 months
 - **Session IDs**: Persisted for 30 minutes
 - **Cart**: Current items in the user's cart
-- **Viewed Products**: Recently viewed products (up to 20 items, one per parent product — the most recently viewed variant is kept)
+- **Viewed Products**: Recently viewed products (up to 20 items, one per parent product — the most recently viewed variant is kept). If local storage is unavailable, the cookie fallback only stores product IDs, so variants of the same parent are not merged
 - **Attribution**: Campaign/attribution source tracking
 
 ### Cart Storage API
@@ -1119,7 +1119,7 @@ const beacon = new Beacon(
 
 ### Single Page Application (SPA) Support
 
-For single-page applications, generate a new page load ID when the page/view changes:
+For single-page applications, generate a new page load ID when the page/view changes. This also resets product page view deduplication, so returning to a previously viewed product sends a new page view:
 
 ```typescript
 // On navigation
@@ -1141,6 +1141,8 @@ Update tracking context dynamically as user behavior or application state change
 // Update page URL for client-side routing
 beacon.updateContext('pageUrl', window.location.href);
 ```
+
+Updating `pageUrl` does not start a new page load. On navigation, also call `pageLoad()` (see [Single Page Application (SPA) Support](#single-page-application-spa-support)).
 
 ### Attribution Tracking
 

@@ -246,6 +246,14 @@ for (const { isAthos, siteId } of [
 					expect(beacon.storage.viewed.get()).toStrictEqual([parent1VariantC, parent2VariantA]);
 				});
 
+				it('keeps only the first entry per parent and product when set directly', () => {
+					const sameVariantOtherParent = { ...parent2VariantA, parentId: 'parent3' };
+
+					beacon.storage.viewed.set([parent1VariantB, parent2VariantA, parent1VariantA, sameVariantOtherParent]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([parent1VariantB, parent2VariantA]);
+				});
+
 				it('replaces legacy cookie entries for the same product', () => {
 					global.document.cookie = `${STORAGE_KEYS.viewedProducts[storageArea]}=${parent1VariantA.sku},${parent2VariantA.sku}`;
 
@@ -1512,7 +1520,37 @@ for (const { isAthos, siteId } of [
 						beacon.events.product.pageView({ data: { result: variantB } });
 						beacon.events.product.pageView({ data: { result: variantA } });
 
-						expect(beacon.storage.viewed.get()[0]).toStrictEqual(variantA);
+						expect(beacon.storage.viewed.get()).toStrictEqual([variantA]);
+					});
+
+					it('resends a previously viewed variant when the page path changes', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+						const variantC = { uid: 'variantC', parentId: 'parent2', sku: 'skuC' };
+
+						beacon.updateContext('pageUrl', 'https://example.com/products/a');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.updateContext('pageUrl', 'https://example.com/products/c');
+						beacon.events.product.pageView({ data: { result: variantC } });
+						beacon.updateContext('pageUrl', 'https://example.com/products/a');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(3);
+						expect(spy.mock.calls[2][0].productPageviewSchema.data.result).toStrictEqual(variantA);
+					});
+
+					it('does not resend a previously viewed variant when only the query string or hash changes', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+
+						beacon.updateContext('pageUrl', 'https://example.com/products/a?variant=A');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.updateContext('pageUrl', 'https://example.com/products/a?variant=B#reviews');
+						beacon.events.product.pageView({ data: { result: variantB } });
+						beacon.updateContext('pageUrl', 'https://example.com/products/a?variant=A');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(2);
 					});
 				});
 			});

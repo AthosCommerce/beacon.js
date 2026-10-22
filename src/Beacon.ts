@@ -206,7 +206,7 @@ export class Beacon {
 	private apis: ApiMethodMap;
 
 	private requests: PayloadRequest[] = [];
-	private sentPageViews: { pageLoadId: string; keys: Set<string> } = { pageLoadId: '', keys: new Set() };
+	private sentPageViews: { pageLoadId: string; pagePath: string; keys: Set<string> } = { pageLoadId: '', pagePath: '', keys: new Set() };
 
 	constructor(globals: BeaconGlobals, config?: BeaconConfig) {
 		if (typeof globals != 'object' || typeof globals.siteId != 'string') {
@@ -453,9 +453,21 @@ export class Beacon {
 			},
 			set: (products: ProductPageviewSchemaDataResult[]): void => {
 				const currentViewedItems = this.storage.viewed.get();
+				const seenParentIds = new Set<string>();
+				const seenProductIds = new Set<string>();
 				// remove qty and price if product is provided
 				const normalizedItems: ProductPageviewSchemaDataResult[] = products
 					.map((item) => ({ sku: item.sku, parentId: item.parentId, uid: item.uid }))
+					// keep only the first (most recent) entry per parent and per product (e.g. legacy cookie entries)
+					.filter((item) => {
+						const productId = this.getProductId(item);
+						if (seenParentIds.has(item.parentId) || seenProductIds.has(productId)) {
+							return false;
+						}
+						seenParentIds.add(item.parentId);
+						seenProductIds.add(productId);
+						return true;
+					})
 					.slice(0, MAX_VIEWED_COUNT);
 
 				const stringifiedNormalizedItems = JSON.stringify(normalizedItems);
@@ -478,22 +490,8 @@ export class Beacon {
 			add: (products: ProductPageviewSchemaDataResult[]): void => {
 				// the order of the stored items matters - most recently viewed should be in front of array?
 				if (products.length) {
-					let viewedProducts = this.storage.viewed.get();
-					products.forEach((product) => {
-						const item: ProductPageviewSchemaDataResult = {
-							sku: product.sku,
-							parentId: product.parentId,
-							uid: product.uid,
-						};
-						const productId = this.getProductId(item);
-						// remove any variant of this parent and any entry for the same product (e.g. legacy cookie entries) so only the latest is kept
-						viewedProducts = viewedProducts.filter(
-							(viewedProduct) => viewedProduct.parentId !== item.parentId && this.getProductId(viewedProduct) !== productId
-						);
-						// add item to front of array
-						viewedProducts.unshift(item);
-					});
-					this.storage.viewed.set(viewedProducts);
+					// add items to front of array (last product is the most recent) - set removes older entries for the same parent or product
+					this.storage.viewed.set([...products].reverse().concat(this.storage.viewed.get()));
 				}
 			},
 		},
@@ -875,11 +873,13 @@ export class Beacon {
 				const context = this.getContext();
 				const item = event.data.result;
 
-				if (this.sentPageViews.pageLoadId !== context.pageLoadId) {
-					this.sentPageViews = { pageLoadId: context.pageLoadId, keys: new Set() };
+				// query string and hash are ignored so variant params (e.g. ?variant=) don't reset tracking, but SPA route changes do
+				const pagePath = context.pageUrl.split(/[?#]/)[0];
+				if (this.sentPageViews.pageLoadId !== context.pageLoadId || this.sentPageViews.pagePath !== pagePath) {
+					this.sentPageViews = { pageLoadId: context.pageLoadId, pagePath, keys: new Set() };
 				}
 
-				// only send one pageView per unique variant per page load
+				// only send one pageView per unique variant per page load and path
 				const pageViewKey = `${siteId}||${item.parentId}||${item.uid}||${item.sku || ''}`;
 				if (!this.sentPageViews.keys.has(pageViewKey)) {
 					this.sentPageViews.keys.add(pageViewKey);
