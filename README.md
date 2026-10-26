@@ -971,7 +971,7 @@ beacon.storage.viewed.add([
 
 Access and manipulate the recent search query history. Each query is stored as a `SearchedQuery` (`{ query, timestamp }`) where `timestamp` is an ISO string of when it was searched. Queries are kept most recent first, de-duplicated (case insensitive) and limited to the 10 most recent. Storage does not expire queries by age; consumers decide which queries to use. For example, [`getLastSearches`](#getlastsearchessiteid-string-string) only returns queries from the past 2 weeks.
 
-Queries are stored separately for each siteId under `athosSearchedQueries-<siteId>` (`ssSearchedQueries-<siteId>` for siteIds not starting with `at`). Every method accepts an optional `siteId` as its last parameter and defaults to the siteId the beacon was created with. When the `lastSearches` of the beacon siteId change, a preflight request is sent; queries stored for other siteIds are not sent in preflight requests unless `sendPreflight` is called with that `siteId`.
+Queries are stored separately for each siteId under `athosSearchedQueries-<siteId>` (`ssSearchedQueries-<siteId>` for siteIds not starting with `at`), with the siteId lowercased. Every method accepts an optional `siteId` as its last parameter and defaults to the siteId the beacon was created with. When the `lastSearches` of the beacon siteId change, a preflight request is sent; queries stored for other siteIds are not sent in preflight requests unless `sendPreflight` is called with that `siteId`.
 
 ```typescript
 // Get searched queries
@@ -988,6 +988,9 @@ beacon.storage.searched.set([
   { query: 'boots', timestamp: '2026-09-23T14:00:00.000Z' },
   { query: 'shoes', timestamp: '2026-09-22T14:00:00.000Z' },
 ]);
+
+// Remove searched queries (case insensitive)
+beacon.storage.searched.remove(['Boots']);
 
 // Clear searched queries
 beacon.storage.searched.clear();

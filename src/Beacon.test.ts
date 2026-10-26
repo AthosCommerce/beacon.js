@@ -301,6 +301,40 @@ for (const { isAthos, siteId } of [
 					expect(localStorageMock.getItem(searchedQueriesKey)).toBe(JSON.stringify({ value: [] }));
 				});
 
+				it('can remove searched queries case insensitively', () => {
+					beacon.storage.searched.add(['shoes', 'Boots', 'hats']);
+
+					beacon.storage.searched.remove(['boots', ' HATS ']);
+
+					expect(beacon.storage.searched.get()).toEqual([{ query: 'shoes', timestamp }]);
+				});
+
+				it('does not write to storage when removing a query that was not searched', () => {
+					beacon.storage.searched.add(['shoes']);
+					localStorageMock.setItem.mockClear();
+
+					beacon.storage.searched.remove(['boots']);
+
+					expect(localStorageMock.setItem).not.toHaveBeenCalled();
+					expect(getQueries()).toEqual(['shoes']);
+				});
+
+				it('sends a preflight request with the remaining queries when a query is removed', async () => {
+					beacon.storage.searched.add(['shoes', 'boots']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+					mockFetchApi.mockClear();
+
+					beacon.storage.searched.remove(['boots']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).toHaveBeenCalledWith(
+						expect.stringContaining('/v1/preflight'),
+						expect.objectContaining({ body: expect.stringContaining('"lastSearches":["shoes"]') })
+					);
+				});
+
 				it('keeps queries older than 2 weeks in storage', () => {
 					const expired = { query: 'boots', timestamp: daysAgo(15) };
 					localStorageMock.setItem(searchedQueriesKey, JSON.stringify({ value: [expired] }));
@@ -436,6 +470,44 @@ for (const { isAthos, siteId } of [
 
 					expect(getQueries('other1')).toEqual([]);
 					expect(getQueries()).toEqual(['shoes']);
+				});
+
+				it('only removes queries for the given siteId', () => {
+					beacon.storage.searched.add(['boots'], 'other1');
+					beacon.storage.searched.add(['boots']);
+
+					beacon.storage.searched.remove(['boots'], 'other1');
+
+					expect(getQueries('other1')).toEqual([]);
+					expect(getQueries()).toEqual(['boots']);
+				});
+
+				it('uses the same queries for the beacon siteId whether or not it is passed', () => {
+					const upperCaseSiteId = siteId.toUpperCase();
+					const upperCaseBeacon = new Beacon({ siteId: upperCaseSiteId }, mockConfig);
+
+					upperCaseBeacon.storage.searched.add(['boots'], upperCaseSiteId);
+					upperCaseBeacon.storage.searched.add(['shoes']);
+
+					expect(upperCaseBeacon.getLastSearches()).toEqual(['shoes', 'boots']);
+					expect(upperCaseBeacon.getLastSearches(upperCaseSiteId)).toEqual(['shoes', 'boots']);
+				});
+
+				it('sends a preflight request when queries change for the beacon siteId passed in a different case', async () => {
+					const upperCaseSiteId = siteId.toUpperCase();
+					const upperCaseBeacon = new Beacon({ siteId: upperCaseSiteId }, mockConfig);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+					mockFetchApi.mockClear();
+
+					upperCaseBeacon.storage.searched.add(['boots'], siteId);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).toHaveBeenCalledWith(
+						expect.stringContaining('/v1/preflight'),
+						expect.objectContaining({ body: expect.stringContaining('"lastSearches":["boots"]') })
+					);
 				});
 
 				it('does not send a preflight request when queries change for another siteId', async () => {

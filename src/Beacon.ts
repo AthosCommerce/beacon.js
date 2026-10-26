@@ -556,7 +556,7 @@ export class Beacon {
 				// re-read from storage so a failed or disabled write does not send a preflight
 				// queries for other siteIds are sent on their own requests
 				const lastSearchesHaveChanged = JSON.stringify(this.getLastSearches(searchedSiteId)) !== stringifiedLastSearches;
-				if (lastSearchesHaveChanged && searchedSiteId === this.globals.siteId) {
+				if (lastSearchesHaveChanged && searchedSiteId === getSearchedSiteId(undefined, this.globals.siteId)) {
 					this._sendPreflight();
 				}
 			},
@@ -566,6 +566,17 @@ export class Beacon {
 					const timestamp = this.getTimestamp();
 					const addedItems = queries.map((query) => ({ query: `${query || ''}`, timestamp }));
 					this.storage.searched.set([...addedItems, ...this.storage.searched.get(siteId)], siteId);
+				}
+			},
+			remove: (queries: string[], siteId?: string): void => {
+				// queries are matched case insensitively, the same way they are de-duplicated
+				if (queries.length) {
+					const queriesToRemove = queries.map((query) => `${query || ''}`.trim().toLowerCase());
+					const storedItems = this.storage.searched.get(siteId);
+					const remainingItems = storedItems.filter((item) => !queriesToRemove.includes(item.query.trim().toLowerCase()));
+					if (remainingItems.length !== storedItems.length) {
+						this.storage.searched.set(remainingItems, siteId);
+					}
 				}
 			},
 			clear: (siteId?: string): void => {
@@ -1642,7 +1653,7 @@ function getKeyPair(keyName: keyof typeof STORAGE_KEYS, siteId: string): KeyPair
 }
 
 function getSearchedSiteId(siteId: string | undefined, defaultSiteId: string): string {
-	return `${siteId || ''}`.trim().toLowerCase() || defaultSiteId;
+	return (`${siteId || ''}`.trim() || `${defaultSiteId || ''}`.trim()).toLowerCase();
 }
 
 function isSearchedQuery(item: unknown): item is SearchedQuery {
