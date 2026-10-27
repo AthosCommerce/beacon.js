@@ -461,7 +461,7 @@ export class Beacon {
 					// keep only the first (most recent) entry per parent and per product (e.g. legacy cookie entries)
 					.filter((item) => {
 						const productId = this.getProductId(item);
-						if (seenParentIds.has(item.parentId) || seenProductIds.has(productId)) {
+						if ((item.parentId && seenParentIds.has(item.parentId)) || seenProductIds.has(productId)) {
 							return false;
 						}
 						seenParentIds.add(item.parentId);

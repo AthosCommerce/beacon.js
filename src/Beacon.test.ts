@@ -254,6 +254,18 @@ for (const { isAthos, siteId } of [
 					expect(beacon.storage.viewed.get()).toStrictEqual([parent1VariantB, parent2VariantA]);
 				});
 
+				it('does not merge different products without a parentId (sku-only views)', () => {
+					const skuOnlyA = { uid: 'skuOnlyA', parentId: '', sku: 'skuOnlyA' };
+					const skuOnlyB = { uid: 'skuOnlyB', parentId: '', sku: 'skuOnlyB' };
+
+					beacon.storage.viewed.add([skuOnlyA]);
+					beacon.storage.viewed.add([skuOnlyB]);
+					beacon.storage.viewed.add([parent1VariantA]);
+					beacon.storage.viewed.add([skuOnlyA]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([skuOnlyA, parent1VariantA, skuOnlyB]);
+				});
+
 				it('replaces legacy cookie entries for the same product', () => {
 					global.document.cookie = `${STORAGE_KEYS.viewedProducts[storageArea]}=${parent1VariantA.sku},${parent2VariantA.sku}`;
 
