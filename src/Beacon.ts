@@ -106,6 +106,21 @@ export type PreflightRequestModel = {
 	shopper?: string;
 	cart?: string[];
 	lastViewed?: string[];
+	lastSearches?: string[];
+};
+
+export type PreflightOverrides = {
+	userId?: string;
+	siteId?: string;
+	shopper?: string;
+	cart?: Product[];
+	lastViewed?: ProductPageviewSchemaDataResult[];
+	lastSearches?: string[];
+};
+
+export type SearchedQuery = {
+	query: string;
+	timestamp: string;
 };
 
 export type BeaconConfig = {
@@ -162,11 +177,14 @@ const MAX_EXPIRATION = 47304000000; // 18 months
 const THIRTY_MINUTES = 1800000; // 30 minutes
 export const PAGE_LOAD_ID_EXPIRATION = 10000; // 10 seconds
 const MAX_VIEWED_COUNT = 20;
+const MAX_SEARCHED_COUNT = 10;
+const MAX_SEARCHED_AGE = 1209600000; // 2 weeks
 const EXPIRED_COOKIE = -1;
 export const COOKIE_DOMAIN =
 	(typeof window !== 'undefined' && window.location.hostname && '.' + window.location.hostname.replace(/^www\./, '')) || undefined;
 
-export type KeyPair = { primary: string; legacy: string };
+// perSite keys are suffixed with the siteId they are stored for
+export type KeyPair = { primary: string; legacy: string; perSite?: boolean };
 
 export const USER_ID = 'userId';
 const PAGE_LOAD_ID = 'pageLoadId';
@@ -174,9 +192,17 @@ const SESSION_ID = 'sessionId';
 const SHOPPER_ID = 'shopperId';
 const CART_PRODUCTS = 'cartProducts';
 const VIEWED_PRODUCTS = 'viewedProducts';
+const SEARCHED_QUERIES = 'searchedQueries';
 const ATTRIBUTION = 'attribution';
 export const STORAGE_KEYS: Record<
-	typeof USER_ID | typeof PAGE_LOAD_ID | typeof SESSION_ID | typeof SHOPPER_ID | typeof CART_PRODUCTS | typeof VIEWED_PRODUCTS | typeof ATTRIBUTION,
+	| typeof USER_ID
+	| typeof PAGE_LOAD_ID
+	| typeof SESSION_ID
+	| typeof SHOPPER_ID
+	| typeof CART_PRODUCTS
+	| typeof VIEWED_PRODUCTS
+	| typeof SEARCHED_QUERIES
+	| typeof ATTRIBUTION,
 	KeyPair
 > = {
 	[USER_ID]: { primary: 'athosUserId', legacy: 'ssUserId' },
@@ -185,6 +211,7 @@ export const STORAGE_KEYS: Record<
 	[SHOPPER_ID]: { primary: 'athosShopperId', legacy: 'ssShopperId' },
 	[CART_PRODUCTS]: { primary: 'athosCartProducts', legacy: 'ssCartProducts' },
 	[VIEWED_PRODUCTS]: { primary: 'athosViewedProducts', legacy: 'ssViewedProducts' },
+	[SEARCHED_QUERIES]: { primary: 'athosSearchedQueries', legacy: 'ssSearchedQueries', perSite: true },
 	[ATTRIBUTION]: { primary: 'athosAttribution', legacy: 'ssAttribution' },
 };
 
@@ -271,8 +298,8 @@ export class Beacon {
 		}
 	}
 
-	private getLocalStorageItem<T = LocalStorageItem>(keyName: keyof typeof STORAGE_KEYS): T | undefined {
-		const keys = getKeysRead(keyName, this.globals.siteId);
+	private getLocalStorageItem<T = LocalStorageItem>(keyName: keyof typeof STORAGE_KEYS, siteId: string = this.globals.siteId): T | undefined {
+		const keys = getKeysRead(keyName, siteId);
 		if (typeof window !== 'undefined' && featureFlags.storage) {
 			let rawData = '';
 			for (const key of keys) {
@@ -298,8 +325,8 @@ export class Beacon {
 		}
 	}
 
-	private setLocalStorageItem(keyName: keyof typeof STORAGE_KEYS, value: LocalStorageItem): void {
-		const keys = getKeysWrite(keyName, this.globals.siteId);
+	private setLocalStorageItem(keyName: keyof typeof STORAGE_KEYS, value: LocalStorageItem, siteId: string = this.globals.siteId): void {
+		const keys = getKeysWrite(keyName, siteId);
 		if (typeof window !== 'undefined' && featureFlags.storage) {
 			try {
 				const item = JSON.stringify({ value });
@@ -336,7 +363,7 @@ export class Beacon {
 						}
 					} catch {
 						// corrupted - delete entry
-						removeStorageItemsForKey(CART_PRODUCTS);
+						removeStorageItemsForKey(CART_PRODUCTS, this.globals.siteId);
 
 						this.setCookie(CART_PRODUCTS, '', COOKIE_SAMESITE, 0, COOKIE_DOMAIN);
 					}
@@ -359,7 +386,7 @@ export class Beacon {
 				try {
 					this.setLocalStorageItem(CART_PRODUCTS, products);
 				} catch (e) {
-					sendStorageError(e, this, CART_PRODUCTS, stringifiedProducts);
+					sendStorageError(e, this, CART_PRODUCTS, stringifiedProducts, this.globals.siteId);
 				}
 
 				// also set cookie with re-mapping - favoring the more specific variant
@@ -437,7 +464,7 @@ export class Beacon {
 						}
 					} catch {
 						// corrupted - delete entry
-						removeStorageItemsForKey(VIEWED_PRODUCTS);
+						removeStorageItemsForKey(VIEWED_PRODUCTS, this.globals.siteId);
 
 						this.setCookie(VIEWED_PRODUCTS, '', COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
 					}
@@ -479,7 +506,7 @@ export class Beacon {
 				try {
 					this.setLocalStorageItem(VIEWED_PRODUCTS, normalizedItems);
 				} catch (e) {
-					sendStorageError(e, this, VIEWED_PRODUCTS, stringifiedNormalizedItems);
+					sendStorageError(e, this, VIEWED_PRODUCTS, stringifiedNormalizedItems, this.globals.siteId);
 				}
 
 				// also set cookie with re-mapping - favoring the more specific variant
@@ -498,6 +525,66 @@ export class Beacon {
 					// add items to front of array (last product is the most recent) - set removes older entries for the same parent or product
 					this.storage.viewed.set([...products].reverse().concat(this.storage.viewed.get()));
 				}
+			},
+		},
+		searched: {
+			get: (siteId?: string): SearchedQuery[] => {
+				const storedItems = this.getLocalStorageItem(SEARCHED_QUERIES, getSearchedSiteId(siteId, this.globals.siteId));
+				if (Array.isArray(storedItems)) {
+					return storedItems.filter(isSearchedQuery);
+				}
+				return [];
+			},
+			set: (queries: SearchedQuery[], siteId?: string): void => {
+				const searchedSiteId = getSearchedSiteId(siteId, this.globals.siteId);
+				const stringifiedLastSearches = JSON.stringify(this.getLastSearches(searchedSiteId));
+
+				// most recent first - the first occurrence of a query (case insensitive) is kept
+				const seenQueries = new Set<string>();
+				const normalizedItems: SearchedQuery[] = [];
+				queries.filter(isSearchedQuery).forEach((item) => {
+					const query = item.query.trim();
+					if (query && !seenQueries.has(query.toLowerCase()) && normalizedItems.length < MAX_SEARCHED_COUNT) {
+						seenQueries.add(query.toLowerCase());
+						normalizedItems.push({ query, timestamp: item.timestamp });
+					}
+				});
+
+				try {
+					this.setLocalStorageItem(SEARCHED_QUERIES, normalizedItems, searchedSiteId);
+				} catch (e) {
+					sendStorageError(e, this, SEARCHED_QUERIES, JSON.stringify(normalizedItems), searchedSiteId);
+				}
+
+				// re-read from storage so a failed or disabled write does not send a preflight
+				// _sendPreflight only sends for the beacon siteId - queries for other siteIds are sent by sendPreflight({ siteId })
+				const lastSearchesHaveChanged = JSON.stringify(this.getLastSearches(searchedSiteId)) !== stringifiedLastSearches;
+				const beaconSiteId = getSearchedSiteId(undefined, this.globals.siteId);
+				if (lastSearchesHaveChanged && searchedSiteId === beaconSiteId) {
+					this._sendPreflight();
+				}
+			},
+			add: (queries: string[], siteId?: string): void => {
+				// queries are provided most recent first and added to the front of the stored queries
+				if (queries.length) {
+					const timestamp = this.getTimestamp();
+					const addedItems = queries.map((query) => ({ query: `${query || ''}`, timestamp }));
+					this.storage.searched.set([...addedItems, ...this.storage.searched.get(siteId)], siteId);
+				}
+			},
+			remove: (queries: string[], siteId?: string): void => {
+				// queries are matched case insensitively, the same way they are de-duplicated
+				if (queries.length) {
+					const queriesToRemove = queries.map((query) => `${query || ''}`.trim().toLowerCase());
+					const storedItems = this.storage.searched.get(siteId);
+					const remainingItems = storedItems.filter((item) => !queriesToRemove.includes(item.query.trim().toLowerCase()));
+					if (remainingItems.length !== storedItems.length) {
+						this.storage.searched.set(remainingItems, siteId);
+					}
+				}
+			},
+			clear: (siteId?: string): void => {
+				this.storage.searched.set([], siteId);
 			},
 		},
 	};
@@ -1097,7 +1184,7 @@ export class Beacon {
 			this.setLocalStorageItem(keyName, data);
 		} catch (e) {
 			// failed to save value - storage may be disabled
-			sendStorageError(e, this, keyName, data.value);
+			sendStorageError(e, this, keyName, data.value, this.globals.siteId);
 		}
 
 		return data.value;
@@ -1124,7 +1211,7 @@ export class Beacon {
 			this.setLocalStorageItem(PAGE_LOAD_ID, { href: currentHref, value: pageLoadId, timestamp: this.getTimestamp() });
 		} catch (e) {
 			// failed to save value - storage may be disabled
-			sendStorageError(e, this, PAGE_LOAD_ID, pageLoadId);
+			sendStorageError(e, this, PAGE_LOAD_ID, pageLoadId, this.globals.siteId);
 		}
 
 		return pageLoadId;
@@ -1166,7 +1253,7 @@ export class Beacon {
 		try {
 			this.setLocalStorageItem(SHOPPER_ID, this.shopperId);
 		} catch (e) {
-			sendStorageError(e, this, SHOPPER_ID, this.shopperId);
+			sendStorageError(e, this, SHOPPER_ID, this.shopperId, this.globals.siteId);
 		}
 		if (existingShopperId !== shopperId) {
 			this.events.shopper.login({ data: { id: this.shopperId } });
@@ -1216,7 +1303,7 @@ export class Beacon {
 			try {
 				this.setLocalStorageItem(ATTRIBUTION, attribution);
 			} catch (e) {
-				sendStorageError(e, this, ATTRIBUTION, stringifiedAttribution);
+				sendStorageError(e, this, ATTRIBUTION, stringifiedAttribution, this.globals.siteId);
 			}
 			this.attribution = attribution;
 			return [...attribution];
@@ -1402,18 +1489,13 @@ export class Beacon {
 		}, PREFLIGHT_DEBOUNCE_TIMEOUT);
 	}
 
-	public sendPreflight(overrides?: {
-		userId: string;
-		siteId: string;
-		shopper: string;
-		cart: Product[];
-		lastViewed: ProductPageviewSchemaDataResult[];
-	}): void {
+	public sendPreflight(overrides?: PreflightOverrides): void {
 		const userId = overrides?.userId || this.getUserId();
 		const siteId = overrides?.siteId || this.globals.siteId;
 		const shopper = overrides?.shopper || this.getShopperId();
 		const cart = overrides?.cart || this.storage.cart.get();
 		const lastViewed = overrides?.lastViewed || this.storage.viewed.get();
+		const lastSearches = overrides?.lastSearches || this.getLastSearches(siteId);
 
 		if (userId && typeof userId == 'string' && siteId) {
 			const preflightParams: PreflightRequestModel = {
@@ -1429,6 +1511,9 @@ export class Beacon {
 			}
 			if (lastViewed.length) {
 				preflightParams.lastViewed = lastViewed.map((item) => this.getProductId(item));
+			}
+			if (lastSearches.length) {
+				preflightParams.lastSearches = lastSearches;
 			}
 
 			const domain = `${siteId}`.toLowerCase().startsWith('at') ? 'athoscommerce.net' : 'searchspring.io';
@@ -1447,6 +1532,16 @@ export class Beacon {
 				});
 			}
 		}
+	}
+
+	public getLastSearches(siteId?: string): string[] {
+		return this.storage.searched
+			.get(siteId)
+			.filter((item) => {
+				const searchedAt = new Date(item.timestamp).getTime();
+				return !isNaN(searchedAt) && searchedAt > Date.now() - MAX_SEARCHED_AGE;
+			})
+			.map((item) => item.query);
 	}
 
 	protected getProductId(product: Product | ProductPageviewSchemaDataResult): string {
@@ -1553,7 +1648,7 @@ export function getCookieRaw(name: string): string {
 }
 
 function getKeysRead(keyName: keyof typeof STORAGE_KEYS, siteId: string): Array<string> {
-	const keys = STORAGE_KEYS[keyName];
+	const keys = getKeyPair(keyName, siteId);
 	if (siteId.trim().toLowerCase().startsWith('at')) {
 		return [keys.primary, keys.legacy];
 	}
@@ -1561,24 +1656,40 @@ function getKeysRead(keyName: keyof typeof STORAGE_KEYS, siteId: string): Array<
 }
 
 function getKeysWrite(keyName: keyof typeof STORAGE_KEYS, siteId: string): Array<string> {
-	const keys = STORAGE_KEYS[keyName];
+	const keys = getKeyPair(keyName, siteId);
 	if (siteId.trim().toLowerCase().startsWith('at')) {
 		return [keys.primary];
 	}
 	return [keys.legacy];
 }
 
-function removeStorageItemsForKey(keyName: keyof typeof STORAGE_KEYS): void {
+function getKeyPair(keyName: keyof typeof STORAGE_KEYS, siteId: string): KeyPair {
 	const keys = STORAGE_KEYS[keyName];
+	if (keys.perSite) {
+		return { primary: `${keys.primary}-${siteId}`, legacy: `${keys.legacy}-${siteId}` };
+	}
+	return keys;
+}
+
+function getSearchedSiteId(siteId: string | undefined, defaultSiteId: string): string {
+	return `${siteId || defaultSiteId || ''}`.trim().toLowerCase();
+}
+
+function isSearchedQuery(item: unknown): item is SearchedQuery {
+	return Boolean(item) && typeof (item as SearchedQuery).query === 'string' && typeof (item as SearchedQuery).timestamp === 'string';
+}
+
+function removeStorageItemsForKey(keyName: keyof typeof STORAGE_KEYS, siteId: string): void {
+	const keys = getKeyPair(keyName, siteId);
 	if (typeof window !== 'undefined') {
 		window.localStorage?.removeItem(keys.primary);
 		window.localStorage?.removeItem(keys.legacy);
 	}
 }
 
-function sendStorageError(e: unknown, beacon: Beacon, keyName: keyof typeof STORAGE_KEYS, value: string) {
+function sendStorageError(e: unknown, beacon: Beacon, keyName: keyof typeof STORAGE_KEYS, value: string, siteId: string) {
 	if (e instanceof Error && e.name === 'QuotaExceededError') {
-		const keys = STORAGE_KEYS[keyName];
+		const keys = getKeyPair(keyName, siteId);
 		beacon.events.error.snap({
 			data: {
 				message: 'QuotaExceededError',
