@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/AthosCommerce/beacon.js/compare/v1.3.0...v1.4.0) (2026-10-28)
+
+
+### Features
+
+* add lastSearches preflight support and per-site searched queries storage ([30ef85c](https://github.com/AthosCommerce/beacon.js/commit/30ef85c52a7b91b2acb341bcd50b6e17a066f2d2))
+* allow product.pageView event to send multiple times per pageLoad, but excludes duplicates ([f2292e9](https://github.com/AthosCommerce/beacon.js/commit/f2292e90c1e11079999c1be528466477d52db5cc))
+
+
+### Bug Fixes
+
+* don't merge viewed products that have no parentId ([0e0abbc](https://github.com/AthosCommerce/beacon.js/commit/0e0abbcd1ef2753ff7b15e754de763fddbd2e600))
+* guard viewed dedupe against empty ids and compare product ids for preflight ([456390c](https://github.com/AthosCommerce/beacon.js/commit/456390c2a773d6e0c70d72a0f638642e7b16a36e))
+* reset pageView dedupe on path change and dedupe viewed products in set ([866ea43](https://github.com/AthosCommerce/beacon.js/commit/866ea4354fb09edb9e8277d8dedc592499de7298))
+
 ## [1.3.0](https://github.com/AthosCommerce/beacon.js/compare/v1.2.3...v1.3.0) (2026-07-10)
 
 
