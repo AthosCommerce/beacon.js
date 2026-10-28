@@ -458,14 +458,18 @@ export class Beacon {
 				// remove qty and price if product is provided
 				const normalizedItems: ProductPageviewSchemaDataResult[] = products
 					.map((item) => ({ sku: item.sku, parentId: item.parentId, uid: item.uid }))
-					// keep only the first (most recent) entry per parent and per product (e.g. legacy cookie entries)
+					// keep only the first (most recent) entry per parent and per product id sent downstream (sku || uid), which also covers legacy cookie entries
 					.filter((item) => {
 						const productId = this.getProductId(item);
-						if ((item.parentId && seenParentIds.has(item.parentId)) || seenProductIds.has(productId)) {
+						if ((item.parentId && seenParentIds.has(item.parentId)) || (productId && seenProductIds.has(productId))) {
 							return false;
 						}
-						seenParentIds.add(item.parentId);
-						seenProductIds.add(productId);
+						if (item.parentId) {
+							seenParentIds.add(item.parentId);
+						}
+						if (productId) {
+							seenProductIds.add(productId);
+						}
 						return true;
 					})
 					.slice(0, MAX_VIEWED_COUNT);
@@ -482,7 +486,8 @@ export class Beacon {
 				const storedProductsCookie = normalizedItems.map((item) => this.getProductId(item)).join(',');
 				this.setCookie(VIEWED_PRODUCTS, storedProductsCookie, COOKIE_SAMESITE, MAX_EXPIRATION, COOKIE_DOMAIN);
 
-				const productsHaveChanged = JSON.stringify(currentViewedItems) !== stringifiedNormalizedItems;
+				// compare the product ids the preflight sends - cookie-restored items differ in shape and key order from stored items
+				const productsHaveChanged = currentViewedItems.map((item) => this.getProductId(item)).join(',') !== storedProductsCookie;
 				if (productsHaveChanged) {
 					this._sendPreflight();
 				}

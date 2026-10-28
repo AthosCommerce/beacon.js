@@ -266,6 +266,16 @@ for (const { isAthos, siteId } of [
 					expect(beacon.storage.viewed.get()).toStrictEqual([skuOnlyA, parent1VariantA, skuOnlyB]);
 				});
 
+				it('does not merge different products on an empty product id', () => {
+					const noIdA = { uid: '', parentId: 'parent1' };
+					const noIdB = { uid: '', parentId: 'parent2' };
+
+					beacon.storage.viewed.add([noIdA]);
+					beacon.storage.viewed.add([noIdB]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([noIdB, noIdA]);
+				});
+
 				it('replaces legacy cookie entries for the same product', () => {
 					global.document.cookie = `${STORAGE_KEYS.viewedProducts[storageArea]}=${parent1VariantA.sku},${parent2VariantA.sku}`;
 
@@ -2012,6 +2022,17 @@ for (const { isAthos, siteId } of [
 
 				const preflightCall = mockFetchApi.mock.calls.find(([url]) => `${url}`.endsWith('/v1/preflight'));
 				expect(JSON.parse(preflightCall[1].body).lastViewed).toStrictEqual(['sku123']);
+			});
+
+			it('does not send a preflight when a product restored from the cookie is viewed again', async () => {
+				global.document.cookie = `${STORAGE_KEYS.viewedProducts[storageArea]}=sku123`;
+
+				beacon.storage.viewed.add([{ uid: 'uid123', sku: 'sku123', parentId: 'parent123' }]);
+
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+
+				expect(mockFetchApi.mock.calls.filter(([url]) => `${url}`.endsWith('/v1/preflight'))).toStrictEqual([]);
 			});
 
 			it('can sendPreflight via POST', async () => {
