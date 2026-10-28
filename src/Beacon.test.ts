@@ -199,6 +199,476 @@ for (const { isAthos, siteId } of [
 					expect(localStorageMock.getItem(STORAGE_KEYS.cartProducts[storageArea])).toBe(JSON.stringify({ value: [] }));
 				});
 			});
+			describe('Viewed', () => {
+				const parent1VariantA = { uid: 'parent1VariantA', parentId: 'parent1', sku: 'parent1SkuA' };
+				const parent1VariantB = { uid: 'parent1VariantB', parentId: 'parent1', sku: 'parent1SkuB' };
+				const parent2VariantA = { uid: 'parent2VariantA', parentId: 'parent2', sku: 'parent2SkuA' };
+
+				it('adds viewed products to the front', () => {
+					beacon.storage.viewed.add([parent1VariantA]);
+					beacon.storage.viewed.add([parent2VariantA]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([parent2VariantA, parent1VariantA]);
+				});
+
+				it('keeps one entry per parent, replacing it with the latest variant and moving it to the front', () => {
+					beacon.storage.viewed.add([parent1VariantA]);
+					beacon.storage.viewed.add([parent2VariantA]);
+					beacon.storage.viewed.add([parent1VariantB]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([parent1VariantB, parent2VariantA]);
+				});
+
+				it('keeps only the last variant of a parent when multiple are added at once', () => {
+					beacon.storage.viewed.add([parent1VariantA, parent2VariantA, parent1VariantB]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([parent1VariantB, parent2VariantA]);
+				});
+
+				it('does not keep the same product under multiple parents', () => {
+					const sameVariantOtherParent = { ...parent1VariantA, parentId: 'parent3' };
+
+					beacon.storage.viewed.add([parent1VariantA]);
+					beacon.storage.viewed.add([sameVariantOtherParent]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([sameVariantOtherParent]);
+				});
+
+				it('removes every stored variant of a parent', () => {
+					const parent1VariantC = { uid: 'parent1VariantC', parentId: 'parent1', sku: 'parent1SkuC' };
+					localStorageMock.setItem(
+						STORAGE_KEYS.viewedProducts[storageArea],
+						JSON.stringify({ value: [parent1VariantA, parent1VariantB, parent2VariantA] })
+					);
+
+					beacon.storage.viewed.add([parent1VariantC]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([parent1VariantC, parent2VariantA]);
+				});
+
+				it('keeps only the first entry per parent and product when set directly', () => {
+					const sameVariantOtherParent = { ...parent2VariantA, parentId: 'parent3' };
+
+					beacon.storage.viewed.set([parent1VariantB, parent2VariantA, parent1VariantA, sameVariantOtherParent]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([parent1VariantB, parent2VariantA]);
+				});
+
+				it('does not merge different products without a parentId (sku-only views)', () => {
+					const skuOnlyA = { uid: 'skuOnlyA', parentId: '', sku: 'skuOnlyA' };
+					const skuOnlyB = { uid: 'skuOnlyB', parentId: '', sku: 'skuOnlyB' };
+
+					beacon.storage.viewed.add([skuOnlyA]);
+					beacon.storage.viewed.add([skuOnlyB]);
+					beacon.storage.viewed.add([parent1VariantA]);
+					beacon.storage.viewed.add([skuOnlyA]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([skuOnlyA, parent1VariantA, skuOnlyB]);
+				});
+
+				it('does not merge different products on an empty product id', () => {
+					const noIdA = { uid: '', parentId: 'parent1' };
+					const noIdB = { uid: '', parentId: 'parent2' };
+
+					beacon.storage.viewed.add([noIdA]);
+					beacon.storage.viewed.add([noIdB]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([noIdB, noIdA]);
+				});
+
+				it('replaces legacy cookie entries for the same product', () => {
+					global.document.cookie = `${STORAGE_KEYS.viewedProducts[storageArea]}=${parent1VariantA.sku},${parent2VariantA.sku}`;
+
+					beacon.storage.viewed.add([parent1VariantA]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([
+						parent1VariantA,
+						{ uid: parent2VariantA.sku, parentId: parent2VariantA.sku, sku: parent2VariantA.sku },
+					]);
+				});
+			});
+
+			describe('Searched', () => {
+				const timestamp = '2026-09-23T14:00:00.000Z';
+				const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+				const searchedQueriesKey = isAthos ? 'athosSearchedQueries-athos0' : 'ssSearchedQueries-abc123';
+				const readStored = () => JSON.parse(localStorageMock.getItem(searchedQueriesKey) || '{}').value;
+				const getQueries = (siteId?: string) => beacon.storage.searched.get(siteId).map((item) => item.query);
+
+				beforeEach(() => {
+					jest.setSystemTime(new Date(timestamp));
+				});
+
+				it('returns an empty array when nothing has been searched', () => {
+					expect(beacon.storage.searched.get()).toEqual([]);
+				});
+
+				it('can add searched queries and returns them most recent first with their timestamp', () => {
+					beacon.storage.searched.add(['shoes']);
+					beacon.storage.searched.add(['boots']);
+
+					expect(beacon.storage.searched.get()).toEqual([
+						{ query: 'boots', timestamp },
+						{ query: 'shoes', timestamp },
+					]);
+				});
+
+				it('adds several queries keeping the first as the most recent', () => {
+					beacon.storage.searched.add(['boots']);
+					beacon.storage.searched.add(['hats', 'gloves']);
+
+					expect(getQueries()).toEqual(['hats', 'gloves', 'boots']);
+				});
+
+				it('stores each query with an ISO timestamp', () => {
+					beacon.storage.searched.add(['shoes']);
+
+					expect(localStorageMock.getItem(searchedQueriesKey)).toBe(JSON.stringify({ value: [{ query: 'shoes', timestamp }] }));
+				});
+
+				it('stores and returns queries containing special characters unchanged', () => {
+					const query = 'red & blue, 50% off / "sale"';
+					beacon.storage.searched.add([query]);
+
+					expect(readStored()[0].query).toBe(query);
+					expect(getQueries()).toEqual([query]);
+				});
+
+				it('moves an existing query to the front with a new timestamp when searched again (case insensitive)', () => {
+					beacon.storage.searched.add(['shoes']);
+					beacon.storage.searched.add(['boots']);
+					const laterTimestamp = '2026-09-24T14:00:00.000Z';
+					jest.setSystemTime(new Date(laterTimestamp));
+					beacon.storage.searched.add(['Shoes']);
+
+					expect(beacon.storage.searched.get()).toEqual([
+						{ query: 'Shoes', timestamp: laterTimestamp },
+						{ query: 'boots', timestamp },
+					]);
+				});
+
+				it('trims queries and ignores empty queries', () => {
+					beacon.storage.searched.add(['  shoes  ', '', '   ']);
+
+					expect(getQueries()).toEqual(['shoes']);
+				});
+
+				it('limits stored queries to the 10 most recent', () => {
+					for (let i = 1; i <= 12; i++) {
+						beacon.storage.searched.add([`query${i}`]);
+					}
+
+					const searched = getQueries();
+					expect(searched).toHaveLength(10);
+					expect(searched[0]).toBe('query12');
+					expect(searched[9]).toBe('query3');
+				});
+
+				it('can set searched queries directly', () => {
+					const items = [
+						{ query: 'hats', timestamp },
+						{ query: 'gloves', timestamp: daysAgo(3) },
+					];
+					beacon.storage.searched.set(items);
+
+					expect(beacon.storage.searched.get()).toEqual(items);
+					expect(readStored()).toEqual(items);
+				});
+
+				it('de-duplicates queries (case insensitive) keeping the first occurrence when set directly', () => {
+					beacon.storage.searched.set(['Boots', ' boots ', 'shoes', 'SHOES', 'hats'].map((query) => ({ query, timestamp })));
+
+					expect(getQueries()).toEqual(['Boots', 'shoes', 'hats']);
+				});
+
+				it('can clear searched queries', () => {
+					beacon.storage.searched.add(['shoes']);
+					beacon.storage.searched.clear();
+
+					expect(beacon.storage.searched.get()).toEqual([]);
+					expect(localStorageMock.getItem(searchedQueriesKey)).toBe(JSON.stringify({ value: [] }));
+				});
+
+				it('can remove searched queries case insensitively', () => {
+					beacon.storage.searched.add(['shoes', 'Boots', 'hats']);
+
+					beacon.storage.searched.remove(['boots', ' HATS ']);
+
+					expect(beacon.storage.searched.get()).toEqual([{ query: 'shoes', timestamp }]);
+				});
+
+				it('does not write to storage when removing a query that was not searched', () => {
+					beacon.storage.searched.add(['shoes']);
+					localStorageMock.setItem.mockClear();
+
+					beacon.storage.searched.remove(['boots']);
+
+					expect(localStorageMock.setItem).not.toHaveBeenCalled();
+					expect(getQueries()).toEqual(['shoes']);
+				});
+
+				it('sends a preflight request with the remaining queries when a query is removed', async () => {
+					beacon.storage.searched.add(['shoes', 'boots']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+					mockFetchApi.mockClear();
+
+					beacon.storage.searched.remove(['boots']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).toHaveBeenCalledWith(
+						expect.stringContaining('/v1/preflight'),
+						expect.objectContaining({ body: expect.stringContaining('"lastSearches":["shoes"]') })
+					);
+				});
+
+				it('keeps queries older than 2 weeks in storage', () => {
+					const expired = { query: 'boots', timestamp: daysAgo(15) };
+					localStorageMock.setItem(searchedQueriesKey, JSON.stringify({ value: [expired] }));
+
+					beacon.storage.searched.add(['shoes']);
+
+					expect(beacon.storage.searched.get()).toEqual([{ query: 'shoes', timestamp }, expired]);
+				});
+
+				it('keeps the original timestamp of existing queries when another query is added', () => {
+					const existing = { query: 'boots', timestamp: daysAgo(3) };
+					localStorageMock.setItem(searchedQueriesKey, JSON.stringify({ value: [existing] }));
+
+					beacon.storage.searched.add(['shoes']);
+
+					expect(readStored()).toEqual([{ query: 'shoes', timestamp }, existing]);
+				});
+
+				it('ignores malformed stored entries', () => {
+					const valid = { query: 'shoes', timestamp };
+					localStorageMock.setItem(
+						searchedQueriesKey,
+						JSON.stringify({
+							value: [valid, { query: 123, timestamp }, { query: 'gloves' }, { value: 'hats', timestamp }, 'boots', null],
+						})
+					);
+
+					expect(beacon.storage.searched.get()).toEqual([valid]);
+				});
+
+				it('sends a preflight request when searched queries change', async () => {
+					beacon.storage.searched.add(['shoes']);
+
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
+				});
+
+				it('does not send a preflight request when searched queries are unchanged', async () => {
+					beacon.storage.searched.add(['shoes']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+					mockFetchApi.mockClear();
+
+					beacon.storage.searched.set(beacon.storage.searched.get());
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).not.toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
+				});
+
+				it('does not send a preflight request when the most recent query is searched again', async () => {
+					beacon.storage.searched.add(['shoes']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+					mockFetchApi.mockClear();
+
+					jest.setSystemTime(new Date('2026-09-24T14:00:00.000Z'));
+					beacon.storage.searched.add(['shoes']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).not.toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
+				});
+
+				it('sends a preflight request when a query older than 2 weeks is searched again', async () => {
+					localStorageMock.setItem(searchedQueriesKey, JSON.stringify({ value: [{ query: 'shoes', timestamp: daysAgo(15) }] }));
+
+					beacon.storage.searched.add(['shoes']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
+				});
+
+				it('does not send a preflight request when storing the queries fails', async () => {
+					const quotaError = new Error('quota exceeded');
+					quotaError.name = 'QuotaExceededError';
+					localStorageMock.setItem.mockImplementationOnce(() => {
+						throw quotaError;
+					});
+					const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+					beacon.storage.searched.add(['shoes']);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(beacon.storage.searched.get()).toEqual([]);
+					expect(mockFetchApi).not.toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
+					warnSpy.mockRestore();
+				});
+
+				it('stores queries under a key namespaced by the beacon siteId', () => {
+					beacon.storage.searched.add(['shoes']);
+
+					expect(readStored()).toEqual([{ query: 'shoes', timestamp }]);
+					expect(localStorageMock.getItem(STORAGE_KEYS.searchedQueries.primary)).toBeNull();
+					expect(localStorageMock.getItem(STORAGE_KEYS.searchedQueries.legacy)).toBeNull();
+				});
+
+				it('keeps queries for each siteId separate', () => {
+					beacon.storage.searched.add(['boots'], 'other1');
+					beacon.storage.searched.add(['shoes']);
+
+					expect(getQueries()).toEqual(['shoes']);
+					expect(getQueries('other1')).toEqual(['boots']);
+				});
+
+				it('normalizes the siteId used to namespace queries', () => {
+					beacon.storage.searched.add(['boots'], ' OTHER1 ');
+
+					expect(getQueries('other1')).toEqual(['boots']);
+					expect(localStorageMock.getItem('ssSearchedQueries-other1')).not.toBeNull();
+				});
+
+				it('picks the athos or legacy key from the namespaced siteId', () => {
+					beacon.storage.searched.add(['boots'], 'atother');
+					beacon.storage.searched.add(['shoes'], 'ssother');
+
+					expect(JSON.parse(localStorageMock.getItem('athosSearchedQueries-atother') || '{}').value[0].query).toBe('boots');
+					expect(JSON.parse(localStorageMock.getItem('ssSearchedQueries-ssother') || '{}').value[0].query).toBe('shoes');
+				});
+
+				it('only sets and clears queries for the given siteId', () => {
+					beacon.storage.searched.set(
+						['boots', 'hats'].map((query) => ({ query, timestamp })),
+						'other1'
+					);
+					beacon.storage.searched.add(['shoes']);
+
+					beacon.storage.searched.clear('other1');
+
+					expect(getQueries('other1')).toEqual([]);
+					expect(getQueries()).toEqual(['shoes']);
+				});
+
+				it('only removes queries for the given siteId', () => {
+					beacon.storage.searched.add(['boots'], 'other1');
+					beacon.storage.searched.add(['boots']);
+
+					beacon.storage.searched.remove(['boots'], 'other1');
+
+					expect(getQueries('other1')).toEqual([]);
+					expect(getQueries()).toEqual(['boots']);
+				});
+
+				it('uses the same queries for the beacon siteId whether or not it is passed', () => {
+					const upperCaseSiteId = siteId.toUpperCase();
+					const upperCaseBeacon = new Beacon({ siteId: upperCaseSiteId }, mockConfig);
+
+					upperCaseBeacon.storage.searched.add(['boots'], upperCaseSiteId);
+					upperCaseBeacon.storage.searched.add(['shoes']);
+
+					expect(upperCaseBeacon.getLastSearches()).toEqual(['shoes', 'boots']);
+					expect(upperCaseBeacon.getLastSearches(upperCaseSiteId)).toEqual(['shoes', 'boots']);
+				});
+
+				it('sends a preflight request when queries change for the beacon siteId passed in a different case', async () => {
+					const upperCaseSiteId = siteId.toUpperCase();
+					const upperCaseBeacon = new Beacon({ siteId: upperCaseSiteId }, mockConfig);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+					mockFetchApi.mockClear();
+
+					upperCaseBeacon.storage.searched.add(['boots'], siteId);
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).toHaveBeenCalledWith(
+						expect.stringContaining('/v1/preflight'),
+						expect.objectContaining({ body: expect.stringContaining('"lastSearches":["boots"]') })
+					);
+				});
+
+				it('does not send a preflight request when queries change for another siteId', async () => {
+					beacon.storage.searched.add(['boots'], 'other1');
+
+					jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+					await flushPromises();
+
+					expect(mockFetchApi).not.toHaveBeenCalledWith(expect.stringContaining('/v1/preflight'), expect.any(Object));
+				});
+
+				it('reports the namespaced key when storage quota is exceeded', () => {
+					const quotaError = new Error('quota exceeded');
+					quotaError.name = 'QuotaExceededError';
+					localStorageMock.setItem.mockImplementationOnce(() => {
+						throw quotaError;
+					});
+					const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+					const errorSpy = jest.spyOn(beacon.events.error, 'snap');
+
+					beacon.storage.searched.add(['boots'], 'other1');
+
+					expect(errorSpy).toHaveBeenCalledWith({
+						data: {
+							message: 'QuotaExceededError',
+							details: {
+								key: 'ssSearchedQueries-other1',
+								keyPrimary: 'athosSearchedQueries-other1',
+								value: expect.stringContaining('boots'),
+							},
+						},
+					});
+					warnSpy.mockRestore();
+				});
+
+				describe('getLastSearches', () => {
+					it('returns the queries searched within the past 2 weeks, most recent first', () => {
+						localStorageMock.setItem(
+							searchedQueriesKey,
+							JSON.stringify({
+								value: [
+									{ query: 'shoes', timestamp: daysAgo(1) },
+									{ query: 'hats', timestamp: daysAgo(13) },
+									{ query: 'boots', timestamp: daysAgo(15) },
+								],
+							})
+						);
+
+						expect(beacon.getLastSearches()).toEqual(['shoes', 'hats']);
+					});
+
+					it('ignores queries with an invalid timestamp', () => {
+						localStorageMock.setItem(
+							searchedQueriesKey,
+							JSON.stringify({
+								value: [
+									{ query: 'shoes', timestamp },
+									{ query: 'hats', timestamp: 'not-a-date' },
+								],
+							})
+						);
+
+						expect(beacon.getLastSearches()).toEqual(['shoes']);
+					});
+
+					it('returns the queries of the given siteId', () => {
+						beacon.storage.searched.add(['boots'], 'other1');
+						beacon.storage.searched.add(['shoes']);
+
+						expect(beacon.getLastSearches('other1')).toEqual(['boots']);
+					});
+				});
+			});
 			describe('Methods', () => {
 				it('can getStoredId', async () => {
 					// must use real timers with cookie expiration
@@ -1394,6 +1864,99 @@ for (const { isAthos, siteId } of [
 					expect(spy).toHaveBeenCalled();
 					expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 				});
+
+				describe('pageView deduplication', () => {
+					const variantA = { uid: 'variantA', parentId: 'parent1', sku: 'skuA' };
+					const variantB = { uid: 'variantB', parentId: 'parent1', sku: 'skuB' };
+
+					it('does not resend a pageView for the same variant within the same page load', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.events.product.pageView({ data: { result: variantA } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(1);
+					});
+
+					it('sends a pageView for each unique variant but not when toggling back and forth', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.events.product.pageView({ data: { result: variantB } });
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.events.product.pageView({ data: { result: variantB } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(2);
+						expect(spy.mock.calls[0][0].productPageviewSchema.data.result).toStrictEqual(variantA);
+						expect(spy.mock.calls[1][0].productPageviewSchema.data.result).toStrictEqual(variantB);
+					});
+
+					it('resends a previously viewed variant after a new page load', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.pageLoad();
+						beacon.events.product.pageView({ data: { result: variantA } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(2);
+						expect(spy.mock.calls[0][0].productPageviewSchema.context.pageLoadId).not.toBe(
+							spy.mock.calls[1][0].productPageviewSchema.context.pageLoadId
+						);
+					});
+
+					it('resends a previously viewed variant when pageLoadId is updated via updateContext', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.updateContext('pageLoadId', 'new-page-load-id');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(2);
+						expect(spy.mock.calls[1][0].productPageviewSchema.context.pageLoadId).toBe('new-page-load-id');
+					});
+
+					it('still updates viewed products when a duplicate pageView is skipped', () => {
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.events.product.pageView({ data: { result: variantB } });
+						beacon.events.product.pageView({ data: { result: variantA } });
+
+						expect(beacon.storage.viewed.get()).toStrictEqual([variantA]);
+					});
+
+					it('resends a previously viewed variant when the page path changes', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+						const variantC = { uid: 'variantC', parentId: 'parent2', sku: 'skuC' };
+
+						beacon.updateContext('pageUrl', 'https://example.com/products/a');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.updateContext('pageUrl', 'https://example.com/products/c');
+						beacon.events.product.pageView({ data: { result: variantC } });
+						beacon.updateContext('pageUrl', 'https://example.com/products/a');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(3);
+						expect(spy.mock.calls[2][0].productPageviewSchema.data.result).toStrictEqual(variantA);
+					});
+
+					it('does not resend a previously viewed variant when only the query string or hash changes', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+
+						beacon.updateContext('pageUrl', 'https://example.com/products/a?variant=A');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.updateContext('pageUrl', 'https://example.com/products/a?variant=B#reviews');
+						beacon.events.product.pageView({ data: { result: variantB } });
+						beacon.updateContext('pageUrl', 'https://example.com/products/a?variant=A');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(2);
+					});
+				});
 			});
 			describe('Cart', () => {
 				it('can process add event', async () => {
@@ -1828,6 +2391,32 @@ for (const { isAthos, siteId } of [
 		});
 
 		describe('sendPreflight', () => {
+			it('does not send duplicate lastViewed product ids', async () => {
+				[
+					{ uid: 'uid123', sku: 'sku123', parentId: 'parent123' },
+					{ uid: 'uid123', sku: 'sku123', parentId: 'parent1234' },
+					{ uid: 'uid1231', sku: 'sku1231', parentId: 'parent1234' },
+					{ uid: 'uid123', sku: 'sku123', parentId: 'parent1234' },
+				].forEach((result) => beacon.events.product.pageView({ data: { result } }));
+
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+
+				const preflightCall = mockFetchApi.mock.calls.find(([url]) => `${url}`.endsWith('/v1/preflight'));
+				expect(JSON.parse(preflightCall[1].body).lastViewed).toStrictEqual(['sku123']);
+			});
+
+			it('does not send a preflight when a product restored from the cookie is viewed again', async () => {
+				global.document.cookie = `${STORAGE_KEYS.viewedProducts[storageArea]}=sku123`;
+
+				beacon.storage.viewed.add([{ uid: 'uid123', sku: 'sku123', parentId: 'parent123' }]);
+
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+
+				expect(mockFetchApi.mock.calls.filter(([url]) => `${url}`.endsWith('/v1/preflight'))).toStrictEqual([]);
+			});
+
 			it('can sendPreflight via POST', async () => {
 				// only add 1 product to be under threshold and still generate GET request
 				const items = [{ uid: 'uid123', sku: 'sku123', parentId: 'parentId123', qty: 1, price: 10.99 }];
@@ -1885,6 +2474,111 @@ for (const { isAthos, siteId } of [
 					}),
 					keepalive: true,
 				});
+			});
+
+			it('includes the lastSearches of the siteId the preflight is sent for', async () => {
+				beacon.storage.searched.add(['boots'], 'other1');
+				beacon.storage.searched.add(['shoes']);
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+				mockFetchApi.mockClear();
+
+				const userId = beacon.getUserId();
+				beacon.sendPreflight({ userId, siteId: 'other1', shopper: '', cart: [], lastViewed: [] });
+
+				expect(mockFetchApi).toHaveBeenCalledWith('https://other1.a.searchspring.io/v1/preflight', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'text/plain',
+					},
+					body: JSON.stringify({ userId, siteId: 'other1', lastSearches: ['boots'] }),
+					keepalive: true,
+				});
+			});
+
+			it('includes lastSearches (most recent first) in the preflight request', async () => {
+				beacon.storage.searched.add(['shoes']);
+				beacon.storage.searched.add(['boots & sandals']);
+
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+
+				expect(mockFetchApi).toHaveBeenCalledWith(`https://${mockGlobals.siteId}.a.${preflightDomain}/v1/preflight`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'text/plain',
+					},
+					body: JSON.stringify({
+						userId: beacon.getUserId(),
+						// @ts-ignore - accessing protected property
+						siteId: beacon.globals.siteId,
+						lastSearches: ['boots & sandals', 'shoes'],
+					}),
+					keepalive: true,
+				});
+			});
+
+			it('only includes lastSearches searched within the past 2 weeks in the preflight request', async () => {
+				const searchedQueriesKey = isAthos ? 'athosSearchedQueries-athos0' : 'ssSearchedQueries-abc123';
+				const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+				localStorageMock.setItem(searchedQueriesKey, JSON.stringify({ value: [{ query: 'boots', timestamp: daysAgo(15) }] }));
+
+				beacon.storage.searched.add(['shoes']);
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+
+				expect(mockFetchApi).toHaveBeenCalledWith(
+					expect.stringContaining('/v1/preflight'),
+					expect.objectContaining({
+						body: JSON.stringify({
+							userId: beacon.getUserId(),
+							// @ts-ignore - accessing protected property
+							siteId: beacon.globals.siteId,
+							lastSearches: ['shoes'],
+						}),
+					})
+				);
+			});
+
+			it('uses the lastSearches override instead of the stored queries', async () => {
+				beacon.storage.searched.add(['shoes']);
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+				mockFetchApi.mockClear();
+
+				beacon.sendPreflight({ lastSearches: ['boots', 'hats'] });
+
+				expect(mockFetchApi).toHaveBeenCalledWith(
+					expect.stringContaining('/v1/preflight'),
+					expect.objectContaining({
+						body: JSON.stringify({
+							userId: beacon.getUserId(),
+							// @ts-ignore - accessing protected property
+							siteId: beacon.globals.siteId,
+							lastSearches: ['boots', 'hats'],
+						}),
+					})
+				);
+			});
+
+			it('does not send lastSearches when the override is an empty array', async () => {
+				beacon.storage.searched.add(['shoes']);
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+				mockFetchApi.mockClear();
+
+				beacon.sendPreflight({ lastSearches: [] });
+
+				expect(mockFetchApi).toHaveBeenCalledWith(
+					expect.stringContaining('/v1/preflight'),
+					expect.objectContaining({
+						body: JSON.stringify({
+							userId: beacon.getUserId(),
+							// @ts-ignore - accessing protected property
+							siteId: beacon.globals.siteId,
+						}),
+					})
+				);
 			});
 		});
 	});
