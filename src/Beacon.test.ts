@@ -199,6 +199,84 @@ for (const { isAthos, siteId } of [
 					expect(localStorageMock.getItem(STORAGE_KEYS.cartProducts[storageArea])).toBe(JSON.stringify({ value: [] }));
 				});
 			});
+			describe('Viewed', () => {
+				const parent1VariantA = { uid: 'parent1VariantA', parentId: 'parent1', sku: 'parent1SkuA' };
+				const parent1VariantB = { uid: 'parent1VariantB', parentId: 'parent1', sku: 'parent1SkuB' };
+				const parent2VariantA = { uid: 'parent2VariantA', parentId: 'parent2', sku: 'parent2SkuA' };
+
+				it('adds viewed products to the front', () => {
+					beacon.storage.viewed.add([parent1VariantA]);
+					beacon.storage.viewed.add([parent2VariantA]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([parent2VariantA, parent1VariantA]);
+				});
+
+				it('keeps one entry per parent, replacing it with the latest variant and moving it to the front', () => {
+					beacon.storage.viewed.add([parent1VariantA]);
+					beacon.storage.viewed.add([parent2VariantA]);
+					beacon.storage.viewed.add([parent1VariantB]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([parent1VariantB, parent2VariantA]);
+				});
+
+				it('keeps only the last variant of a parent when multiple are added at once', () => {
+					beacon.storage.viewed.add([parent1VariantA, parent2VariantA, parent1VariantB]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([parent1VariantB, parent2VariantA]);
+				});
+
+				it('does not keep the same product under multiple parents', () => {
+					const sameVariantOtherParent = { ...parent1VariantA, parentId: 'parent3' };
+
+					beacon.storage.viewed.add([parent1VariantA]);
+					beacon.storage.viewed.add([sameVariantOtherParent]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([sameVariantOtherParent]);
+				});
+
+				it('removes every stored variant of a parent', () => {
+					const parent1VariantC = { uid: 'parent1VariantC', parentId: 'parent1', sku: 'parent1SkuC' };
+					localStorageMock.setItem(
+						STORAGE_KEYS.viewedProducts[storageArea],
+						JSON.stringify({ value: [parent1VariantA, parent1VariantB, parent2VariantA] })
+					);
+
+					beacon.storage.viewed.add([parent1VariantC]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([parent1VariantC, parent2VariantA]);
+				});
+
+				it('keeps only the first entry per parent and product when set directly', () => {
+					const sameVariantOtherParent = { ...parent2VariantA, parentId: 'parent3' };
+
+					beacon.storage.viewed.set([parent1VariantB, parent2VariantA, parent1VariantA, sameVariantOtherParent]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([parent1VariantB, parent2VariantA]);
+				});
+
+				it('does not merge different products without a parentId (sku-only views)', () => {
+					const skuOnlyA = { uid: 'skuOnlyA', parentId: '', sku: 'skuOnlyA' };
+					const skuOnlyB = { uid: 'skuOnlyB', parentId: '', sku: 'skuOnlyB' };
+
+					beacon.storage.viewed.add([skuOnlyA]);
+					beacon.storage.viewed.add([skuOnlyB]);
+					beacon.storage.viewed.add([parent1VariantA]);
+					beacon.storage.viewed.add([skuOnlyA]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([skuOnlyA, parent1VariantA, skuOnlyB]);
+				});
+
+				it('replaces legacy cookie entries for the same product', () => {
+					global.document.cookie = `${STORAGE_KEYS.viewedProducts[storageArea]}=${parent1VariantA.sku},${parent2VariantA.sku}`;
+
+					beacon.storage.viewed.add([parent1VariantA]);
+
+					expect(beacon.storage.viewed.get()).toStrictEqual([
+						parent1VariantA,
+						{ uid: parent2VariantA.sku, parentId: parent2VariantA.sku, sku: parent2VariantA.sku },
+					]);
+				});
+			});
 
 			describe('Searched', () => {
 				const timestamp = '2026-09-23T14:00:00.000Z';
@@ -1776,6 +1854,99 @@ for (const { isAthos, siteId } of [
 					expect(spy).toHaveBeenCalled();
 					expect(mockFetchApi).toHaveBeenCalledWith(expect.any(String), fetchPayloadAssertion);
 				});
+
+				describe('pageView deduplication', () => {
+					const variantA = { uid: 'variantA', parentId: 'parent1', sku: 'skuA' };
+					const variantB = { uid: 'variantB', parentId: 'parent1', sku: 'skuB' };
+
+					it('does not resend a pageView for the same variant within the same page load', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.events.product.pageView({ data: { result: variantA } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(1);
+					});
+
+					it('sends a pageView for each unique variant but not when toggling back and forth', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.events.product.pageView({ data: { result: variantB } });
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.events.product.pageView({ data: { result: variantB } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(2);
+						expect(spy.mock.calls[0][0].productPageviewSchema.data.result).toStrictEqual(variantA);
+						expect(spy.mock.calls[1][0].productPageviewSchema.data.result).toStrictEqual(variantB);
+					});
+
+					it('resends a previously viewed variant after a new page load', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.pageLoad();
+						beacon.events.product.pageView({ data: { result: variantA } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(2);
+						expect(spy.mock.calls[0][0].productPageviewSchema.context.pageLoadId).not.toBe(
+							spy.mock.calls[1][0].productPageviewSchema.context.pageLoadId
+						);
+					});
+
+					it('resends a previously viewed variant when pageLoadId is updated via updateContext', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.updateContext('pageLoadId', 'new-page-load-id');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(2);
+						expect(spy.mock.calls[1][0].productPageviewSchema.context.pageLoadId).toBe('new-page-load-id');
+					});
+
+					it('still updates viewed products when a duplicate pageView is skipped', () => {
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.events.product.pageView({ data: { result: variantB } });
+						beacon.events.product.pageView({ data: { result: variantA } });
+
+						expect(beacon.storage.viewed.get()).toStrictEqual([variantA]);
+					});
+
+					it('resends a previously viewed variant when the page path changes', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+						const variantC = { uid: 'variantC', parentId: 'parent2', sku: 'skuC' };
+
+						beacon.updateContext('pageUrl', 'https://example.com/products/a');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.updateContext('pageUrl', 'https://example.com/products/c');
+						beacon.events.product.pageView({ data: { result: variantC } });
+						beacon.updateContext('pageUrl', 'https://example.com/products/a');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(3);
+						expect(spy.mock.calls[2][0].productPageviewSchema.data.result).toStrictEqual(variantA);
+					});
+
+					it('does not resend a previously viewed variant when only the query string or hash changes', async () => {
+						const spy = jest.spyOn(beacon['apis'].product, 'productPageview');
+
+						beacon.updateContext('pageUrl', 'https://example.com/products/a?variant=A');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						beacon.updateContext('pageUrl', 'https://example.com/products/a?variant=B#reviews');
+						beacon.events.product.pageView({ data: { result: variantB } });
+						beacon.updateContext('pageUrl', 'https://example.com/products/a?variant=A');
+						beacon.events.product.pageView({ data: { result: variantA } });
+						await flushPromises();
+
+						expect(spy).toHaveBeenCalledTimes(2);
+					});
+				});
 			});
 			describe('Cart', () => {
 				it('can process add event', async () => {
@@ -2210,6 +2381,21 @@ for (const { isAthos, siteId } of [
 		});
 
 		describe('sendPreflight', () => {
+			it('does not send duplicate lastViewed product ids', async () => {
+				[
+					{ uid: 'uid123', sku: 'sku123', parentId: 'parent123' },
+					{ uid: 'uid123', sku: 'sku123', parentId: 'parent1234' },
+					{ uid: 'uid1231', sku: 'sku1231', parentId: 'parent1234' },
+					{ uid: 'uid123', sku: 'sku123', parentId: 'parent1234' },
+				].forEach((result) => beacon.events.product.pageView({ data: { result } }));
+
+				jest.advanceTimersByTime(PREFLIGHT_DEBOUNCE_TIMEOUT);
+				await flushPromises();
+
+				const preflightCall = mockFetchApi.mock.calls.find(([url]) => `${url}`.endsWith('/v1/preflight'));
+				expect(JSON.parse(preflightCall[1].body).lastViewed).toStrictEqual(['sku123']);
+			});
+
 			it('can sendPreflight via POST', async () => {
 				// only add 1 product to be under threshold and still generate GET request
 				const items = [{ uid: 'uid123', sku: 'sku123', parentId: 'parentId123', qty: 1, price: 10.99 }];
