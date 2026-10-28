@@ -554,9 +554,10 @@ export class Beacon {
 				}
 
 				// re-read from storage so a failed or disabled write does not send a preflight
-				// queries for other siteIds are sent on their own requests
+				// _sendPreflight only sends for the beacon siteId - queries for other siteIds are sent by sendPreflight({ siteId })
 				const lastSearchesHaveChanged = JSON.stringify(this.getLastSearches(searchedSiteId)) !== stringifiedLastSearches;
-				if (lastSearchesHaveChanged && searchedSiteId === getSearchedSiteId(undefined, this.globals.siteId)) {
+				const beaconSiteId = getSearchedSiteId(undefined, this.globals.siteId);
+				if (lastSearchesHaveChanged && searchedSiteId === beaconSiteId) {
 					this._sendPreflight();
 				}
 			},
@@ -1653,7 +1654,7 @@ function getKeyPair(keyName: keyof typeof STORAGE_KEYS, siteId: string): KeyPair
 }
 
 function getSearchedSiteId(siteId: string | undefined, defaultSiteId: string): string {
-	return (`${siteId || ''}`.trim() || `${defaultSiteId || ''}`.trim()).toLowerCase();
+	return `${siteId || defaultSiteId || ''}`.trim().toLowerCase();
 }
 
 function isSearchedQuery(item: unknown): item is SearchedQuery {
